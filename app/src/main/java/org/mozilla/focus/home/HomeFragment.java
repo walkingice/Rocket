@@ -332,6 +332,25 @@ public class HomeFragment extends LocaleAwareFragment implements TopSitesContrac
             topSites = topSites.subList(0, TOP_SITES_QUERY_LIMIT);
         }
 
+        final Site temp1 = new Site();
+        temp1.setId(9527);
+        temp1.setTitle("Julian test");
+        temp1.setUrl("http://test.julianchu.net/open_link/");
+        temp1.setViewCount(9999);
+        topSites.add(0, temp1);
+        final Site temp2 = new Site();
+        temp2.setId(9528);
+        temp2.setTitle("Google");
+        temp2.setUrl("https://www.google.com");
+        temp2.setViewCount(9999);
+        topSites.add(1, temp2);
+        final Site temp3 = new Site();
+        temp3.setId(9529);
+        temp3.setTitle("Detect");
+        temp3.setUrl("https://detectmybrowser.com/");
+        temp3.setViewCount(9999);
+        topSites.add(2, temp3);
+
         this.presenter.setSites(topSites);
         this.presenter.populateSites();
     }
