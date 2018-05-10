@@ -31,8 +31,8 @@ import java.util.Locale;
 
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     private boolean localeUpdated;
-    private  static int debugClicks = 0;
-    private  static final int DEBUG_CLICKS_THRESHOLD = 19;
+    private static int debugClicks = 0;
+    private static final int DEBUG_CLICKS_THRESHOLD = 19;
 
 
     @Override
@@ -142,10 +142,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
         TelemetryWrapper.settingsEvent(key, String.valueOf(sharedPreferences.getAll().get(key)));
 
-        if (key.equals(getString(R.string.pref_key_storage_clear_browsing_data))) {
-            //Clear browsing data Callback function is not here
-            //Go to Class CleanBrowsingDataPreference -> onDialogClosed
-        } else if (key.equals(getString(R.string.pref_key_storage_save_downloads_to))) {
+        if (key.equals(getString(R.string.pref_key_storage_save_downloads_to))) {
             //Save downloads/cache/offline pages to SD card/Internal storage Callback function
         }
     }
