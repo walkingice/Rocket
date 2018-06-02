@@ -6,8 +6,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import org.mozilla.focus.Inject;
-import org.mozilla.focus.R;
 import org.mozilla.focus.persistence.TabModel;
 import org.mozilla.focus.persistence.TabsDatabase;
 import org.mozilla.focus.utils.FileUtils;
@@ -22,6 +20,7 @@ import static android.os.AsyncTask.SERIAL_EXECUTOR;
 
 public class TabModelStore {
 
+    private static final String PREF_KEY_TAB_ID = "pref_key_focus_tab_id";
     private static final String TAB_WEB_VIEW_STATE_FOLDER_NAME = "tabs_cache";
 
     private static volatile TabModelStore instance;
@@ -36,7 +35,7 @@ public class TabModelStore {
     }
 
     private TabModelStore(@NonNull final Context context) {
-        tabsDatabase = Inject.getTabsDatabase(context);
+        tabsDatabase = TabsDatabase.getInstance(context);
     }
 
     public static TabModelStore getInstance(@NonNull final Context context) {
@@ -61,7 +60,7 @@ public class TabModelStore {
 
         PreferenceManager.getDefaultSharedPreferences(context)
                 .edit()
-                .putString(context.getResources().getString(R.string.pref_key_focus_tab_id), focusTabId)
+                .putString(PREF_KEY_TAB_ID, focusTabId)
                 .apply();
 
         new SaveTabsTask(context, tabsDatabase, listener).executeOnExecutor(SERIAL_EXECUTOR, tabModelList.toArray(new TabModel[0]));
@@ -108,7 +107,7 @@ public class TabModelStore {
             AsyncQueryListener listener = listenerRef.get();
             if (listener != null && context != null) {
                 String focusTabId = PreferenceManager.getDefaultSharedPreferences(context)
-                        .getString(context.getResources().getString(R.string.pref_key_focus_tab_id), "");
+                        .getString(PREF_KEY_TAB_ID, "");
                 listener.onQueryComplete(tabModelList, focusTabId);
             }
         }
