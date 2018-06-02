@@ -213,6 +213,7 @@ dependencies {
     implementation project(':utils')
     implementation project(':tabview')
     implementation project(':webkit')
+    implementation project(':gecko')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlin}"
 
