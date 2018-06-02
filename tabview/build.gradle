@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 27
@@ -28,6 +30,8 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation "android.arch.persistence.room:runtime:${Versions.room}"
+    kapt "android.arch.persistence.room:compiler:${Versions.room}"
+
     implementation project(':utils')
 
     implementation 'com.android.support:appcompat-v7:27.1.1'
