@@ -22,6 +22,10 @@ allprojects {
     repositories {
         jcenter()
         google()
+
+        flatDir {
+            dirs project(':gecko').file('libs')
+        }
     }
 }
 
