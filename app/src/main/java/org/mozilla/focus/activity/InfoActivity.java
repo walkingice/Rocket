@@ -81,10 +81,12 @@ public class InfoActivity extends AppCompatActivity {
     @Override
     public View onCreateView(String name, Context context, AttributeSet attrs) {
         if (name.equals(TabView.class.getName())) {
-            final TabView tabView = WebViewProvider.create(this, attrs);
-            tabView.setContentBlockingEnabled(false);
+            final View view = WebViewProvider.create(this, attrs).getView();
 
-            return tabView.getView();
+            final TabView webView = (TabView) view;
+            webView.setContentBlockingEnabled(false);
+
+            return view;
         }
 
         return super.onCreateView(name, context, attrs);

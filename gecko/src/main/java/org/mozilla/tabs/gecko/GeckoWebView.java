@@ -6,6 +6,7 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.view.ViewGroup;
 
 import org.mozilla.focus.tabs.SiteIdentity;
 import org.mozilla.focus.tabs.TabChromeClient;
@@ -44,7 +45,7 @@ public class GeckoWebView implements TabView {
         this.geckoView.releaseSession();
     }
 
-    public void onAttach() {
+    public void onAttach(ViewGroup parent) {
         this.session.setActive(true);
         if (!session.isOpen()) {
             session.open(this.runtime);
