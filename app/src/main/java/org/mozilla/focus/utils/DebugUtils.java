@@ -19,13 +19,7 @@ public final class DebugUtils {
     }
 
     public static String loadWebViewVersion(Context context) {
-        String webViewVersion;
-        try {
-            webViewVersion = loadWebViewVersion(new WebView(context));
-        } catch (Exception exception) {
-            webViewVersion = UNKNOWN_WEBVIEW_VERSION;
-        }
-        return webViewVersion;
+        return UNKNOWN_WEBVIEW_VERSION;
     }
 
     public static String loadWebViewVersion(WebView webvView) {
