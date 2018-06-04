@@ -48,7 +48,6 @@ import org.mozilla.focus.utils.UrlUtils;
 import org.mozilla.focus.utils.FeatureModule;
 import org.mozilla.focus.widget.FragmentListener;
 import org.mozilla.focus.widget.SwipeMotionLayout;
-import org.mozilla.rocket.privatebrowsing.PrivateActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -278,7 +277,10 @@ public class HomeFragment extends LocaleAwareFragment implements TopSitesContrac
                             }
                             break;
                         case R.id.private_browsing:
-                            Intent intent = PrivateActivity.getIntentFor(getActivity(), site.getUrl());
+                            Intent intent = new Intent();
+                            intent.setClassName("org.mozilla.rocket.privatebrowsing",
+                                    "org.mozilla.rocket.privatebrowsing.PrivateActivity");
+                            intent.putExtra("extra_url", site.getUrl());
                             getActivity().startActivity(intent);
                             break;
                         default:

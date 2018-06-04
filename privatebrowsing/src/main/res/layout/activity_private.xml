@@ -8,13 +8,11 @@
               android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        app:theme="@style/Theme.AppCompat.NoActionBar"/>
+        android:background="#FF363B40"
+        android:elevation="4dp" />
 
     <FrameLayout
         android:id="@+id/private_fragment"

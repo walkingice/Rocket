@@ -186,7 +186,7 @@ android {
         // used by Room, to test migrations
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
-    dynamicFeatures = [":private"]
+    dynamicFeatures = [":private", ":privatebrowsing"]
 
 
 }
@@ -215,7 +215,6 @@ dependencies {
     implementation project(':tabview')
     implementation project(':webkit')
     implementation project(':gecko')
-    implementation project(':privatebrowsing')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlin}"
 
