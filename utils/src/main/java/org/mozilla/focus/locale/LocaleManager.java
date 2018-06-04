@@ -5,7 +5,6 @@
 
 package org.mozilla.focus.locale;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,7 +20,6 @@ import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import org.mozilla.focus.R;
 import org.mozilla.focus.generated.LocaleList;
 
 /**
@@ -245,7 +243,7 @@ public class LocaleManager {
 
     private SharedPreferences getSharedPreferences(final Context context) {
         if (PREF_LOCALE == null) {
-            PREF_LOCALE = context.getResources().getString(R.string.pref_key_locale);
+            PREF_LOCALE = "pref_locale";
         }
 
         return PreferenceManager.getDefaultSharedPreferences(context);
