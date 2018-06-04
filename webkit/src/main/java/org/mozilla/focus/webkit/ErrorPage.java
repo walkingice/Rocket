@@ -9,7 +9,6 @@ import android.support.v4.util.ArrayMap;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import org.mozilla.focus.R;
 import org.mozilla.focus.utils.HtmlLoader;
 
 import java.util.Map;
