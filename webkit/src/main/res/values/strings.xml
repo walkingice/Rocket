@@ -5,4 +5,18 @@
     <string name="pref_key_privacy_block_social" translatable="false"><xliff:g id="preference_key">pref_privacy_block_social</xliff:g></string>
     <string name="pref_key_privacy_block_other" translatable="false"><xliff:g id="preference_key">pref_privacy_block_other</xliff:g></string>
     <string name="pref_key_performance_block_webfonts" translatable="false"><xliff:g id="preference_key">pref_performance_block_webfonts</xliff:g></string>
+
+    <!-- The page html title (i.e. the <title> tag content) -->
+    <string name="error_page_message" translatable="false"><![CDATA[
+      <ul>
+        <li>%1$s</li>
+        <li>%2$s</li>
+      </ul>
+    ]]></string>
+    <string name="error_page_title">Webpage not available</string>
+    <string name="error_page_recover_a">Make sure you are connected to the internet</string>
+    <string name="error_page_recover_b">Check the address</string>
+    <string name="error_page_button">TRY AGAIN</string>
+    <string name="error_page_title_unsupported_scheme">The address wasn’t understood</string>
+    <string name="error_page_content_text_unsupported_scheme">You might need to install other software to open this address.</string>
 </resources>
