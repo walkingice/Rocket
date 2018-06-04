@@ -13,14 +13,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 public class ThreadUtils {
     private static final ExecutorService backgroundExecutorService = Executors.newSingleThreadExecutor(getIoPrioritisedFactory());
     private static final Handler handler = new Handler(Looper.getMainLooper());
     private static final Thread uiThread = Looper.getMainLooper().getThread();
 
-    @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_BAD_PRACTICE", justification = "We don't care about the results here")
     public static void postToBackgroundThread(final Runnable runnable) {
         backgroundExecutorService.submit(runnable);
     }
