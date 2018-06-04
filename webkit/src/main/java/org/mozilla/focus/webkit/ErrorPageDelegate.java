@@ -20,8 +20,6 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-import org.mozilla.focus.BuildConfig;
-
 public class ErrorPageDelegate {
     private final ErrorViewFactory<HtmlErrorViewHolder> factory;
 
