@@ -5,15 +5,15 @@
 
 package org.mozilla.tabs.gecko;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
-import android.util.AttributeSet;
-import android.view.View;
 import android.webkit.WebSettings;
 
 import org.mozilla.focus.tabs.TabView;
+import org.mozilla.focus.tabs.TabViewProvider;
 import org.mozilla.geckoview.GeckoRuntime;
 import org.mozilla.geckoview.GeckoRuntimeSettings;
 import org.mozilla.geckoview.GeckoView;
@@ -21,20 +21,25 @@ import org.mozilla.geckoview.GeckoView;
 /**
  * WebViewProvider implementation for creating a Gecko based implementation of TabView.
  */
-public class GeckoViewProvider {
+public class GeckoViewProvider implements TabViewProvider {
 
     private static volatile GeckoRuntime geckoRuntime;
     private static GeckoView gv;
+    private Activity activity;
 
     private static String userAgentString = null;
+
+    public GeckoViewProvider(Activity activity) {
+        this.activity = activity;
+    }
 
     public static void preload(final Context context) {
         createGeckoRuntimeIfNeeded(context);
     }
 
-    public static TabView create(Context context, AttributeSet attrs) {
+    public TabView create() {
         if (gv == null) {
-            gv = new NestedGeckoView(context, attrs);
+            gv = new NestedGeckoView(activity, null);
         }
         return new GeckoWebView(gv, geckoRuntime);
     }
