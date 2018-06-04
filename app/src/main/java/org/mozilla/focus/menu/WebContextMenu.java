@@ -34,10 +34,11 @@ import org.mozilla.focus.tabs.TabsSession;
 import org.mozilla.focus.tabs.TabsSessionProvider;
 import org.mozilla.focus.tabs.utils.TabUtil;
 import org.mozilla.focus.telemetry.TelemetryWrapper;
-import org.mozilla.focus.utils.FeatureModule;
 import org.mozilla.focus.utils.UrlUtils;
 import org.mozilla.focus.web.Download;
 import org.mozilla.focus.web.DownloadCallback;
+import org.mozilla.focus.utils.FeatureModule;
+import org.mozilla.rocket.privatebrowsing.PrivateActivity;
 
 import java.util.List;
 
@@ -132,10 +133,7 @@ public class WebContextMenu {
                         return true;
                     case R.id.menu_private_browsing:
                         Context ctx = dialog.getContext();
-                        Intent intent = new Intent();
-                        intent.setClassName("org.mozilla.rocket.privatebrowsing",
-                                "org.mozilla.rocket.privatebrowsing.PrivateActivity");
-                        intent.putExtra("extra_url", targetUrl);
+                        Intent intent = PrivateActivity.getIntentFor(ctx, targetUrl);
                         ctx.startActivity(intent);
                         return true;
                     case R.id.menu_link_share: {

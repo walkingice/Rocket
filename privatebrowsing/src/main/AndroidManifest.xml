@@ -1,6 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.mozilla.rocket.privatebrowsing"
-    split="privatebrowsing">
+    package="org.mozilla.rocket.privatebrowsing">
     <application>
         <activity android:name="org.mozilla.rocket.privatebrowsing.PrivateActivity">
             <intent-filter>
