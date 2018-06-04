@@ -12,12 +12,10 @@ import android.os.Build;
 import android.support.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-import org.mozilla.focus.R;
 import org.mozilla.focus.tabs.TabView;
 import org.mozilla.focus.utils.Settings;
 import org.mozilla.focus.webkit.TrackingProtectionWebViewClient;
@@ -181,7 +179,7 @@ public class WebViewProvider {
     // We're caching the ua since buildUserAgentString is pretty heavy.
     public static String getUserAgentString(Context context) {
         if (userAgentString == null) {
-            userAgentString = buildUserAgentString(context, context.getResources().getString(R.string.useragent_appname));
+            userAgentString = buildUserAgentString(context, "rocket");
         }
         return userAgentString;
     }
