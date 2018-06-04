@@ -12,11 +12,8 @@ import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
-import org.mozilla.focus.history.BrowsingHistoryManager;
-import org.mozilla.focus.history.model.Site;
 import org.mozilla.focus.tabs.TabChromeClient;
 import org.mozilla.focus.tabs.TabView;
-import org.mozilla.focus.telemetry.TelemetryWrapper;
 import org.mozilla.focus.utils.FavIconUtils;
 
 /**
@@ -71,12 +68,6 @@ class FocusWebChromeClient extends WebChromeClient {
                 icon,
                 FavIconUtils.getRepresentativeCharacter(url));
 
-        final Site site = new Site();
-        site.setTitle(view.getTitle());
-        site.setUrl(url);
-        site.setFavIcon(refinedBitmap);
-        BrowsingHistoryManager.getInstance().updateLastEntry(site, null);
-
         if (this.tabChromeClient != null) {
             this.tabChromeClient.onReceivedIcon(this.host, icon);
         }
@@ -94,7 +85,6 @@ class FocusWebChromeClient extends WebChromeClient {
         if (this.tabChromeClient != null) {
             this.tabChromeClient.onEnterFullScreen(fullscreenCallback, view);
         }
-        TelemetryWrapper.browseEnterFullScreenEvent();
     }
 
     @Override
@@ -102,20 +92,17 @@ class FocusWebChromeClient extends WebChromeClient {
         if (this.tabChromeClient != null) {
             this.tabChromeClient.onExitFullScreen();
         }
-        TelemetryWrapper.browseExitFullScreenEvent();
     }
 
 
     @Override
     public void onPermissionRequest(PermissionRequest request) {
         super.onPermissionRequest(request);
-        TelemetryWrapper.browsePermissionEvent(request.getResources());
     }
 
     @Override
     public void onGeolocationPermissionsShowPrompt(String origin,
                                                    GeolocationPermissions.Callback glpcallback) {
-        TelemetryWrapper.browseGeoLocationPermissionEvent();
         if (this.tabChromeClient != null) {
             this.tabChromeClient.onGeolocationPermissionsShowPrompt(origin, glpcallback);
         }
