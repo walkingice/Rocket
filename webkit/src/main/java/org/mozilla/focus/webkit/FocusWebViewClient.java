@@ -17,7 +17,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import org.mozilla.focus.tabs.TabViewClient;
-import org.mozilla.focus.utils.AppConstants;
 import org.mozilla.focus.utils.Settings;
 import org.mozilla.focus.utils.SupportUtils;
 import org.mozilla.focus.utils.UrlUtils;
@@ -110,12 +109,16 @@ import org.mozilla.focus.utils.UrlUtils;
         return false;
     }
 
+    private boolean isDevBuild() {
+        return true;
+    }
+
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         view.getSettings().setLoadsImagesAutomatically(true);
         if (url == null) {
             // in case of null url, we won't crash app in release build
-            if (AppConstants.isDevBuild()) {
+            if (isDevBuild()) {
                 throw new RuntimeException("Got null url in FocsWebViewClient.shouldOverrideUrlLoading");
             } else {
                 return super.shouldOverrideUrlLoading(view, "");
