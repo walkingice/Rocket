@@ -24,15 +24,10 @@ import android.webkit.WebStorage;
 import android.webkit.WebView;
 import android.webkit.WebViewDatabase;
 
-import org.mozilla.focus.BuildConfig;
-import org.mozilla.focus.history.BrowsingHistoryManager;
-import org.mozilla.focus.history.model.Site;
 import org.mozilla.focus.tabs.SiteIdentity;
 import org.mozilla.focus.tabs.TabChromeClient;
 import org.mozilla.focus.tabs.TabView;
 import org.mozilla.focus.tabs.TabViewClient;
-import org.mozilla.focus.utils.AppConstants;
-import org.mozilla.focus.utils.FavIconUtils;
 import org.mozilla.focus.utils.FileUtils;
 import org.mozilla.focus.utils.SupportUtils;
 import org.mozilla.focus.utils.ThreadUtils;
@@ -376,13 +371,6 @@ public class WebkitView extends NestedWebView implements TabView {
                         if (!"null".equals(errorPage)) {
                             return;
                         }
-
-                        Site site = new Site();
-                        site.setUrl(url);
-                        site.setTitle(getTitle());
-                        site.setLastViewTimestamp(System.currentTimeMillis());
-                        site.setFavIcon(FavIconUtils.getInitialBitmap(getResources(), null, FavIconUtils.getRepresentativeCharacter(url)));
-                        BrowsingHistoryManager.getInstance().insert(site, null);
                     }
                 });
     }
@@ -396,9 +384,6 @@ public class WebkitView extends NestedWebView implements TabView {
         return new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
-                if (!AppConstants.supportsDownloadingFiles()) {
-                    return;
-                }
 
                 if (downloadCallback != null) {
                     final Download download = new Download(url, userAgent, contentDisposition, mimetype, contentLength, false);
