@@ -5,14 +5,10 @@
 
 package org.mozilla.focus.utils;
 
-import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-
-import org.mozilla.focus.search.SearchEngine;
-import org.mozilla.focus.search.SearchEngineManager;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,15 +16,28 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 
 public class UrlUtils {
+    public static final String BLANK_URL = "about:blank";
+    public static final String FOCUS_ABOUT_URL = "focusabout:";
+    public static final String YOUR_RIGHTS_URI = "file:///android_res/raw/rights.html";
+    public static final String PRIVACY_URL = "https://www.mozilla.org/privacy/firefox-rocket";
+    public static final String ABOUT_URI = "file:///android_res/raw/about.html";
 
     private final static Pattern schemePattern = Pattern.compile("^.+://");
+    static final String[] SUPPORTED_URLS = new String[]{
+            BLANK_URL,
+            FOCUS_ABOUT_URL,
+            YOUR_RIGHTS_URI,
+            PRIVACY_URL,
+            ABOUT_URI
+    };
+
 
     public static String normalize(@NonNull String input) {
         String trimmedInput = input.trim();
         Uri uri = Uri.parse(trimmedInput);
 
         // for supported/predefined url, no need to normalize it
-        for (final String s : SupportUtils.SUPPORTED_URLS) {
+        for (final String s : SUPPORTED_URLS) {
             if (s.equals(input)) {
                 return input;
             }
@@ -56,7 +65,7 @@ public class UrlUtils {
             return false;
         }
 
-        for (final String s : SupportUtils.SUPPORTED_URLS) {
+        for (final String s : SUPPORTED_URLS) {
             if (s.equals(trimmedUrl)) {
                 return true;
             }
@@ -96,13 +105,6 @@ public class UrlUtils {
 
     public static boolean isSearchQuery(String text) {
         return text.contains(" ");
-    }
-
-    public static String createSearchUrl(Context context, String searchTerm) {
-        final SearchEngine searchEngine = SearchEngineManager.getInstance()
-                .getDefaultSearchEngine(context);
-
-        return searchEngine.buildSearchUrl(searchTerm);
     }
 
     public static String stripUserInfo(@Nullable String url) {
