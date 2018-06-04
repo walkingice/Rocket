@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:dist="http://schemas.android.com/apk/distribution"
+    package="org.mozilla.rocket.privatebrowsing"
+    split="private">
+
+    <dist:module
+        dist:onDemand="true"
+        dist:title="Private Browsing">
+        <dist:fusing include="true" />
+    </dist:module>
+</manifest>
+
