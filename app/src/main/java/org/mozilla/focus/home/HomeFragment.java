@@ -45,8 +45,10 @@ import org.mozilla.focus.telemetry.TelemetryWrapper;
 import org.mozilla.focus.utils.OnSwipeListener;
 import org.mozilla.focus.utils.TopSitesUtils;
 import org.mozilla.focus.utils.UrlUtils;
+import org.mozilla.focus.utils.FeatureModule;
 import org.mozilla.focus.widget.FragmentListener;
 import org.mozilla.focus.widget.SwipeMotionLayout;
+import org.mozilla.rocket.privatebrowsing.PrivateActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -255,6 +257,9 @@ public class HomeFragment extends LocaleAwareFragment implements TopSitesContrac
             }
             final PopupMenu popupMenu = new PopupMenu(v.getContext(), v, Gravity.CLIP_HORIZONTAL);
             popupMenu.getMenuInflater().inflate(R.menu.menu_top_site_item, popupMenu.getMenu());
+            if (FeatureModule.getInstance(getActivity()).isSupportPrivateBrowsing()) {
+                popupMenu.getMenu().findItem(R.id.private_browsing).setVisible(true);
+            }
             popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
@@ -271,6 +276,10 @@ public class HomeFragment extends LocaleAwareFragment implements TopSitesContrac
                                 BrowsingHistoryManager.getInstance().updateLastEntry(site, mTopSiteUpdateListener);
                                 TelemetryWrapper.removeTopSite(false);
                             }
+                            break;
+                        case R.id.private_browsing:
+                            Intent intent = PrivateActivity.getIntentFor(getActivity(), site.getUrl());
+                            getActivity().startActivity(intent);
                             break;
                         default:
                             throw new IllegalStateException("Unhandled menu item");

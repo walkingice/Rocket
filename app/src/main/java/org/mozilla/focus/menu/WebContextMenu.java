@@ -37,6 +37,8 @@ import org.mozilla.focus.telemetry.TelemetryWrapper;
 import org.mozilla.focus.utils.UrlUtils;
 import org.mozilla.focus.web.Download;
 import org.mozilla.focus.web.DownloadCallback;
+import org.mozilla.focus.utils.FeatureModule;
+import org.mozilla.rocket.privatebrowsing.PrivateActivity;
 
 import java.util.List;
 
@@ -112,6 +114,10 @@ public class WebContextMenu {
         navigationView.getMenu().findItem(R.id.menu_image_share).setVisible(hitTarget.isImage);
         navigationView.getMenu().findItem(R.id.menu_image_copy).setVisible(hitTarget.isImage);
 
+        if (FeatureModule.getInstance(dialog.getContext()).isSupportPrivateBrowsing()) {
+            navigationView.getMenu().findItem(R.id.menu_private_browsing).setVisible(true);
+        }
+
         navigationView.getMenu().findItem(R.id.menu_image_save).setVisible(
                 hitTarget.isImage && UrlUtils.isHttpOrHttps(hitTarget.imageURL));
 
@@ -124,6 +130,11 @@ public class WebContextMenu {
                     case R.id.menu_new_tab:
                     case R.id.menu_new_tab_image:
                         openInNewTab(hitTarget.source, dialog, targetUrl);
+                        return true;
+                    case R.id.menu_private_browsing:
+                        Context ctx = dialog.getContext();
+                        Intent intent = PrivateActivity.getIntentFor(ctx, targetUrl);
+                        ctx.startActivity(intent);
                         return true;
                     case R.id.menu_link_share: {
                         TelemetryWrapper.shareLinkEvent();
