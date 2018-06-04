@@ -11,7 +11,6 @@ import android.content.res.Resources;
 import android.support.v4.util.ArrayMap;
 import android.webkit.WebView;
 
-import org.mozilla.focus.R;
 import org.mozilla.focus.locale.Locales;
 
 import java.io.UnsupportedEncodingException;
@@ -106,7 +105,7 @@ public class SupportUtils {
 
         final Map<String, String> substitutionMap = new ArrayMap<>();
 
-        final String appName = context.getResources().getString(R.string.app_name);
+        final String appName = "rocket";
         final String mplUrl = "https://www.mozilla.org/en-US/MPL/";
         final String trademarkPolicyUrl = "https://www.mozilla.org/foundation/trademarks/policy/";
         final String gplUrl = "file:///android_asset/gpl.html";
@@ -136,10 +135,10 @@ public class SupportUtils {
         final Context context = webView.getContext();
         final Resources resources = Locales.getLocalizedResources(webView.getContext());
 
-        final String webviewVersion = DebugUtils.loadWebViewVersion(webView.getContext());
+        final String webviewVersion = "";
 
         final Map<String, String> substitutionMap = new ArrayMap<>();
-        final String appName = webView.getContext().getResources().getString(R.string.app_name);
+        final String appName = "rocket";
         final String aboutBody = webView.getContext().getResources().getString(R.string.about_content_body, appName);
 
         final String aboutURI = SupportUtils.getAboutURI();

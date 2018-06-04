@@ -1,3 +1,405 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <resources>
-    <string name="app_name">utils</string>
+    <!-- Label used for buttons, e.g. in dialogs -->
+    <string name="action_cancel">CANCEL</string>
+    <!-- Label used for buttons, e.g. in dialogs -->
+    <string name="action_ok">OK</string>
+
+    <!-- This text is shown in the URL bar when it's empty -->
+    <string name="urlbar_hint">Search or enter address</string>
+
+    <string name="menu_settings">Settings</string>
+    <string name="menu_about">About</string>
+    <string name="menu_help">Help</string>
+    <string name="menu_rights">Your Rights</string>
+    <string name="menu_give_feedback">Give feedback</string>
+    <string name="menu_share_with_friends">Share with friends</string>
+
+    <!-- This is the title of a dialog that shows all the share targets (apps or contacts) when
+         sharing an URL. -->
+    <string name="share_dialog_title">Share via</string>
+
+    <!-- This is the label of an action we offer when the user selects text in other third-party apps.
+         Clicking this action will launch Rocket and perform a search in the default search engine. -->
+    <string name="text_selection_search_action">Search in {{app_name}}</string>
+
+    <!-- Content of about Rocket. Argument 1 is the major body of the content #about_content_body.
+         Argument 2,4,6,8 is the urls.
+         Argument 3,5,7,9 is the Label of the urls. -->
+    <string name="about_content" translatable="false"><![CDATA[
+<p>%1$s<br/>
+<a href="%2$s">%3$s</a></p><br/><br/>
+<a href="%4$s">%5$s</a><br/><br/>
+<a href="%6$s">%7$s</a><br/><br/>
+<a href="%8$s">%9$s</a><br/><br/>
+    ]]></string>
+
+    <!-- Content of about Rocket. Argument 1 is the app name of the content. i.e.x. Firefox Rocket -->
+    <string name="about_content_body">%1$s is a fast and lightweight browser produced by Mozilla. Our mission is to foster a healthy, open internet.</string>
+    <string name="about_link_learn_more">Learn more</string>
+    <string name="about_link_support">Support</string>
+    <string name="about_link_your_rights">Your Rights / Licenses</string>
+    <string name="about_link_privacy">Privacy Notice</string>
+
+    <!-- This label is shown below the name of the default search engine in settings -->
+    <string name="preference_search_engine_default">Default search engine</string>
+
+    <string name="preference_language">Language</string>
+    <!-- This is shown when the user hasn't set a Rocket specific language, i.e. when Rocket
+         is using the system default language. -->
+    <string name="preference_language_systemdefault">System default</string>
+
+    <!-- This is the title of the dialog for selecting a new default search engine -->
+    <string name="preference_dialog_title_search_engine">Default search engine</string>
+
+    <string name="preference_data_saving_block_images">Block images</string>
+
+    <!-- Settings Privacy and storage-->
+    <string name="preference_privacy_storage_clear_browsing_data">Clear browsing data</string>
+    <string name="preference_privacy_storage_save_downloads_to">Save downloads to </string>
+
+    <!-- This preference does not set Rocket as the default browser but instead links to Android's
+     "default apps" screen, on older Android versions, we try to reset user's current default
+     browser and let user choose again if they want to always open links with Rocket. -->
+    <string name="preference_default_browser">Make default browser</string>
+    <!-- In the "Make default browser" preference entry, there is an optional description field
+    which is empty before the entry is tapped. When a user taps the entry and the change is
+    applying, this message is shown as the description. -->
+    <string name="preference_default_browser_is_setting">Changing settings…</string>
+
+    <string name="preference_turbo_mode">Turbo mode</string>
+
+    <string name="preference_mozilla_telemetry">Send usage data</string>
+
+    <!-- Item in Preferences that shows the app name wants to send telemetry. Parameter 1 is the app name, i.e. Firefox Rocket. -->
+    <string name="preference_mozilla_telemetry_summary">Mozilla strives to collect only what we need to provide and improve %1$s for everyone.</string>
+    <string name="preference_learn_more">Learn more</string>
+
+    <!-- Item in Preferences that shows the about page. Parameter 1 is the app name, i.e. Firefox Rocket. -->
+    <string name="preference_about">About %1$s</string>
+
+    <!-- Content description (not visible, for screen readers etc.): Clear text in URL bar -->
+    <string name="content_description_clear_input">Clear input</string>
+
+    <!-- Content description (not visible, for screen readers etc.): Clicking on the website overlay
+     while in typing mode will dismiss and go back to the browser. This text will be read when the
+     overlay if it gain focus. -->
+    <string name="content_description_dismiss_input">Dismiss</string>
+
+    <!-- Content description (not visible, for screen readers etc.): Lock icon showed in the URL bar for
+     https pages.. -->
+    <string name="content_description_lock">Secure connection</string>
+
+    <!-- This text is not visible. Instead it will be read by the accessibility service once we start
+     loading a website -->
+    <string name="accessibility_announcement_loading">Loading</string>
+
+    <!-- This text is not visible. Instead it will be read by the accessibility service once we
+     finished loading a website -->
+    <string name="accessibility_announcement_loading_finished">Website loaded</string>
+
+    <!-- Content description (not visible, for screen readers etc.): "Three dot" menu button. -->
+    <string name="content_description_menu">More options</string>
+
+    <!-- Content description (not visible, for screen readers etc.): Navigate forward (browsing history) -->
+    <string name="content_description_forward">Navigate forward</string>
+
+    <!-- Content description (not visible, for screen readers etc.): Reload current website -->
+    <string name="content_description_reload">Reload website</string>
+
+    <!-- Content description (not visible, for screen readers etc.): Navigate back (browsing history) -->
+    <string name="content_description_back">Navigate back</string>
+
+    <!-- Content description (not visible, for screen readers etc.): Stop loading the current website. This button will turn into the refresh button once loading has been completed (see content_description_reload) -->
+    <string name="content_description_stop">Stop loading website</string>
+
+    <!-- Content description (not visible, for screen readers etc.): Custom Tab exit button - closes the custom tab and returns to the previous app. -->
+    <string name="content_description_customtab_exit">Return to previous app</string>
+
+    <!-- Content description (not visible, for screen readers etc.): This is the description for the switch in the menu that temporarily disables/enables
+         content blocking for the current session -->
+    <string name="content_description_blocking_switch">Block trackers</string>
+
+    <!-- This text is the title of a dialog shown if no app could be found for a custom link protocol. -->
+    <string name="external_app_prompt_no_app_title">Find an app that can open link</string>
+    <!-- This text is shown in a dialog if no app could be found for a custom link protocol. Argument 1 is the name of the app (i.e. Firefox Rocket) and %2$s is the name of
+         the app store installed on the device (usually that's Google Play). -->
+    <string name="external_app_prompt_no_app">None of the apps on your device are able to open this link. You can leave %1$s to search %2$s for an app that can.</string>
+
+
+    <string name="error_page_message" translatable="false"><![CDATA[
+      <ul>
+        <li>%1$s</li>
+        <li>%2$s</li>
+      </ul>
+    ]]></string>
+    <!-- The page html title (i.e. the <title> tag content) -->
+    <string name="error_page_title">Webpage not available</string>
+    <string name="error_page_recover_a">Make sure you are connected to the internet</string>
+    <string name="error_page_recover_b">Check the address</string>
+    <string name="error_page_button">TRY AGAIN</string>
+    <string name="error_page_title_unsupported_scheme">The address wasn’t understood</string>
+    <string name="error_page_content_text_unsupported_scheme">You might need to install other software to open this address.</string>
+
+
+    <!-- Label used in the contextmenu shown when long-pressing on a link -->
+    <string name="contextmenu_link_share">Share link</string>
+    <!-- Label used in the contextmenu shown when long-pressing on a link -->
+    <string name="contextmenu_link_copy">Copy link address</string>
+    <!-- Label used in the contextmenu shown when long-pressing on an image -->
+    <string name="contextmenu_image_share">Share image</string>
+    <!-- Label used in the contextmenu shown when long-pressing on an image -->
+    <string name="contextmenu_image_copy">Copy image address</string>
+    <!-- Label used in the contextmenu shown when long-pressing on an image -->
+    <string name="contextmenu_image_save">Save image</string>
+    <!-- Label used in the contextmenu shown when long-pressing on a link -->
+    <string name="contextmenu_open_in_new_tab">Open link in new tab</string>
+    <!-- Label used in the contextmenu shown when long-pressing on a image -->
+    <string name="contextmenu_open_image_in_new_tab">Open image in new tab</string>
+
+    <!-- First run tour -->
+    <!-- title for first page of FirstRun, Argument 1 will be formatted by product name -->
+    <string name="first_run_page1_title">Thanks for choosing %1$s</string>
+    <string name="first_run_page1_text">A browser tailor-made for Indonesia by Mozilla, the non-profit committed to a free and open web.</string>
+    <string name="first_run_page2_title">Browse faster than ever</string>
+    <string name="first_run_page2_text">Use turbo mode to block tracking ads so you can browse at blazing speeds. If sites seem broken, just tap off the turbo mode switch in the menu.</string>
+    <string name="first_run_page3_title">Save data = Save money</string>
+    <string name="first_run_page3_text">Blocking tracking ads not only speeds up browsing, it saves data. Save even more when you block images.</string>
+    <string name="first_run_page4_title">Screenshot everything</string>
+    <string name="first_run_page4_text">Take screenshots of entire web pages. View a screenshot offline (without using data) or tap it to revisit the web page.</string>
+
+    <string name="first_run_upgrade_page_title">We heard your feedback!</string>
+
+    <!-- The %s here is a placeholder for "multiple tabs" (paired with first_run_upgrade_page_text1_highlight) -->
+    <string name="first_run_upgrade_page_text1">1. Multitask by opening %s at the same time!</string>
+    <string name="first_run_upgrade_page_text1_highlight">multiple tabs</string>
+
+    <!-- The %s here is a placeholder for "adding them to the home screen!" (paired with first_run_upgrade_page_text2_highlight) -->
+    <string name="first_run_upgrade_page_text2">2. Access your favorite sites quickly by %s</string>
+    <string name="first_run_upgrade_page_text2_highlight">adding them to the home screen!</string>
+
+    <string name="firstrun_close_button">OK, got it!</string>
+    <string name="firstrun_skip_button">Skip</string>
+    <string name="firstrun_next_button">Next</string>
+
+    <!-- Menu labels -->
+    <!-- Zerda Need l10n -->
+    <string name="label_menu_download">Downloads</string>
+    <string name="label_menu_clear_cache">Clear cache</string>
+    <string name="label_menu_history">History</string>
+    <string name="label_menu_share">Share</string>
+    <string name="label_menu_my_shots">My shots</string>
+    <string name="label_menu_capture_page">Capture page</string>
+    <string name="label_menu_turbo_mode">Turbo mode</string>
+    <string name="label_menu_block_ads">Block Ads</string>
+    <string name="label_menu_block_image">Block images</string>
+    <string name="label_menu_settings">Settings</string>
+    <string name="label_menu_exit">Exit</string>
+
+    <string name="permission_dialog_setting">settings</string>
+    <string name="permission_dialog_not_now">not now</string>
+    <string name="permission_dialog_msg_location">Missing permissions. Give Firefox Rocket permission to access your location.</string>
+    <string name="permission_toast_location">Location not available. Give permission to access your location.</string>
+    <string name="permission_dialog_msg_storage">Missing permissions. Give Firefox Rocket permission to access your location.</string>
+    <string name="permission_toast_storage">Storage not available. Give permission to store photos and files on your device.</string>
+
+    <!-- When the webpage request access to geolocation a dialog will popup.
+        This is the title of the permission request dialog. Argument 1 is the url of the website. -->
+    <string name="geolocation_dialog_message">%1$s \nwants to access your location.</string>
+    <string name="geolocation_dialog_allow">ALLOW</string>
+    <string name="geolocation_dialog_block">BLOCK</string>
+
+    <!-- Setting Clear browsing data dialog-->
+    <string name="setting_dialog_clear_data">Clear Data</string>
+    <string name="setting_dialog_cancel">Cancel</string>
+    <string name="setting_dialog_browsing_history">Browsing history</string>
+    <string name="setting_dialog_search_history">Search history</string>
+    <string name="setting_dialog_form_history">Form history</string>
+    <string name="setting_dialog_cookies">Cookies</string>
+    <string name="setting_dialog_cache">Cache</string>
+
+    <!-- Download list-->
+    <string name="no_downloads">No downloads</string>
+    <string name="download_started">Downloading…</string>
+    <string name="download_file_not_supported">Download protocol not supported</string>
+    <string name="cannot_find_the_file">Cannot find the file</string>
+    <string name="cannot_delete_the_file">Cannot delete the file.</string>
+    <string name="download_completed">%1$s downloaded</string>
+    <string name="download_deleted">%1$s was deleted</string>
+    <string name="download_cancel">Download canceled</string>
+    <string name="undo">Undo</string>
+    <string name="open">Open</string>
+
+    <!-- Download status-->
+    <!-- File download status is paused -->
+    <string name="pause">paused</string>
+    <!-- File download status is pending -->
+    <string name="pending">Pending</string>
+    <!-- File download status is running -->
+    <string name="running">downloading</string>
+    <!-- File download status is successful -->
+    <string name="successful">Successful</string>
+    <!-- File download status is failed -->
+    <string name="failed">failed</string>
+    <!-- File download status is unknown -->
+    <string name="unknown">Unknown</string>
+
+    <!-- Setting data saving path dialog -->
+    <string name="setting_dialog_sd_card">SD card</string>
+    <string name="setting_dialog_internal_storage">Internal storage</string>
+
+    <!--BrowsingHistoryActivity-->
+    <string name="browsing_history_clear_btn">CLEAR BROWSING HISTORY</string>
+    <string name="browsing_history_empty_view_msg">No browsing history</string>
+    <string name="browsing_history_date_today">Today</string>
+    <string name="browsing_history_date_yesterday">Yesterday</string>
+    <string name="browsing_history_menu_delete">Delete</string>
+    <string name="browsing_history_dialog_confirm_clear_message">Clear all browsing history?</string>
+    <string name="browsing_history_dialog_btn_clear">Clear</string>
+
+    <!-- Remove the item from Download file panel -->
+    <string name="remove_from_list">Remove from list</string>
+
+    <!-- Remove the item from Download file panel and delete the file -->
+    <string name="delete_file">Delete file</string>
+
+    <!-- Long Screenshot -->
+    <!-- Message in the Snackbar which is shown after a successful screenshot capture. -->
+    <string name="screenshot_saved">Screenshot saved</string>
+    <!-- Message in the Toast which is shown after a failed screenshot capture. -->
+    <string name="screenshot_failed">Failed to capture screenshot</string>
+    <!-- Message shown when screenshot is being captured. -->
+    <string name="screenshot_illustration">Capturing screenshot of entire page…</string>
+    <!-- Available action in Snackbar that gives users a chance to view the captured screenshot
+    right after it is successfully captured. -->
+    <string name="screenshot_view">VIEW</string>
+    <!-- Available action in Snackbar that gives users a chance to edit the captured screenshot
+    right after it is successfully captured. -->
+    <string name="screenshot_edit">EDIT</string>
+    <!-- Available action in Snackbar that gives users a chance to delete the captured screenshot
+    right after it is successfully captured. -->
+    <string name="screenshot_delete">DELETE</string>
+    <!-- Available action in Snackbar that gives users a chance to share the captured screenshot
+    right after it is successfully captured. -->
+    <string name="screenshot_share">SHARE</string>
+
+    <!-- Snack bar message -->
+    <string name="message_fallback_save_to_primary_external">No SD card detected. File was saved to internal storage.</string>
+    <string name="message_start_to_save_to_removable_storage">File saved to SD card</string>
+    <string name="message_removable_storage_space_not_enough">SD card is almost full. File was saved to internal storage.</string>
+
+    <!-- ScreenshotGridFragment-->
+    <string name="screenshot_grid_empty_text_title">No screenshots</string>
+
+    <!-- This string is followed by the image of the button, keep the trailing whitespace.
+        Final result: 'Tap [image] on the menu to capture an entire web page'. -->
+    <string name="screenshot_grid_empty_text_msg_prefix">Tap&#160;</string>
+
+    <!-- This string is preceded by the image of the button, keep the leading whitespace.
+        Final result: 'Tap [image] on the menu to capture an entire web page'. -->
+    <string name="screenshot_grid_empty_text_msg_postfix">&#160;&#160;on the menu to capture\nan entire web page.</string>
+
+    <string name="screenshot_image_viewer_dialog_title">Info</string>
+    <string name="screenshot_image_viewer_dialog_info_time1">Date: %1$s</string>
+    <string name="screenshot_image_viewer_dialog_info_resolution1">Resolution: %1$s</string>
+    <string name="screenshot_image_viewer_dialog_info_size1">Size: %1$s</string>
+    <string name="screenshot_image_viewer_dialog_info_title1">Title: %1$s</string>
+    <string name="screenshot_image_viewer_dialog_info_url1">URL: %1$s</string>
+    <string name="screenshot_image_viewer_dialog_delete_msg">Delete this image?</string>
+
+    <!-- Title for file picker when user trying to upload a file -->
+    <string name="file_picker_title">Choose a file to upload</string>
+
+    <!-- Toast message -->
+    <string name="message_enable_turbo_mode">Turbo mode enabled</string>
+    <string name="message_disable_turbo_mode">Turbo mode disabled</string>
+    <string name="message_enable_block_image">Now blocking images</string>
+    <string name="message_disable_block_image">Now showing images</string>
+    <string name="message_clear_cache_fail">Unable to clear cache</string>
+    <string name="message_storage_unavailable_cancel_download">Storage inaccessible. Download canceled.</string>
+
+    <!-- Message indicate how much cache file cause disk storage was cleared.
+        Argument 1 is the amount, i.e. 15.0 MB cache cleared -->
+    <string name="message_cleared_cached">%1$s cache cleared</string>
+    <string name="message_cleared_browsing_data">Browsing data cleared</string>
+    <string name="message_deleted_screenshot">Screenshot deleted</string>
+    <string name="message_cannot_find_screenshot">Cannot display the screenshot</string>
+
+    <!-- Remove Top site item -->
+    <string name="remove">Remove</string>
+
+    <!-- In-app notification, Privacy policy update -->
+    <string name="privacy_policy_update_notification_title">Product Update Notice</string>
+    <string name="privacy_policy_update_notification_action">To make Firefox Rocket better for you and everyone, we made some changes to our privacy policy. Tap to learn more.</string>
+
+    <!--In-app Promotion, Rate the App-->
+    <string name="rate_app_dialog_text_title">Love {{app_name}}?</string>
+    <string name="rate_app_dialog_text_content">Thank you for choosing our product. Your feedback is important to us.</string>
+    <string name="rate_app_dialog_btn_go_rate">Yes, rate 5 stars!</string>
+    <string name="rate_app_notification_action_rate">RATE 5 STARS</string>
+    <string name="rate_app_dialog_btn_feedback">No, send feedback.</string>
+    <string name="rate_app_notification_action_feedback">FEEDBACK</string>
+
+    <string name="rate_app_feedback_url" translatable="false">https://qsurvey.mozilla.com/s3/Firefox-Rocket-Input/</string>
+
+    <!--In-app Promotion, Share app-->
+    <string name="share_app_dialog_text_title">Share {{app_name}} with friends!</string>
+    <string name="share_app_dialog_text_content">- Fast and lightweight\n- Data saving\n- Powerful screenshots</string>
+    <string name="share_app_dialog_btn_share">Share</string>
+    <string name="share_app_google_play_url" translatable="false">https://mzl.la/2kScptw</string>
+    <string name="share_app_promotion_text">Hey, check out this fast and lightweight browser from Mozilla. {{app_name}} {{share_app_google_play_url}}</string>
+
+    <!-- Text shown in the "Your rights" screen.
+    %1$s will be replaced with the name of the app (e.g. Firefox Rocket)-->
+    <string name="your_rights_content1"><![CDATA[%1$s is free and open source software made by Mozilla and other contributors.]]></string>
+
+    <!-- Text shown in the "Your rights" screen.
+    %1$s will be replaced with the name of the app (e.g. Firefox Rocket)
+    %2$s will be replaced with a URL linking to the MPL (e.g. https://www.mozilla.org/en-US/MPL/) -->
+    <string name="your_rights_content2"><![CDATA[%1$s is made available to you under the terms of the <a href="%2$s">Mozilla Public License</a> and other open source licenses.]]></string>
+
+    <!-- Text shown in the "Your rights" screen.
+    %1$s will be replaced with the name of the app (e.g. Firefox Rocket)
+    %2$s will be replaced with a URL linking to the trademark policy (e.g. https://www.mozilla.org/foundation/trademarks/policy/) -->
+    <string name="your_rights_content3"><![CDATA[You are not granted any rights or licenses to the trademarks of the Mozilla Foundation or any party, including the Mozilla, Firefox or %1$s names or logos. Additional information may be found <a href="%2$s">here</a>.]]></string>
+
+    <!-- Text shown in the "Your rights" screen.
+    %1$s will be replaced with the name of the app (e.g. Firefox Rocket)
+    %2$s will be replaced with a URL linking to the list of licenses used by the dependencies.-->
+    <string name="your_rights_content4"><![CDATA[Additional source code for %1$s is available under various other free and open source <a href="%2$s">licenses</a>.]]></string>
+
+    <!-- Text shown in the "Your rights" screen.
+    %1$s will be replaced with the name of the app (e.g. Firefox Rocket)
+    %2$s will be replaced with a URL linking to the GPL
+    %3$s will be replaced with a URL linking to the tracking protection wiki page (e.g. https://wiki.mozilla.org/Security/Tracking_protection#Lists) -->
+    <string name="your_rights_content5"><![CDATA[%1$s also uses blocklists provided by Disconnect, Inc. as separate and independent works under the <a href="%2$s">GNU General Public License v3</a>, and available <a href="%3$s">here</a>.]]></string>
+
+    <!-- Title for survey notification posted after launching the app on the 3rd time
+    %1$s will be replaced with an emoticon -->
+    <string name="survey_notification_title">We need you! %1$s</string>
+
+    <!-- Subtitle for survey notification posted after launching the app on the 3rd time -->
+    <string name="survey_notification_description">Shape a better product for Indonesia</string>
+
+    <string name="survey_notification_url" translatable="false">https://qsurvey.mozilla.com/s3/Rocket-Existing-User-Survey&amp;sglocale=%1$s</string>
+
+    <!-- Snack bar message indicates there's a new tab loaded in the background -->
+    <string name="new_background_tab_hint">New tab opened</string>
+
+    <!-- Snack bar button that switch the newly loaded background tab to the foreground -->
+    <string name="new_background_tab_switch">Switch</string>
+
+    <!-- Sticky notification to inform user we are in the process of changing default browser -->
+    <string name="setting_default_browser_notification_title">Changing settings…</string>
+    <string name="setting_default_browser_notification_text">It may take a while</string>
+    <string name="setting_default_browser_notification_clickable_text">Tap to set default browser</string>
+
+    <!-- Button on tab tray that can closes all tabs at once -->
+    <string name="tab_tray_close_tabs_btn_text">Close all</string>
+
+    <!-- Confirm message shown on the dialog popped after user clicks close-all-tabs button -->
+    <string name="tab_tray_close_tabs_dialog_msg">Close all tabs?</string>
 </resources>
