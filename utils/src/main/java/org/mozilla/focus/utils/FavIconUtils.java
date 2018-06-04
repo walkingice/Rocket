@@ -16,8 +16,6 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import org.mozilla.focus.R;
-
 /**
  * Created by hart on 31/08/2017.
  */
