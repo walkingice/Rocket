@@ -14,9 +14,7 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import org.mozilla.focus.R;
 import org.mozilla.focus.utils.Settings;
-import org.mozilla.focus.web.BrowsingSession;
 import org.mozilla.focus.webkit.matcher.UrlMatcher;
 
 public class TrackingProtectionWebViewClient extends WebViewClient {
@@ -95,7 +93,6 @@ public class TrackingProtectionWebViewClient extends WebViewClient {
         // open a link that redirects to another app (e.g. to the play store).
         if ((currentPageURL != null && !request.isForMainFrame()) &&
                 matcher.matches(resourceUri, Uri.parse(currentPageURL))) {
-            BrowsingSession.getInstance().countBlockedTracker();
             return new WebResourceResponse(null, null, null);
         }
 
@@ -115,10 +112,6 @@ public class TrackingProtectionWebViewClient extends WebViewClient {
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        if (blockingEnabled) {
-            BrowsingSession.getInstance().resetTrackerCount();
-        }
-
         currentPageURL = url;
 
         super.onPageStarted(view, url, favicon);
