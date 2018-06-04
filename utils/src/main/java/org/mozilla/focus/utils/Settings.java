@@ -12,9 +12,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 
-import org.mozilla.focus.R;
-import org.mozilla.focus.search.SearchEngine;
-
 import java.util.Set;
 
 /**
@@ -41,13 +38,11 @@ public class Settings {
     private final SharedPreferences preferences;
     private final Resources resources;
     private final EventHistory eventHistory;
-    private final NewFeatureNotice newFeatureNotice;
 
     private Settings(Context context) {
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         resources = context.getResources();
         eventHistory = new EventHistory(preferences);
-        newFeatureNotice = NewFeatureNotice.getInstance(context);
     }
 
     public boolean shouldBlockImages() {
@@ -62,17 +57,11 @@ public class Settings {
     }
 
     public boolean shouldShowFirstrun() {
-        return newFeatureNotice.shouldShowMultiTabUpdate() || !newFeatureNotice.hasShownFirstRun();
+        return false;
     }
 
     public boolean shouldSaveToRemovableStorage() {
-        // FIXME: rely on String-array-order is not a good idea
-        final String[] defined = resources.getStringArray(R.array.data_saving_path_values);
-
-        final String key = getPreferenceKey(R.string.pref_key_storage_save_downloads_to);
-        final String value = preferences.getString(key, defined[0]);
-
-        return defined[0].equals(value); // assume the first item is for removable storage
+        return false;
     }
 
     public boolean shouldUseTurboMode() {
@@ -189,12 +178,6 @@ public class Settings {
 
     public int getAppCreateCount() {
         return preferences.getInt(getPreferenceKey(R.string.pref_key_app_create_counter), 0);
-    }
-
-    public void setDefaultSearchEngine(SearchEngine searchEngine) {
-        preferences.edit()
-                .putString(getPreferenceKey(R.string.pref_key_search_engine), searchEngine.getName())
-                .apply();
     }
 
     public static void updatePrefDefaultBrowserIfNeeded(Context context, boolean isDefaultBrowser) {
