@@ -24,6 +24,14 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+
+        beta {
+            applicationIdSuffix ".beta." + System.getenv("USER")
+        }
+
+        debug {
+            applicationIdSuffix ".debug." + System.getenv("USER")
+        }
     }
 
 }
