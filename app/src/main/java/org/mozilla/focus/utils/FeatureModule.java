@@ -31,6 +31,10 @@ public class FeatureModule {
     private static FeatureModule sInstance;
     private boolean supportPrivateBrowsing = true;
 
+    public static String getFeatureModuleApkPath(Context ctx) {
+        return ctx.getPackageResourcePath().replace("base.apk", "split_geckopower.apk");
+    }
+
     public synchronized static FeatureModule getInstance() {
         if (sInstance == null) {
             sInstance = new FeatureModule();
