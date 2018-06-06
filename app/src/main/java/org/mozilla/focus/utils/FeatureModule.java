@@ -11,6 +11,7 @@ import com.google.android.play.core.splitinstall.SplitInstallRequest;
 import com.google.android.play.core.tasks.OnFailureListener;
 import com.google.android.play.core.tasks.OnSuccessListener;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +47,13 @@ public class FeatureModule {
             Log.d(TAG, "Feature-module - Installed module: " + s);
         }
 
-        supportPrivateBrowsing = set.contains(DYNAMIC_FEATURE_GECKO_POWER);
+        boolean newValue = set.contains(DYNAMIC_FEATURE_GECKO_POWER);
+        boolean dirty = supportPrivateBrowsing != newValue;
+        supportPrivateBrowsing = newValue;
+
+        if (dirty) {
+            provider = null;
+        }
     }
 
     public boolean isSupportPrivateBrowsing() {
@@ -119,7 +126,41 @@ public class FeatureModule {
                 });
     }
 
+    private static TheViewProvider provider = null;
+
+    public TheViewProvider getViewProvider(Context ctx) {
+        if (provider == null) {
+            if (isSupportPrivateBrowsing()) {
+                try {
+                    Class c = Class.forName("org.mozilla.gecko.tabs.FeatureViewProvider");
+                    Constructor<?> cs = c.getConstructor(Context.class);
+                    provider = (TheViewProvider) cs.newInstance(ctx);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    provider = new FallbackViewProvider();
+                }
+            } else {
+                provider = new BaseViewProvider();
+            }
+        }
+
+        return provider;
+    }
+
     public interface StatusListener {
         void onDone();
+    }
+
+    public class FallbackViewProvider implements TheViewProvider {
+        @Override
+        public Foo createFoo() {
+            return new FallbackFoo();
+        }
+
+        class FallbackFoo extends Foo {
+            FallbackFoo() {
+                super.name = "FallbackFoo";
+            }
+        }
     }
 }

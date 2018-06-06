@@ -24,6 +24,7 @@ import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -150,6 +151,12 @@ public class HomeFragment extends LocaleAwareFragment implements TopSitesContrac
         final FeatureModule features = FeatureModule.getInstance();
         features.refresh(getContext());
         btnPrivate.setVisibility(features.isSupportPrivateBrowsing() ? View.VISIBLE : View.INVISIBLE);
+
+        String msg = FeatureModule.getInstance()
+                .getViewProvider(getContext())
+                .createFoo()
+                .toString();
+        Toast.makeText(getContext(), msg, Toast.LENGTH_LONG).show();
     }
 
     @Override
