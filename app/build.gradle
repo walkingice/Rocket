@@ -34,6 +34,11 @@ android {
         testInstrumentationRunner "org.mozilla.focus.test.runner.CustomTestRunner"
         multiDexEnabled true
 
+        // XXX: change version code automatically for easier uploading to Google play
+        String currentTime = (new Date()).time & 0xFFFFFF
+        versionCode currentTime.toInteger()
+        versionName Versions.version_name + "(" + currentTime + ")"
+
         def buddy_build_number = System.getenv("BUDDYBUILD_BUILD_NUMBER")
         if (buddy_build_number?.trim()) {
             versionCode buddy_build_number.toInteger()
