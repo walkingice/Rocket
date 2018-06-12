@@ -338,13 +338,6 @@ public class HomeFragment extends LocaleAwareFragment implements TopSitesContrac
         TopSideComparator topSideComparator = new TopSideComparator();
         Collections.sort(topSites, topSideComparator);
 
-        if (topSites.size() > TOP_SITES_QUERY_LIMIT) {
-            List<Site> removeSites = topSites.subList(TOP_SITES_QUERY_LIMIT, topSites.size());
-            removeDefaultSites(removeSites);
-
-            topSites = topSites.subList(0, TOP_SITES_QUERY_LIMIT);
-        }
-
         final Site temp1 = new Site();
         temp1.setId(9527);
         temp1.setTitle("Julian test");
@@ -363,6 +356,13 @@ public class HomeFragment extends LocaleAwareFragment implements TopSitesContrac
         temp3.setUrl("https://detectmybrowser.com/");
         temp3.setViewCount(9999);
         topSites.add(2, temp3);
+
+        if (topSites.size() > TOP_SITES_QUERY_LIMIT) {
+            List<Site> removeSites = topSites.subList(TOP_SITES_QUERY_LIMIT, topSites.size());
+            removeDefaultSites(removeSites);
+
+            topSites = topSites.subList(0, TOP_SITES_QUERY_LIMIT);
+        }
 
         this.presenter.setSites(topSites);
         this.presenter.populateSites();
