@@ -10,6 +10,7 @@ import android.webkit.CookieManager
 import android.webkit.GeolocationPermissions
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.widget.FrameLayout
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.support.base.observer.Observable
 import mozilla.components.support.base.observer.ObserverRegistry
@@ -164,10 +165,31 @@ class TabViewEngineSession constructor(
         override fun onLongPress(hitTarget: TabView.HitTarget) =
                 es.notifyObservers { onLongPress(hitTarget) }
 
-        override fun onEnterFullScreen(callback: TabView.FullscreenCallback, view: View?) =
-                es.notifyObservers { onEnterFullScreen(callback, view) }
+        var cb: TabView.FullscreenCallback? = null
+        override fun onEnterFullScreen(callback: TabView.FullscreenCallback, view: View?) {
+            val root = es.tabView!!.view.rootView
+            val browserContainer = root.findViewWithTag<ViewGroup>("browser_container")
+            val videoContainer = root.findViewWithTag<ViewGroup>("video_container")
+            val params = FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            browserContainer.visibility = View.INVISIBLE
+            videoContainer.removeAllViews()
+            videoContainer.addView(view, params)
+            videoContainer.visibility = View.VISIBLE
+            cb = callback
+            es.notifyObservers { onEnterFullScreen(callback, view) }
+        }
 
-        override fun onExitFullScreen() = es.notifyObservers { onExitFullScreen() }
+        override fun onExitFullScreen() {
+            val root = es.tabView!!.view.rootView
+            val browserContainer = root.findViewWithTag<ViewGroup>("browser_container")
+            val videoContainer = root.findViewWithTag<ViewGroup>("video_container")
+            videoContainer.removeAllViews()
+            videoContainer.visibility = View.GONE
+            browserContainer.visibility = View.VISIBLE
+            cb?.fullScreenExited()
+            es.notifyObservers { onExitFullScreen() }
+        }
 
         override fun onGeolocationPermissionsShowPrompt(
                 origin: String,

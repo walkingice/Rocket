@@ -9,6 +9,7 @@
 
     <org.mozilla.rocket.nightmode.themed.ThemedLinearLayout
         android:id="@+id/browser_container"
+        android:tag="browser_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/browser_background"
@@ -105,6 +106,7 @@
 
     <FrameLayout
         android:id="@+id/video_container"
+        android:tag="video_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/black"

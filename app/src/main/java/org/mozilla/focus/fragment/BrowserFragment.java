@@ -45,7 +45,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebHistoryItem;
 import android.webkit.WebView;
 import android.widget.CheckedTextView;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -1147,51 +1146,13 @@ public class BrowserFragment extends LocaleAwareFragment implements View.OnClick
         @Override
         public void onEnterFullScreen(@NonNull TabView.FullscreenCallback callback,
                                       @Nullable View fullscreenContentView) {
-            if (session == null) {
-                return;
-            }
-            if (!isForegroundSession(session)) {
-                callback.fullScreenExited();
-                return;
-            }
-
-            fullscreenCallback = callback;
-
-            if (session.getEngineSession().getTabView() != null && fullscreenContentView != null) {
-                // Hide browser UI and web content
-                browserContainer.setVisibility(View.INVISIBLE);
-
-                // Add view to video container and make it visible
-                final FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                videoContainer.addView(fullscreenContentView, params);
-                videoContainer.setVisibility(View.VISIBLE);
-
-                // Switch to immersive mode: Hide system bars other UI controls
-                systemVisibility = ViewUtils.switchToImmersiveMode(getActivity());
-            }
+            systemVisibility = ViewUtils.switchToImmersiveMode(getActivity());
         }
 
         @Override
         public void onExitFullScreen() {
-            if (session == null) {
-                return;
-            }
-            // Remove custom video views and hide container
-            videoContainer.removeAllViews();
-            videoContainer.setVisibility(View.GONE);
-
-            // Show browser UI and web content again
-            browserContainer.setVisibility(View.VISIBLE);
-
             if (systemVisibility != ViewUtils.SYSTEM_UI_VISIBILITY_NONE) {
                 ViewUtils.exitImmersiveMode(systemVisibility, getActivity());
-            }
-
-            // Notify renderer that we left fullscreen mode.
-            if (fullscreenCallback != null) {
-                fullscreenCallback.fullScreenExited();
-                fullscreenCallback = null;
             }
 
             // WebView gets focus, but unable to open the keyboard after exit Fullscreen for Android 7.0+
