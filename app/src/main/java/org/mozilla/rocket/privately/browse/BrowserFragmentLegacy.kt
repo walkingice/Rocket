@@ -332,7 +332,7 @@ class BrowserFragmentLegacy : LocaleAwareFragment(),
     override fun goForeground() {
         val tabView = sessionManager.focusSession?.engineSession?.tabView ?: return
         if (tabViewSlot.childCount == 0) {
-            tabViewSlot.addView(tabView.view)
+            tabViewSlot.addView(tabView.getView())
         }
     }
 
@@ -340,7 +340,7 @@ class BrowserFragmentLegacy : LocaleAwareFragment(),
         val focus = sessionManager.focusSession ?: return
         val tabView = focus.engineSession?.tabView ?: return
         focus.engineSession?.detach()
-        tabViewSlot.removeView(tabView.view)
+        tabViewSlot.removeView(tabView.getView())
     }
 
     override fun loadUrl(

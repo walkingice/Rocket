@@ -67,17 +67,16 @@ class TabViewEngineSession constructor(
         if (webViewState == null) {
             webViewState = Bundle()
         }
-        tabView?.let {
-            // TODO: should we update latest url, title of TabView to Session?
-            it.saveViewState(webViewState)
-        }
+
+        // TODO: should we update latest url, title of TabView to Session?
+        webViewState?.let { tabView?.saveViewState(it) }
     }
 
     /**
      * To detach @see{android.view.View} of this tab, if any, is detached from its parent.
      */
     fun detach() {
-        tabView?.view?.let { v ->
+        tabView?.getView()?.let { v ->
             v.parent?.let { p ->
                 val parent = p as ViewGroup
                 parent.removeView(v)
@@ -196,7 +195,7 @@ class TabViewEngineSession constructor(
             }
             // This is a hack, Webview often doesn't give us the latest url even in OnPageLoaded
             // We utilize this callback which usually returns later as the last chance.
-            view.url?.let { es.notifyObservers { onLocationChange(it) } }
+            view.getUrl()?.let { es.notifyObservers { onLocationChange(it) } }
             es.notifyObservers {
                 onNavigationStateChange(view.canGoBack(), view.canGoForward())
             }
