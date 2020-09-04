@@ -6,7 +6,6 @@ import org.junit.Test
 import org.mozilla.rocket.deeplink.task.OpenPrivateModeTask
 import org.mozilla.rocket.deeplink.task.StartNewsActivityTask
 import org.mozilla.rocket.deeplink.task.StartNewsItemActivityTask
-import org.mozilla.rocket.deeplink.task.StartRewardActivityTask
 import org.mozilla.rocket.deeplink.task.StartSettingsActivityTask
 import org.mozilla.rocket.deeplink.task.StartShoppingSearchActivityTask
 import java.net.URLEncoder
@@ -35,14 +34,6 @@ class DeepLinkTypeTest {
         assertEquals(task.url, url)
         assertEquals(task.feed, feed)
         assertEquals(task.source, source)
-    }
-
-    @Test
-    fun `When reward home uri is matched, launch reward activity`() {
-        val deepLinkType = DeepLinkType.parse("rocket://content/reward")
-
-        assertEquals(DeepLinkType.REWARD_HOME, deepLinkType)
-        assertTrue(deepLinkType.getTaskList()[0] is StartRewardActivityTask)
     }
 
     @Test

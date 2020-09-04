@@ -5,20 +5,16 @@
 
 package org.mozilla.focus.utils
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import org.mozilla.focus.R
-import org.mozilla.focus.notification.RocketMessagingService
 import org.mozilla.focus.screenshot.ScreenshotManager
 import org.mozilla.rocket.periodic.FirstLaunchWorker
 import org.mozilla.rocket.shopping.search.data.ShoppingSearchRemoteDataSource.Companion.RC_KEY_ENABLE_SHOPPING_SEARCH_V2_5
 import java.util.HashMap
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * A wrapper around FirebaseContract. It's job:
@@ -89,9 +85,6 @@ object FirebaseHelper {
      */
     @JvmStatic
     fun getFirebase() = firebaseContract
-
-    @JvmStatic
-    fun getUid() = firebaseContract.uid
 
     /**
      * The entry point to inject FirebaseContract and start the library. This method can only
@@ -266,40 +259,6 @@ object FirebaseHelper {
     fun setUserProperty(context: Context, tag: String, value: String) {
         firebaseContract.setFirebaseUserProperty(context, tag, value)
     }
-
-    @JvmStatic
-    fun initUserState(activity: Activity) {
-        firebaseContract.initUserState(activity)
-        RocketMessagingService.checkFcmTokenUploaded(activity.applicationContext)
-    }
-
-    @JvmStatic
-    fun signInWithCustomToken(
-        jwt: String,
-        onSuccess: Function2<String?, String?, Unit>,
-        onFail: Function1<String, Unit>
-    ) {
-        firebaseContract.signInWithCustomToken(jwt, onSuccess, onFail)
-    }
-
-    /**
-     *
-     * public interface OnSuccessListener<TResult> {
-    void onSuccess(TResult var1);
-    }
-     */
-
-    @JvmStatic
-    suspend fun getUserToken() = suspendCoroutine<String?> { continuation ->
-        firebaseContract.getUserToken(object : (String?) -> Unit {
-            override fun invoke(p1: String?) {
-                continuation.resume(p1)
-            }
-        })
-    }
-
-    @JvmStatic
-    fun isAnonymous(): Boolean? = firebaseContract.isAnonymous()
 
     @JvmStatic
     fun refreshRemoteConfig(callback: (Boolean, e: Exception?) -> Unit) {

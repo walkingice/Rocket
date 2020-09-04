@@ -10,18 +10,11 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Rect
 import android.graphics.Typeface
-import android.graphics.drawable.BitmapDrawable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.TextUtils
 import android.text.style.StyleSpan
-import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
@@ -30,14 +23,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CircleCrop
-import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.request.transition.Transition
 import kotlinx.android.synthetic.main.myshot_onboarding.view.my_shot_category_learn_more
-import kotlinx.android.synthetic.main.onboarding_spotlight_content_services_request_click.view.content_services_plateform_onboarding_message
 import kotlinx.android.synthetic.main.spotlight_message.view.spotlight_message
 import org.mozilla.focus.R
 import org.mozilla.focus.activity.MainActivity
@@ -51,7 +37,6 @@ import org.mozilla.focus.utils.SpotlightDialog.AttachedGravity
 import org.mozilla.focus.utils.SpotlightDialog.AttachedPosition
 import org.mozilla.focus.utils.SpotlightDialog.AttachedViewConfigs
 import org.mozilla.focus.utils.SpotlightDialog.SpotlightConfigs.CircleSpotlightConfigs
-import org.mozilla.focus.utils.SpotlightDialog.SpotlightConfigs.RectangleSpotlightConfigs
 import org.mozilla.rocket.extension.dpToPx
 import org.mozilla.rocket.extension.inflate
 import org.mozilla.rocket.home.HomeViewModel
@@ -159,40 +144,6 @@ object DialogUtils {
         } else if (context is SettingsActivity) {
             promoteShareClickEvent(value, TelemetryWrapper.Extra_Value.SETTING)
         }
-    }
-
-    fun showLoginMultipleTimesWarningDialog(context: Context?) {
-        val dialog = AlertDialog.Builder(context!!)
-                .setTitle(R.string.msrp_disqualification_title_1)
-                .setMessage(R.string.msrp_disqualification_body_1)
-                .setPositiveButton(R.string.msrp_disqualification_button_1) { _: DialogInterface?, _: Int -> }
-                .setCancelable(false)
-                .create()
-        dialog.show()
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(context, R.color.palettePeach100))
-    }
-
-    fun showLoginMultipleTimesFinalWarningDialog(context: Context?) {
-        val dialog = AlertDialog.Builder(context!!)
-                .setTitle(R.string.msrp_disqualification_title_2)
-                .setMessage(R.string.msrp_disqualification_body_1)
-                .setPositiveButton(R.string.msrp_disqualification_button_1) { _: DialogInterface?, _: Int -> }
-                .setCancelable(false)
-                .create()
-        dialog.show()
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(context, R.color.palettePeach100))
-    }
-
-    fun showAccountDisabledDialog(context: Context?, dismissListener: DialogInterface.OnDismissListener?) {
-        val dialog = AlertDialog.Builder(context!!)
-                .setTitle(R.string.msrp_disqualification_title_3)
-                .setMessage(R.string.msrp_disqualification_body_3)
-                .setPositiveButton(R.string.msrp_disqualification_button_3) { _: DialogInterface?, _: Int -> }
-                .setCancelable(false)
-                .setOnDismissListener(dismissListener)
-                .create()
-        dialog.show()
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(context, R.color.palettePeach100))
     }
 
     @JvmStatic
@@ -309,31 +260,6 @@ object DialogUtils {
                     .build()
                     .also { it.show() }
 
-    fun showContentServiceRequestClickSpotlight(
-        activity: FragmentActivity,
-        targetView: View,
-        couponName: String,
-        dismissListener: DialogInterface.OnDismissListener
-    ): Dialog = SpotlightDialog.Builder(activity, targetView)
-            .spotlightConfigs(
-                RectangleSpotlightConfigs(
-                    width = activity.resources.getDimensionPixelSize(R.dimen.content_service_focus_view_width),
-                    cornerRadius = activity.resources.getDimensionPixelSize(R.dimen.content_service_focus_view_radius)
-                )
-            )
-            .setAttachedView(
-                activity.inflate(R.layout.onboarding_spotlight_content_services_request_click).apply {
-                    content_services_plateform_onboarding_message.text = activity.getString(R.string.msrp_home_hint, couponName)
-                },
-                AttachedViewConfigs(
-                    position = AttachedPosition.BOTTOM,
-                    gravity = AttachedGravity.CENTER_SCREEN
-                )
-            )
-            .dismissListener(dismissListener)
-            .build()
-            .also { it.show() }
-
     fun showThemeSettingDialog(activity: FragmentActivity, homeViewModel: HomeViewModel) {
         ThemeSettingDialogBuilder(activity, homeViewModel).show()
     }
@@ -369,98 +295,6 @@ object DialogUtils {
             buttonPositive.setTextAppearance(activity, R.style.TutorialDialogPositiveButtonStyle)
             buttonNegative.setTextAppearance(activity, R.style.TutorialDialogNegativeButtonStyle)
         }
-    }
-
-    fun createMissionCompleteDialog(context: Context, imageUrl: String?): PromotionDialog {
-        val data = CustomViewDialogData()
-        val width = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 228f, context.resources.displayMetrics).toInt()
-        val height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 134f, context.resources.displayMetrics).toInt()
-        // TODO: don't know why image rendered with weird size
-        //        data.setDrawable(context.getDrawable(R.drawable.coupon));
-        // TODO: temporarily workaround
-        val resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val couponBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.coupon)
-        val canvas = Canvas(resultBitmap)
-        val paint = Paint()
-        canvas.drawBitmap(couponBitmap, 0f, 0f, paint)
-        data.drawable = BitmapDrawable(context.resources, resultBitmap)
-        data.imgWidth = width
-        data.imgHeight = height
-        data.title = context.getString(R.string.msrp_completed_popup_title)
-        data.description = context.getString(R.string.msrp_completed_popup_body)
-        data.positiveText = context.getString(R.string.msrp_completed_popup_button1)
-        data.negativeText = context.getString(R.string.msrp_completed_popup_button2)
-        data.showCloseButton = true
-        val dialog = PromotionDialog(context, data)
-                .setCancellable(false)
-        val imageView = dialog.view.findViewById<ImageView>(R.id.image)
-        val target: Target<*> = Glide.with(context)
-                .asBitmap()
-                .load(imageUrl)
-                .apply(RequestOptions().transform(CircleCrop()))
-                .into(object : SimpleTarget<Bitmap>() {
-                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>) {
-                        imageView.setImageBitmap(getCouponImage(context, width, height, resource))
-                    }
-                })
-        dialog.addOnDismissListener {
-            Glide.with(context).clear(target)
-        }
-        return dialog
-    }
-
-    private fun getCouponImage(context: Context, width: Int, height: Int, imageBitmap: Bitmap): Bitmap {
-        val imageSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64f, context.resources.displayMetrics).toInt()
-        val shiftX = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, -15f, context.resources.displayMetrics).toInt()
-        val shiftY = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, -1f, context.resources.displayMetrics).toInt()
-        val resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val couponBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.coupon)
-        val canvas = Canvas(resultBitmap)
-        val paint = Paint()
-        canvas.drawBitmap(couponBitmap, 0f, 0f, paint)
-        val centerX = width / 2 + shiftX
-        val centerY = height / 2 + shiftY
-        val src = Rect(0, 0, imageBitmap.width, imageBitmap.height)
-        val target = Rect(
-            centerX - imageSize / 2,
-            centerY - imageSize / 2,
-            centerX + imageSize / 2,
-            centerY + imageSize / 2
-        )
-        canvas.drawBitmap(imageBitmap, src, target, paint)
-        couponBitmap.recycle()
-        return resultBitmap
-    }
-
-    fun createMissionForceUpdateDialog(context: Context, title: String?, description: String?, imageUrl: String?): PromotionDialog {
-        val data = CustomViewDialogData()
-        val width = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 134f, context.resources.displayMetrics).toInt()
-        val height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 134f, context.resources.displayMetrics).toInt()
-        data.imgWidth = width
-        data.imgHeight = height
-        data.title = title
-        data.description = description
-        data.positiveText = context.getString(R.string.msrp_force_update_dialog_positive_btn)
-        data.negativeText = context.getString(R.string.msrp_force_update_dialog_negative_btn)
-        data.showCloseButton = true
-        val dialog = PromotionDialog(context, data)
-                .setCancellable(true)
-        if (imageUrl != null) {
-            val imageView = dialog.view.findViewById<ImageView>(R.id.image)
-            imageView.visibility = View.VISIBLE
-            val target: Target<*> = Glide.with(context)
-                    .asBitmap()
-                    .load(imageUrl)
-                    .into(object : SimpleTarget<Bitmap>() {
-                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>) {
-                            imageView.setImageBitmap(resource)
-                        }
-                    })
-            dialog.addOnDismissListener {
-                Glide.with(context).clear(target)
-            }
-        }
-        return dialog
     }
 
     fun showGoToSystemAppsSettingsDialog(context: Context, viewModel: DefaultBrowserPreferenceViewModel) {

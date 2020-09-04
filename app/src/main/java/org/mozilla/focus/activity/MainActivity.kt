@@ -52,7 +52,6 @@ import org.mozilla.focus.urlinput.UrlInputFragment
 import org.mozilla.focus.utils.AppConstants
 import org.mozilla.focus.utils.Constants
 import org.mozilla.focus.utils.DialogUtils
-import org.mozilla.focus.utils.FirebaseHelper
 import org.mozilla.focus.utils.FirebaseHelper.FIREBASE_READY
 import org.mozilla.focus.utils.IntentUtils
 import org.mozilla.focus.utils.SafeIntent
@@ -173,8 +172,6 @@ class MainActivity : BaseActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         appComponent().inject(this)
         super.onCreate(savedInstanceState)
-
-        FirebaseHelper.initUserState(this)
 
         chromeViewModel = getViewModel(chromeViewModelCreator)
         downloadIndicatorViewModel = getViewModel(downloadIndicatorViewModelCreator)

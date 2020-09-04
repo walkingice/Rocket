@@ -13,10 +13,8 @@ import org.mozilla.rocket.chrome.domain.ShouldShowNewMenuItemHintUseCase
 import org.mozilla.rocket.download.SingleLiveEvent
 import org.mozilla.rocket.extension.first
 import org.mozilla.rocket.extension.map
-import org.mozilla.rocket.home.contenthub.data.ContentHubRepo
 import org.mozilla.rocket.home.contenthub.domain.GetContentHubItemsUseCase
 import org.mozilla.rocket.home.contenthub.domain.ReadContentHubItemUseCase
-import org.mozilla.rocket.home.contenthub.ui.ContentHub
 import org.mozilla.rocket.home.domain.IsHomeScreenShoppingButtonEnabledUseCase
 import org.mozilla.rocket.home.logoman.domain.DismissLogoManNotificationUseCase
 import org.mozilla.rocket.home.logoman.domain.GetLogoManNotificationUseCase
@@ -35,15 +33,6 @@ import org.mozilla.rocket.home.topsites.domain.RemoveTopSiteUseCase
 import org.mozilla.rocket.home.topsites.ui.Site
 import org.mozilla.rocket.home.topsites.ui.SitePage
 import org.mozilla.rocket.home.topsites.ui.TopSiteClickListener
-import org.mozilla.rocket.msrp.data.Mission
-import org.mozilla.rocket.msrp.data.MissionProgress
-import org.mozilla.rocket.msrp.domain.CheckInMissionUseCase
-import org.mozilla.rocket.msrp.domain.CompleteJoinMissionOnboardingUseCase
-import org.mozilla.rocket.msrp.domain.GetIsFxAccountUseCase
-import org.mozilla.rocket.msrp.domain.HasUnreadMissionsUseCase
-import org.mozilla.rocket.msrp.domain.IsMsrpAvailableUseCase
-import org.mozilla.rocket.msrp.domain.LastReadMissionIdUseCase
-import org.mozilla.rocket.msrp.domain.RefreshMissionsUseCase
 import org.mozilla.rocket.theme.ThemeManager
 import org.mozilla.rocket.util.ToastMessage
 
@@ -57,15 +46,8 @@ class HomeViewModel(
     private val readContentHubItemUseCase: ReadContentHubItemUseCase,
     private val getLogoManNotificationUseCase: GetLogoManNotificationUseCase,
     private val lastReadLogoManNotificationUseCase: LastReadLogoManNotificationUseCase,
-    private val lastReadMissionIdUseCase: LastReadMissionIdUseCase,
     private val dismissLogoManNotificationUseCase: DismissLogoManNotificationUseCase,
-    private val isMsrpAvailableUseCase: IsMsrpAvailableUseCase,
     private val isHomeScreenShoppingButtonEnabledUseCase: IsHomeScreenShoppingButtonEnabledUseCase,
-    private val checkInMissionUseCase: CheckInMissionUseCase,
-    private val completeJoinMissionOnboardingUseCase: CompleteJoinMissionOnboardingUseCase,
-    refreshMissionsUseCase: RefreshMissionsUseCase,
-    hasUnreadMissionsUseCase: HasUnreadMissionsUseCase,
-    getIsFxAccountUseCase: GetIsFxAccountUseCase,
     shouldShowShoppingSearchOnboardingUseCase: ShouldShowShoppingSearchOnboardingUseCase,
     setShoppingSearchOnboardingIsShownUseCase: SetShoppingSearchOnboardingIsShownUseCase,
     shouldShowNewMenuItemHintUseCase: ShouldShowNewMenuItemHintUseCase,
@@ -79,10 +61,7 @@ class HomeViewModel(
     val topSitesPageIndex = MutableLiveData<Int>()
     val contentHubItems = getContentHubItemsUseCase()
     val logoManNotification = MediatorLiveData<StateNotification?>()
-    val isAccountLayerVisible = MutableLiveData<Boolean>().apply { value = isMsrpAvailableUseCase() }
     val isShoppingSearchEnabled = MutableLiveData<Boolean>().apply { value = isHomeScreenShoppingButtonEnabledUseCase() }
-    val hasUnreadMissions: LiveData<Boolean> = hasUnreadMissionsUseCase()
-    val isFxAccount: LiveData<Boolean> = getIsFxAccountUseCase()
     val shouldShowNewMenuItemHint: LiveData<Boolean> = shouldShowNewMenuItemHintUseCase()
 
     val toggleBackgroundColor = SingleLiveEvent<Unit>()
@@ -92,12 +71,7 @@ class HomeViewModel(
     val openBrowser = SingleLiveEvent<String>()
     val showTopSiteMenu = SingleLiveEvent<ShowTopSiteMenuData>()
     val showAddTopSiteMenu = SingleLiveEvent<Unit>()
-    val openContentPage = SingleLiveEvent<ContentHub.Item>()
     val showToast = SingleLiveEvent<ToastMessage>()
-    val openRewardPage = SingleLiveEvent<Unit>()
-    val openProfilePage = SingleLiveEvent<Unit>()
-    val showMissionCompleteDialog = SingleLiveEvent<Mission>()
-    val openMissionDetailPage = SingleLiveEvent<Mission>()
     val showShoppingSearchOnboardingSpotlight = SingleLiveEvent<Unit>()
     val hideLogoManNotification = SingleLiveEvent<Unit>()
     val executeUriAction = SingleLiveEvent<String>()
@@ -119,11 +93,6 @@ class HomeViewModel(
     init {
         initLogoManData()
 
-        viewModelScope.launch {
-            if (isMsrpAvailableUseCase()) {
-                refreshMissionsUseCase()
-            }
-        }
         if (shouldShowThemeOnboardingUseCase()) {
             setThemeOnboardingIsShownUseCase()
             showThemeSetting.call()
@@ -153,7 +122,6 @@ class HomeViewModel(
             }
         }
         logoManNotification.addSource(lastReadLogoManNotificationUseCase(), lastReadIdObserver)
-        logoManNotification.addSource(lastReadMissionIdUseCase(), lastReadIdObserver)
     }
 
     private fun updateTopSitesData() = viewModelScope.launch {
@@ -373,34 +341,6 @@ class HomeViewModel(
         updateTopSitesData()
     }
 
-    fun onContentHubItemClicked(item: ContentHub.Item) = viewModelScope.launch {
-        openContentPage.value = item
-        readContentHubItemUseCase(item.getItemType())
-        TelemetryWrapper.clickContentHub(item)
-        val checkInResult = checkInMissionUseCase(
-            when (item) {
-                is ContentHub.Item.Travel -> CheckInMissionUseCase.PingType.Travel()
-                is ContentHub.Item.Shopping -> CheckInMissionUseCase.PingType.Shopping()
-                is ContentHub.Item.News -> CheckInMissionUseCase.PingType.Lifestyle()
-                is ContentHub.Item.Games -> CheckInMissionUseCase.PingType.Game()
-            }
-        )
-        checkInResult.data?.let { (mission, hasMissionCompleted) ->
-            val (message, currentDay) = when (val progress = mission.missionProgress) {
-                is MissionProgress.TypeDaily -> progress.message to progress.currentDay
-                null -> error("Unknown MissionProgress type")
-            }
-            if (message.isNotEmpty()) {
-                showToast.value = ToastMessage(message)
-            }
-            if (hasMissionCompleted) {
-                showMissionCompleteDialog.value = mission
-                TelemetryWrapper.showChallengeCompleteMessage()
-            }
-            TelemetryWrapper.endMissionTask(currentDay, hasMissionCompleted)
-        }
-    }
-
     fun onLogoManShown() {
         // Make it only animate once. Remove this when Home Screen doesn't recreate whenever goes back from browser
         val logoManNotification = logoManNotification.value
@@ -433,7 +373,6 @@ class HomeViewModel(
                     executeUriAction.value = logomanAction.action
                 }
             }
-            is GetLogoManNotificationUseCase.LogoManAction.OpenMissionPage -> openMissionDetailPage.value = logomanAction.mission
         }
     }
 
@@ -443,36 +382,6 @@ class HomeViewModel(
             dismissLogoManNotificationUseCase(it)
             TelemetryWrapper.swipeLogoman(logoManType, logoManClickAction?.getLink(), it.id)
         }
-    }
-
-    fun onRewardButtonClicked() {
-        TelemetryWrapper.clickRewardButton()
-        openRewardPage.call()
-    }
-
-    fun onProfileButtonClicked() {
-        openProfilePage.call()
-    }
-
-    fun onRedeemCompletedMissionButtonClicked(mission: Mission) {
-        openMissionDetailPage.value = mission
-        TelemetryWrapper.clickChallengeCompleteMessage(TelemetryWrapper.Extra_Value.LOGIN)
-    }
-
-    fun onContentHubRequestClickHintDismissed() {
-        completeJoinMissionOnboardingUseCase()
-    }
-
-    fun onShowClickContentHubOnboarding() {
-        TelemetryWrapper.showTaskContextualHint()
-    }
-
-    fun onRedeemCompletedLaterButtonClicked() {
-        TelemetryWrapper.clickChallengeCompleteMessage(TelemetryWrapper.Extra_Value.LATER)
-    }
-
-    fun onRedeemCompletedDialogClosed() {
-        TelemetryWrapper.clickChallengeCompleteMessage(TelemetryWrapper.Extra_Value.CLOSE)
     }
 
     fun onNewTabButtonClicked() {
@@ -498,13 +407,4 @@ class HomeViewModel(
 
 private fun GetLogoManNotificationUseCase.Notification.toUiModel() = when (this) {
     is GetLogoManNotificationUseCase.Notification.RemoteNotification -> Notification.RemoteNotification(id, title, subtitle, imageUrl)
-    is GetLogoManNotificationUseCase.Notification.MissionNotification -> Notification.MissionNotification(id, title, subtitle, imageUrl)
 }
-
-private fun ContentHub.Item.getItemType() =
-        when (this) {
-            is ContentHub.Item.Travel -> ContentHubRepo.TRAVEL
-            is ContentHub.Item.Shopping -> ContentHubRepo.SHOPPING
-            is ContentHub.Item.News -> ContentHubRepo.NEWS
-            is ContentHub.Item.Games -> ContentHubRepo.GAMES
-        }

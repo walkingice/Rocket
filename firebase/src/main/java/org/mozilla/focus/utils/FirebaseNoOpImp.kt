@@ -5,7 +5,6 @@
 
 package org.mozilla.focus.utils
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import java.util.HashMap
@@ -70,24 +69,6 @@ open class FirebaseNoOpImp(remoteConfigDefault: HashMap<String, Any> = HashMap()
 
     override fun setFirebaseUserProperty(context: Context, tag: String, value: String) {
     }
-
-    override val uid: String?
-        get() = null
-
-    override fun signInWithCustomToken(
-        jwt: String,
-        onSuccess: (String?, String?) -> Unit,
-        onFail: (error: String) -> Unit
-    ) {
-    }
-
-    override fun initUserState(activity: Activity) {
-    }
-
-    override fun getUserToken(func: (String?) -> Unit) {
-    }
-
-    override fun isAnonymous(): Boolean? = null
 
     override fun refreshRemoteConfig(callback: (Boolean, e: Exception?) -> Unit) {
     }

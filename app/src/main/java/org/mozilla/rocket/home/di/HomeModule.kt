@@ -33,21 +33,10 @@ import org.mozilla.rocket.home.topsites.domain.IsTopSiteFullyPinnedUseCase
 import org.mozilla.rocket.home.topsites.domain.PinTopSiteUseCase
 import org.mozilla.rocket.home.topsites.domain.RemoveTopSiteUseCase
 import org.mozilla.rocket.home.topsites.ui.AddNewTopSitesViewModel
-import org.mozilla.rocket.msrp.data.MissionRepository
-import org.mozilla.rocket.msrp.di.MissionModule
-import org.mozilla.rocket.msrp.domain.CheckInMissionUseCase
-import org.mozilla.rocket.msrp.domain.CompleteJoinMissionOnboardingUseCase
-import org.mozilla.rocket.msrp.domain.GetIsFxAccountUseCase
-import org.mozilla.rocket.msrp.domain.HasUnreadMissionsUseCase
-import org.mozilla.rocket.msrp.domain.IsMsrpAvailableUseCase
-import org.mozilla.rocket.msrp.domain.LastReadMissionIdUseCase
-import org.mozilla.rocket.msrp.domain.RefreshMissionsUseCase
 import org.mozilla.rocket.shopping.search.data.ShoppingSearchRepository
 import javax.inject.Singleton
 
-@Module(
-    includes = [MissionModule::class]
-)
+@Module
 object HomeModule {
 
     @JvmStatic
@@ -62,15 +51,8 @@ object HomeModule {
         readContentHubItemUseCase: ReadContentHubItemUseCase,
         getLogoManNotificationUseCase: GetLogoManNotificationUseCase,
         lastReadLogoManNotificationUseCase: LastReadLogoManNotificationUseCase,
-        lastReadMissionIdUseCase: LastReadMissionIdUseCase,
         dismissLogoManNotificationUseCase: DismissLogoManNotificationUseCase,
-        isMsrpAvailableUseCase: IsMsrpAvailableUseCase,
         isHomeScreenShoppingButtonEnabledUseCase: IsHomeScreenShoppingButtonEnabledUseCase,
-        checkInMissionUseCase: CheckInMissionUseCase,
-        completeJoinMissionOnboardingUseCase: CompleteJoinMissionOnboardingUseCase,
-        refreshMissionsUseCase: RefreshMissionsUseCase,
-        hasUnreadMissionsUseCase: HasUnreadMissionsUseCase,
-        getIsFxAccountUseCase: GetIsFxAccountUseCase,
         shouldShowShoppingSearchOnboardingUseCase: ShouldShowShoppingSearchOnboardingUseCase,
         setShoppingSearchOnboardingIsShownUseCase: SetShoppingSearchOnboardingIsShownUseCase,
         shouldShowNewMenuItemHintUseCase: ShouldShowNewMenuItemHintUseCase,
@@ -88,15 +70,8 @@ object HomeModule {
         readContentHubItemUseCase,
         getLogoManNotificationUseCase,
         lastReadLogoManNotificationUseCase,
-        lastReadMissionIdUseCase,
         dismissLogoManNotificationUseCase,
-        isMsrpAvailableUseCase,
         isHomeScreenShoppingButtonEnabledUseCase,
-        checkInMissionUseCase,
-        completeJoinMissionOnboardingUseCase,
-        refreshMissionsUseCase,
-        hasUnreadMissionsUseCase,
-        getIsFxAccountUseCase,
         shouldShowShoppingSearchOnboardingUseCase,
         setShoppingSearchOnboardingIsShownUseCase,
         shouldShowNewMenuItemHintUseCase,
@@ -173,9 +148,8 @@ object HomeModule {
     @Singleton
     @Provides
     fun provideGetLogoManNotificationUseCase(
-        logoManNotificationRepo: LogoManNotificationRepo,
-        missionRepo: MissionRepository
-    ): GetLogoManNotificationUseCase = GetLogoManNotificationUseCase(logoManNotificationRepo, missionRepo)
+        logoManNotificationRepo: LogoManNotificationRepo
+    ): GetLogoManNotificationUseCase = GetLogoManNotificationUseCase(logoManNotificationRepo)
 
     @JvmStatic
     @Singleton
@@ -187,23 +161,10 @@ object HomeModule {
     @JvmStatic
     @Singleton
     @Provides
-    fun provideLastReadMissionIdUseCase(
-        missionRepo: MissionRepository
-    ): LastReadMissionIdUseCase = LastReadMissionIdUseCase(missionRepo)
-
-    @JvmStatic
-    @Singleton
-    @Provides
     fun provideDismissLogoManNotificationUseCase(
-        logoManNotificationRepo: LogoManNotificationRepo,
-        missionRepo: MissionRepository
+        logoManNotificationRepo: LogoManNotificationRepo
     ): DismissLogoManNotificationUseCase =
-            DismissLogoManNotificationUseCase(logoManNotificationRepo, missionRepo)
-
-    @JvmStatic
-    @Singleton
-    @Provides
-    fun provideIsMsrpAvailableUseCase(missionRepo: MissionRepository) = IsMsrpAvailableUseCase(missionRepo)
+            DismissLogoManNotificationUseCase(logoManNotificationRepo)
 
     @JvmStatic
     @Singleton

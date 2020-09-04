@@ -1,12 +1,9 @@
 package org.mozilla.focus.utils
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 
 abstract class FirebaseContract(var remoteConfigDefault: HashMap<String, Any> = HashMap()) {
-
-    abstract val uid: String?
 
     interface Callback {
         fun onRemoteConfigFetched()
@@ -39,13 +36,6 @@ abstract class FirebaseContract(var remoteConfigDefault: HashMap<String, Any> = 
 
     abstract fun setFirebaseUserProperty(context: Context, tag: String, value: String)
 
-    abstract fun signInWithCustomToken(
-        jwt: String,
-        onSuccess: (String?, String?) -> Unit,
-        onFail: (error: String) -> Unit
-    )
-    abstract fun initUserState(activity: Activity)
-
     companion object {
         internal val TAG = "FirebaseContract"
 
@@ -62,10 +52,6 @@ abstract class FirebaseContract(var remoteConfigDefault: HashMap<String, Any> = 
 
         var developerMode: Boolean = false
     }
-
-    abstract fun getUserToken(func: (String?) -> Unit)
-
-    abstract fun isAnonymous(): Boolean?
 
     abstract fun refreshRemoteConfig(callback: (Boolean, e: Exception?) -> Unit)
 

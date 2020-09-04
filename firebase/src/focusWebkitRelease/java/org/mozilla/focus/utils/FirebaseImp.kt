@@ -5,7 +5,6 @@
 
 package org.mozilla.focus.utils
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -143,66 +142,6 @@ open class FirebaseImp(fromResourceString: HashMap<String, Any>) : FirebaseContr
 
     override fun setFirebaseUserProperty(context: Context, tag: String, value: String) {
         FirebaseAnalytics.getInstance(context).setUserProperty(tag, value)
-    }
-
-    override val uid: String?
-        get() = firebaseAuth.uid
-
-    override fun signInWithCustomToken(
-        jwt: String,
-        onSuccess: (String?, String?) -> Unit,
-        onFail: (error: String) -> Unit
-    ) {
-        firebaseAuth.signInWithCustomToken(jwt).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Log.d(TAG, "=====signInWithCustomToken success=====")
-                fetchClaim(onSuccess)
-            } else {
-                onFail("signInWithCustomToken failed.:${task.exception}")
-            }
-        }
-    }
-
-    override fun initUserState(activity: Activity) {
-        Log.d(TAG, "====initUserState====")
-
-        val currentUser = firebaseAuth.currentUser
-        if (currentUser == null) {
-            firebaseAuth.signInAnonymously()
-                .addOnCompleteListener(activity) { task ->
-                    if (task.isSuccessful) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d(TAG, "====signInAnonymously====")
-                    } else {
-                        // If sign in fails, display a message to the user.
-                        Log.e(TAG, "====signInAnonymously failure====")
-                    }
-                }
-        }
-    }
-
-    override fun getUserToken(func: (String?) -> Unit) {
-        // some http request(mission/redeem) needs user token to access the backend.
-        // we need Firebase SDK to get the user token
-        // TODO: maybe wrap this logic in a MSRP client SDK
-        firebaseAuth.currentUser?.getIdToken(false)?.addOnCompleteListener { task ->
-            val token = if (task.isSuccessful) { task.result?.token } else { null }
-
-            func(token)
-        } ?: func(null)
-    }
-
-    override fun isAnonymous(): Boolean? = firebaseAuth.currentUser?.isAnonymous
-
-    private fun fetchClaim(onClaimFetched: (String?, String?) -> Unit) {
-
-        firebaseAuth.currentUser?.getIdToken(true)?.addOnSuccessListener { result ->
-
-            val fxUid = result.claims["fxuid"]?.toString()
-            val oldFbUid = result.claims["oldFbUid"]?.toString()
-
-            onClaimFetched(fxUid, oldFbUid)
-        }
     }
 
     override fun refreshRemoteConfig(callback: (Boolean, e: Exception?) -> Unit) {
