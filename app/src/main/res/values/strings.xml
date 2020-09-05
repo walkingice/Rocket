@@ -87,10 +87,7 @@
 
     <!-- This is the title of the dialog for selecting a new default search engine -->
     <string name="preference_dialog_title_search_engine">Default search engine</string>
-   
-    <!-- This is the title of the dialog for choosing news source -->
-    <string name="preference_dialog_title_news_source">News source</string>
-   
+
     <string name="preference_data_saving_block_images">Block images</string>
 
     <!-- Settings Privacy and storage-->
@@ -597,78 +594,8 @@
     <!-- Content portal -->
     <!-- Title of news portal page -->
     <string name="label_menu_news">News</string>
-    <string name="label_menu_latest_top_trending_news">Latest &amp; Top Trending News</string>
-    <!-- Button on the news portal page when a newer list is found. When a user tap it, the page will refresh and show the latest list. -->
-    <string name="news_update_btn">New update</string>
-    <!-- Title of news preferences -->
-    <string name="title_news_preferences">News Settings</string>
-    <!-- This is the dialog for choosing news language -->
-    <string name="news_language_dialog_title">Language</string>
-    <string name="news_language_dialog_option_english">English</string>
-    <string name="news_language_dialog_option_hindi">Hindi</string>
-    <string name="news_language_dialog_option_marathi">Marathi</string>
-    <string name="news_language_dialog_option_kannada">Kannada</string>
-    <string name="news_language_dialog_option_gujarati">Gujarati</string>
-    <string name="news_language_dialog_option_malayalam">Malayalam</string>
-    <string name="news_language_dialog_option_tamil">Tamil</string>
-    <string name="news_language_dialog_option_telugu">Telugu</string>
-    <string name="news_language_dialog_option_urdu">Urdu</string>
-    <string name="news_language_dialog_option_nepali">Nepali</string>
-    <string name="news_language_dialog_option_asamiya">Asamiya</string>
-    <string name="news_language_dialog_option_punjabi">Punjabi</string>
-    <string name="news_language_dialog_option_bengali">Bengali</string>
-    <!-- This is the panel for editing show or hide news categories-->
-    <string name="news_category_title">Interests</string>
-    <string name="news_category_option_top_news">Top-news</string>
-    <string name="news_category_option_india">India</string>
-    <string name="news_category_option_world">World</string>
-    <string name="news_category_option_technology">Technology</string>
-    <string name="news_category_option_education">Education</string>
-    <string name="news_category_option_politics">Politics</string>
-    <string name="news_category_option_career">Career</string>
-    <string name="news_category_option_cricket">Cricket</string>
-    <string name="news_category_option_sports">Sports</string>
-    <string name="news_category_option_entertainment">Entertainment</string>
-    <string name="news_category_option_business">Business</string>
-    <string name="news_category_option_health">Health</string>
-    <string name="news_category_option_movie_reviews">Movie-reviews</string>
-    <string name="news_category_option_automobile">Automobile</string>
-    <string name="news_category_option_regional">Regional</string>
-    <string name="news_category_option_travel">Travel</string>
-    <string name="news_category_option_lifestyle">Lifestyle</string>
-    <string name="news_category_option_food">Food</string>
-    <string name="news_category_option_video">Video</string>
-    <string name="news_category_option_city">City</string>
-    <string name="news_category_option_events">Events</string>
-    <string name="news_category_option_religion">Religion</string>
-    <string name="news_category_option_crime">Crime</string>
-    <string name="news_category_option_astrology">Astrology</string>
-    <string name="news_category_option_science">Science</string>
-    <string name="news_category_option_jokes">Jokes</string>
-    <!--"Nation" is one of the news category meaning local news. Its position is same as Top-News/Technology/Education...-->
-    <string name="news_category_option_nation">Nation</string>
-    
-    <!-- A prefix that shows before the logo of a given partner. This string tries to show a user that the service he/she is using is provided by this given partner. -->
-    <string name="logo_text">Service provided by</string>
-
-    <string name="coupon_valid_description" translatable="false">Berlaku hingga %s</string>
-   
-   <!-- Recommended news onboarding title. -->
-   <string name="recommended_news_title">Recommended News For You</string>
-   <!-- Recommended news onboarding content.
-   The %1$s here is a placeholder for "Learn more" which directs users to SUMO page with detail information about the feature. -->
-   <string name="recommended_news_content">Tap “Yes” to begin seeing news recommended for you by our AI news engine. You can turn off recommendations and control your settings anytime in News->Settings. %1$s</string>
-   <!-- Recommended news choose your preferred language -->
-   <string name="recommended_news_preference_language">Choose Your Preferred\nNews Language</string>
-   <!-- Recommended news toggle title -->
-   <string name="recommended_news_preference_toggle">Personalized news experience</string>
-   <!-- Disable personalized experience for news. -->
-   <string name="recommended_news_preference_disable_dialog">Do you want to disable the recommended news? Tap “YES” to just display the latest news articles.</string>
-   <!-- Enable personalized experience for news. -->
-   <string name="recommended_news_preference_enable_dialog">Do you want to enable the recommended news feature? Tap “YES” to start seeing a recommended selection of news articles.</string>
 
     <!-- Private Browsing-->
-
     <!-- This is used in the menu. User can click the menu item and open a private tab. -->
     <string name="private_tab">Private tab</string>
 

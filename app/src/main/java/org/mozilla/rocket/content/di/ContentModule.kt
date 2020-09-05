@@ -6,9 +6,8 @@ import org.mozilla.rocket.content.common.ui.ContentTabBottomBarViewModel
 import org.mozilla.rocket.content.common.ui.ContentTabTelemetryViewModel
 import org.mozilla.rocket.content.common.ui.TabSwipeTelemetryViewModel
 import org.mozilla.rocket.content.common.ui.VerticalTelemetryViewModel
-import org.mozilla.rocket.content.news.di.NewsModule
 
-@Module(includes = [NewsModule::class])
+@Module
 object ContentModule {
 
     @JvmStatic

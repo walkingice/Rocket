@@ -81,8 +81,6 @@
     <dimen name="tab_tray_close_all_btn_margin_start">17dp</dimen>
     <dimen name="tab_tray_close_all_btn_margin_end">18dp</dimen>
     <dimen name="menu_text_padding">5dp</dimen>
-
-
     <dimen name="tab_tray_bottom_sheet_start_margin">24dp</dimen>
     <dimen name="tab_tray_bottom_sheet_end_margin">0dp</dimen>
     <dimen name="pm_home_title_margin">116dp</dimen>
@@ -91,12 +89,6 @@
     <dimen name="fake_input_width">306dp</dimen>
 
     <dimen name="myshot_focus_view_radius">52dp</dimen>
-
-    <dimen name="item_news_inner_width">@dimen/item_news_inner_height</dimen>
-    <dimen name="item_news_inner_height">84dp</dimen>
-
-    <dimen name="news_language_setting_card_horizontal_space">9dp</dimen>
-    <dimen name="news_language_setting_card_vertical_space">8dp</dimen>
 
     <!--  HomeFragment  -->
     <item name="top_sites_pager_indicator_visibility" type="integer">@integer/visibility_gone</item>
@@ -113,6 +105,4 @@
     <dimen name="set_default_browser_tutorial_flow_1_step_1_image_height">104dp</dimen>
     <dimen name="set_default_browser_tutorial_flow_1_step_2_image_height">108dp</dimen>
     <dimen name="set_default_browser_tutorial_flow_2_step_2_image_height">208dp</dimen>
-
-    <dimen name="card_view_elevation">1dp</dimen>
 </resources>

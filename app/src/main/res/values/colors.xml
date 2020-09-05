@@ -166,10 +166,6 @@
     <color name="homeShoppingSearchButtonBackground">@color/paletteWhite100</color>
     <color name="homeShoppingSearchButtonBackgroundNight">#414146</color>
 
-    <!-- Content common -->
-    <color name="contentHeaderTextColor">#0C0C0D</color>
-    <color name="contentHeaderTextColor87">#DE0C0C0D</color>
-
     <!-- Shopping Search -->
     <color name="shoppingSearchInputBackgroundGradientStart">#FF3C61</color>
     <color name="shoppingSearchInputBackgroundGradientCenter">#FF803E</color>

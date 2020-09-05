@@ -35,12 +35,6 @@ import org.mozilla.rocket.chrome.di.ChromeModule
 import org.mozilla.rocket.content.common.ui.ContentTabActivity
 import org.mozilla.rocket.content.common.ui.ContentTabFragment
 import org.mozilla.rocket.content.di.ContentModule
-import org.mozilla.rocket.content.news.ui.NewsActivity
-import org.mozilla.rocket.content.news.ui.NewsFragment
-import org.mozilla.rocket.content.news.ui.NewsLanguageSettingFragment
-import org.mozilla.rocket.content.news.ui.NewsSettingFragment
-import org.mozilla.rocket.content.news.ui.NewsTabFragment
-import org.mozilla.rocket.content.news.ui.PersonalizedNewsOnboardingFragment
 import org.mozilla.rocket.download.data.DownloadCompleteReceiver
 import org.mozilla.rocket.download.data.RelocateService
 import org.mozilla.rocket.firstrun.FirstrunFragment
@@ -82,11 +76,6 @@ import javax.inject.Singleton
 interface AppComponent {
     fun appContext(): Context
 
-    fun inject(newsSettingFragment: NewsSettingFragment)
-    fun inject(newsTabFragment: NewsTabFragment)
-    fun inject(newsFragment: NewsFragment)
-    fun inject(personalizedNewsOnboardingFragment: PersonalizedNewsOnboardingFragment)
-    fun inject(newsLanguageSettingFragment: NewsLanguageSettingFragment)
     fun inject(mainActivity: MainActivity)
     fun inject(editBookmarkActivity: EditBookmarkActivity)
     fun inject(bookmarksFragment: BookmarksFragment)
@@ -104,7 +93,6 @@ interface AppComponent {
     fun inject(privateModeActivity: PrivateModeActivity)
     fun inject(contentTabActivity: ContentTabActivity)
     fun inject(contentTabFragment: ContentTabFragment)
-    fun inject(newsActivity: NewsActivity)
     fun inject(shoppingSearchActivity: ShoppingSearchActivity)
     fun inject(shoppingSearchKeywordInputFragment: ShoppingSearchKeywordInputFragment)
     fun inject(shoppingSearchResultTabFragment: ShoppingSearchResultTabFragment)
