@@ -24,8 +24,6 @@
   <string name="about_link_support">తోడ్పాటు</string>
   <string name="about_link_your_rights">మీ హక్కులు / లైసెన్సులు</string>
   <string name="about_link_privacy">గోప్యతా విధానం</string>
-  <string name="life_feed">జీవనాడి</string>
-  <string name="about_link_life_feed">%1$s గురించి మరింత తెలుసుకోండి</string>
   <string name="preference_search_engine_default">అప్రమేయ శోధన యంత్రం</string>
   <string name="preference_language">భాష</string>
   <string name="preference_language_systemdefault">వ్యవస్థ అప్రమేయం</string>

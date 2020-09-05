@@ -72,10 +72,6 @@
     <string name="about_link_support">Support</string>
     <string name="about_link_your_rights">Your Rights / Licenses</string>
     <string name="about_link_privacy">Privacy Notice</string>
-    <!--Life Feed is an information panel covering content that might help our customers' life. It covers from the most popular topics to the hottest deals, including news, games, coupon...etc.-->
-    <string name="life_feed">Life Feed</string>
-    <!-- The %1$s here is a placeholder for "Life Feed". Life Feed is an information panel covering content that might help our customers' life. It covers from the most popular topics to the hottest deals, including news, games, coupon...etc.-->
-    <string name="about_link_life_feed">Learn more about %1$s</string>
 
     <!-- This label is shown below the name of the default search engine in settings -->
     <string name="preference_search_engine_default">Default search engine</string>
@@ -591,10 +587,6 @@
     <!-- Label for editing a bookmark which is available next to the bookmark item. -->
     <string name="edit_bookmark">Edit</string>
 
-    <!-- Content portal -->
-    <!-- Title of news portal page -->
-    <string name="label_menu_news">News</string>
-
     <!-- Private Browsing-->
     <!-- This is used in the menu. User can click the menu item and open a private tab. -->
     <string name="private_tab">Private tab</string>
@@ -680,17 +672,6 @@
     <string name="shopping_closing_dialog_cancel">Cancel</string>
     <string name="shopping_closing_dialog_body">Close all shopping search results?</string>
 
-    <!--Artboard Name: 4.1 Shopping Deals Overview-->
-    <!--Shopping Home-->
-    <string name="shopping_vertical_title">Shopping</string>
-    <!--Artboard Name: 5.2 Shopping Coupons Update-->
-    <!--Shopping Coupons-->
-    <string name="shopping_coupon_expire_zero">Expired</string>
-
-    <!--Gaming Vertical-->
-    <!--Gaming Home-->
-    <string name="gaming_vertical_title">Game</string>
-
     <!-- Onboarding for new users to introduce Rocket 2.0 -->
     <!-- Introduce Content & Services -->
     <string name="onboarding_2_content_services_news_shopping_games">Tap to read trending news, find good deals, or have fun playing the hottest free games!</string>
@@ -719,9 +700,6 @@
     <string name="private_home_description_1">Now you can browse privately, no history, no passwords recorded and other people who use this device won’t see your activity.\n\nOur Advanced Private Browsing can even %1$s by advertisers and websites, which most private modes cannot.</string>
     <string name="private_home_description_2">prevent you from being tracked</string>
 
-    <!--Travel Vertical--> 
-    <!--travel home-->
-    <string name="travel_vertical_title">Travel</string>
     <!--Action button for setting default browser-->
     <string name="travel_dialog_2_action">SET AS DEFAULT</string>
 

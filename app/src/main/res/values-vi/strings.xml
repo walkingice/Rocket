@@ -24,8 +24,6 @@
   <string name="about_link_support">Hỗ trợ</string>
   <string name="about_link_your_rights">Quyền lợi của bạn / Giấy phép</string>
   <string name="about_link_privacy">Thông báo bảo mật</string>
-  <string name="life_feed">Tin tức hàng ngày</string>
-  <string name="about_link_life_feed">Tìm hiểu thêm về %1$s</string>
   <string name="preference_search_engine_default">Công cụ tìm kiếm mặc định</string>
   <string name="preference_language">Ngôn ngữ</string>
   <string name="preference_language_systemdefault">Mặc định hệ thống</string>

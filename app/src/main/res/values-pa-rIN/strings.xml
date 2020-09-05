@@ -22,8 +22,6 @@
   <string name="about_link_support">ਸਹਾਇਤਾ</string>
   <string name="about_link_your_rights">ਤੁਹਾਡੇ ਹੱਕ / ਲਸੰਸ</string>
   <string name="about_link_privacy">ਪਰਦੇਦਾਰੀ ਸੂਚਨਾ</string>
-  <string name="life_feed">ਜ਼ਿੰਦਗੀ ਫੀਡ</string>
-  <string name="about_link_life_feed">%1$s ਬਾਰੇ ਜਾਣੋ</string>
   <string name="preference_search_engine_default">ਡਿਫੌਲਟ ਖੋਜ ਇੰਜਣ</string>
   <string name="preference_language">ਭਾਸ਼ਾ</string>
   <string name="preference_language_systemdefault">ਸਿਸਟਮ ਡਿਫੌਲਟ</string>

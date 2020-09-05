@@ -26,7 +26,6 @@ import org.mozilla.focus.utils.AppConstants
 import org.mozilla.focus.utils.FirebaseHelper
 import org.mozilla.rocket.content.common.data.ContentTabTelemetryData
 import org.mozilla.rocket.content.common.data.TabSwipeTelemetryData
-import org.mozilla.rocket.home.contenthub.ui.ContentHub
 import org.mozilla.strictmodeviolator.StrictModeViolation
 import org.mozilla.telemetry.annotation.TelemetryDoc
 import org.mozilla.telemetry.annotation.TelemetryExtra
@@ -65,10 +64,8 @@ object TelemetryWrapper {
         const val ADD = "add"
         const val SWIPE = "swipe"
         const val GET = "get"
-        const val RELOAD = "reload"
         const val START = "start"
         const val END = "end"
-        const val IMPRESSION = "impression"
         const val PIN = "pin"
         const val FOREGROUND = "foreground"
         const val BACKGROUND = "background"
@@ -114,16 +111,12 @@ object TelemetryWrapper {
         const val UPDATE = "update"
         const val ONBOARDING = "onboarding"
         const val CONTEXTUAL_HINT = "contextual_hint"
-        const val CONTENT_HUB = "content_hub"
-        const val CONTENT_HOME = "content_home"
         const val CONTENT_TAB = "content_tab"
         const val TAB_SWIPE = "tab_swipe"
         const val LOGOMAN = "logoman"
         const val NOTIFICATION = "notification"
         const val MESSAGE = "message"
-        const val CATEGORY = "category"
         const val PROCESS = "process"
-        const val DETAIL_PAGE = "detail_page"
         const val TOAST = "toast"
         const val SNACKBAR = "snackbar"
         const val DOWNLOAD = "download"
@@ -180,16 +173,7 @@ object TelemetryWrapper {
         internal const val FIRSTRUN = "firstrun"
         internal const val VERTICAL = "vertical"
         internal const val TAB_SWIPE = "tab_swipe"
-        internal const val OPEN_IN_BROWSER = "OPEN_IN_BROWSER"
         internal const val BACK = "back"
-        internal const val ITEM = "item"
-        internal const val CONTENT_HOME = "content_home"
-        internal const val UPDATE = "update"
-        internal const val MORE = "more"
-        internal const val PERSONALIZATION = "personalization"
-        internal const val LANGUAGE = "language"
-        internal const val LIFESTYLE = "lifestyle"
-        internal const val CATEGORY = "category"
         internal const val EXIT_WARNING = "exit_warning"
         internal const val SET_DEFAULT_BY_SETTINGS = "set_default_by_settings"
         internal const val SET_DEFAULT_BY_LINK = "set_default_by_link"
@@ -233,14 +217,8 @@ object TelemetryWrapper {
         const val URL_COUNTS = "url_counts"
         const val APP_LINK = "app_link"
         const val SHOW_KEYBOARD = "show_keyboard"
-        const val IMPRESSION = "impression"
         const val LOADTIME = "loadtime"
-        const val ITEM_ID = "item_id"
-        const val ITEM_NAME = "item_name"
         const val BACKGROUND = "background"
-        const val CHALLENGE_NAME = "challenge_name"
-        const val PERSONALIZATION = "personalization"
-        const val LANGUAGE = "language"
         const val KEYWORD = "keyword"
         const val ORIENTATION = "orientation"
         const val PINNED = "pinned"
@@ -283,13 +261,8 @@ object TelemetryWrapper {
         const val OPEN = "open"
         const val INSTALL = "install"
         const val LATER = "later"
-        const val LOGIN = "login"
-        const val CLOSE = "close"
-        const val MISSION = "mission"
-        const val GIFT = "gift"
         const val HOME = "home"
         const val TAB_SWIPE = "tab_swipe"
-        const val UPDATE = "update"
         const val PORTRAIT = "portrait"
         const val LANDSCAPE = "landscape"
         const val OK = "ok"
@@ -2486,77 +2459,6 @@ object TelemetryWrapper {
     }
 
     @TelemetryDoc(
-            name = "Click Content Hub",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.CONTENT_HUB,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING)
-            ])
-    fun clickContentHub(item: ContentHub.Item) {
-        val vertical = when (item) {
-            is ContentHub.Item.Shopping -> Extra_Value.SHOPPING
-            is ContentHub.Item.Games -> ""
-            is ContentHub.Item.Travel -> ""
-            is ContentHub.Item.News -> ""
-        }
-        EventBuilder(Category.ACTION, Method.CLICK, Object.CONTENT_HUB)
-                .extra(Extra.VERTICAL, vertical)
-                .queue()
-    }
-
-    @TelemetryDoc(
-            name = "Reload Content Home",
-            category = Category.ACTION,
-            method = Method.RELOAD,
-            `object` = Object.CONTENT_HOME,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
-                TelemetryExtra(name = Extra.CATEGORY, value = "category")
-            ])
-    fun reloadContentHome(vertical: String, category: String) {
-        EventBuilder(Category.ACTION, Method.RELOAD, Object.CONTENT_HOME)
-                .extra(Extra.VERTICAL, vertical)
-                .extra(Extra.CATEGORY, category)
-                .queue()
-    }
-
-    @TelemetryDoc(
-            name = "Show Content Home Search Bar",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.SEARCH_BAR,
-            value = Value.CONTENT_HOME,
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING)
-            ])
-    @JvmStatic
-    fun showContentHomeSearchBar(vertical: String) {
-        EventBuilder(Category.ACTION, Method.SHOW, Object.SEARCH_BAR, Value.CONTENT_HOME)
-                .extra(Extra.VERTICAL, vertical)
-                .queue()
-    }
-
-    @TelemetryDoc(
-            name = "Open Category",
-            category = Category.ACTION,
-            method = Method.OPEN,
-            `object` = Object.CATEGORY,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
-                TelemetryExtra(name = Extra.CATEGORY, value = "category")
-            ])
-    fun openCategory(vertical: String, category: String) {
-        EventBuilder(Category.ACTION, Method.OPEN, Object.CATEGORY)
-                .extra(Extra.VERTICAL, vertical)
-                .extra(Extra.CATEGORY, category)
-                .queue()
-    }
-
-    @TelemetryDoc(
             name = "Start Content Tab",
             category = Category.ACTION,
             method = Method.START,
@@ -2619,25 +2521,6 @@ object TelemetryWrapper {
     }
 
     @TelemetryDoc(
-            name = "Category Impression",
-            category = Category.ACTION,
-            method = Method.IMPRESSION,
-            `object` = Object.CATEGORY,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.VERSION_ID, value = "version id"),
-                TelemetryExtra(name = Extra.CATEGORY, value = "category"),
-                TelemetryExtra(name = Extra.IMPRESSION, value = "{subcategory id1: max index, subcategory id2: max index...}")
-            ])
-    fun categoryImpression(version: String, category: String, impression: String) {
-        EventBuilder(Category.ACTION, Method.IMPRESSION, Object.CATEGORY)
-                .extra(Extra.VERSION_ID, version)
-                .extra(Extra.CATEGORY, category)
-                .extra(Extra.IMPRESSION, impression)
-                .queue()
-    }
-
-    @TelemetryDoc(
             name = "Start Vertical Process",
             category = Category.ACTION,
             method = Method.START,
@@ -2666,21 +2549,6 @@ object TelemetryWrapper {
         EventBuilder(Category.ACTION, Method.END, Object.PROCESS, Value.VERTICAL)
                 .extra(Extra.VERTICAL, vertical)
                 .extra(Extra.LOADTIME, loadTime.toString())
-                .queue()
-    }
-
-    @TelemetryDoc(
-            name = "Show Vertical Onboarding",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.ONBOARDING,
-            value = Value.VERTICAL,
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = "${Extra_Value.SHOPPING},${Extra_Value.ALL}")
-            ])
-    fun showVerticalOnboarding(vertical: String) {
-        EventBuilder(Category.ACTION, Method.SHOW, Object.ONBOARDING, Value.VERTICAL)
-                .extra(Extra.VERTICAL, vertical)
                 .queue()
     }
 
@@ -2781,37 +2649,6 @@ object TelemetryWrapper {
             ])
     fun clickContentTabToolbarShare(position: Int, contentTabTelemetryData: ContentTabTelemetryData) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.TOOLBAR, Value.SHARE)
-                .extra(Extra.MODE, Extra_Value.WEBVIEW)
-                .extra(Extra.POSITION, position.toString())
-                .extra(Extra.VERTICAL, contentTabTelemetryData.vertical)
-                .extra(Extra.FEED, contentTabTelemetryData.feed)
-                .extra(Extra.SOURCE, contentTabTelemetryData.source)
-                .extra(Extra.CATEGORY, contentTabTelemetryData.category)
-                .extra(Extra.COMPONENT_ID, contentTabTelemetryData.componentId)
-                .extra(Extra.SUB_CATEGORY_ID, contentTabTelemetryData.subCategoryId)
-                .extra(Extra.VERSION_ID, contentTabTelemetryData.versionId.toString())
-                .queue()
-    }
-
-    @TelemetryDoc(
-            name = "Click Toolbar - Open in browser",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.TOOLBAR,
-            value = Value.OPEN_IN_BROWSER,
-            extras = [
-                TelemetryExtra(name = Extra.MODE, value = "webview"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-9]"),
-                TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
-                TelemetryExtra(name = Extra.FEED, value = "feed"),
-                TelemetryExtra(name = Extra.SOURCE, value = "source"),
-                TelemetryExtra(name = Extra.CATEGORY, value = "category"),
-                TelemetryExtra(name = Extra.COMPONENT_ID, value = "component id"),
-                TelemetryExtra(name = Extra.SUB_CATEGORY_ID, value = "subcategory id"),
-                TelemetryExtra(name = Extra.VERSION_ID, value = "version id")
-            ])
-    fun clickContentTabToolbarOpenInBrowser(position: Int, contentTabTelemetryData: ContentTabTelemetryData) {
-        EventBuilder(Category.ACTION, Method.CLICK, Object.TOOLBAR, Value.OPEN_IN_BROWSER)
                 .extra(Extra.MODE, Extra_Value.WEBVIEW)
                 .extra(Extra.POSITION, position.toString())
                 .extra(Extra.VERTICAL, contentTabTelemetryData.vertical)
@@ -3079,59 +2916,6 @@ object TelemetryWrapper {
                 .extra(Extra.POSITION, position.toString())
                 .extra(Extra.DEFAULT, isDefault.toString())
                 .extra(Extra.PINNED, false.toString())
-                .queue()
-    }
-
-    @TelemetryDoc(
-            name = "Click Content Home Item",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.CONTENT_HOME,
-            value = Value.ITEM,
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
-                TelemetryExtra(name = Extra.CATEGORY, value = "${Extra_Value.MISSION}|${Extra_Value.GIFT}"),
-                TelemetryExtra(name = Extra.ITEM_ID, value = "item id"),
-                TelemetryExtra(name = Extra.ITEM_NAME, value = "item name")
-            ])
-    fun clickContentHomeItem(vertical: String, category: String, itemId: String, itemName: String) {
-        EventBuilder(Category.ACTION, Method.CLICK, Object.CONTENT_HOME, Value.ITEM)
-                .extra(Extra.VERTICAL, vertical)
-                .extra(Extra.CATEGORY, category)
-                .extra(Extra.ITEM_ID, itemId)
-                .extra(Extra.ITEM_NAME, itemName)
-                .queue()
-    }
-
-    @TelemetryDoc(
-            name = "Show Update Message",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.MESSAGE,
-            value = Value.UPDATE,
-            extras = [
-                TelemetryExtra(name = Extra.CHALLENGE_NAME, value = "from backend MissionName")
-            ])
-    fun showUpdateMessage(missionName: String) {
-        EventBuilder(Category.ACTION, Method.SHOW, Object.MESSAGE, Value.UPDATE)
-                .extra(Extra.CHALLENGE_NAME, missionName)
-                .queue()
-    }
-
-    @TelemetryDoc(
-            name = "Click Update Message",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MESSAGE,
-            value = Value.UPDATE,
-            extras = [
-                TelemetryExtra(name = Extra.CHALLENGE_NAME, value = "from backend MissionName"),
-                TelemetryExtra(name = Extra.ACTION, value = "${Extra_Value.DISMISS}|${Extra_Value.LATER}|${Extra_Value.UPDATE}|${Extra_Value.CLOSE}")
-            ])
-    fun clickUpdateMessage(missionName: String, action: String) {
-        EventBuilder(Category.ACTION, Method.CLICK, Object.MESSAGE, Value.UPDATE)
-                .extra(Extra.CHALLENGE_NAME, missionName)
-                .extra(Extra.ACTION, action)
                 .queue()
     }
 

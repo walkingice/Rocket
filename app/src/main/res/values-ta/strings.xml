@@ -22,8 +22,6 @@
   <string name="about_link_support">ஆதரவு</string>
   <string name="about_link_your_rights">உங்கள் உரிமைகள் / உரிமங்கள்</string>
   <string name="about_link_privacy">தனியுரிமை அறிவிப்பு</string>
-  <string name="life_feed">வாழ்க்கை ஊட்டம்</string>
-  <string name="about_link_life_feed">%1$s பற்றி மேலும் அறிக</string>
   <string name="preference_search_engine_default">முன்னிருப்பு தேடுபொறி</string>
   <string name="preference_language">மொழி</string>
   <string name="preference_language_systemdefault">கருவி முன்னிருப்பு</string>

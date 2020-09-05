@@ -22,8 +22,6 @@
   <string name="about_link_support">समर्थन</string>
   <string name="about_link_your_rights">आपनोॅ रो अधिकार / लाइसेंस</string>
   <string name="about_link_privacy">गोपनीयता सूचना</string>
-  <string name="life_feed">प्रमुख जानकारी</string>
-  <string name="about_link_life_feed">%1$s के बारो मेॅ अधिक जानोॅ</string>
   <string name="preference_search_engine_default">डिफॉल्ट सर्च इंजन</string>
   <string name="preference_language">भाषा</string>
   <string name="preference_language_systemdefault">डिफ़ॉल्ट सिस्टम</string>

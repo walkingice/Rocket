@@ -13,8 +13,6 @@ import org.mozilla.rocket.chrome.domain.ShouldShowNewMenuItemHintUseCase
 import org.mozilla.rocket.download.SingleLiveEvent
 import org.mozilla.rocket.extension.first
 import org.mozilla.rocket.extension.map
-import org.mozilla.rocket.home.contenthub.domain.GetContentHubItemsUseCase
-import org.mozilla.rocket.home.contenthub.domain.ReadContentHubItemUseCase
 import org.mozilla.rocket.home.domain.IsHomeScreenShoppingButtonEnabledUseCase
 import org.mozilla.rocket.home.logoman.domain.DismissLogoManNotificationUseCase
 import org.mozilla.rocket.home.logoman.domain.GetLogoManNotificationUseCase
@@ -42,8 +40,6 @@ class HomeViewModel(
     private val isTopSiteFullyPinnedUseCase: IsTopSiteFullyPinnedUseCase,
     private val pinTopSiteUseCase: PinTopSiteUseCase,
     private val removeTopSiteUseCase: RemoveTopSiteUseCase,
-    getContentHubItemsUseCase: GetContentHubItemsUseCase,
-    private val readContentHubItemUseCase: ReadContentHubItemUseCase,
     private val getLogoManNotificationUseCase: GetLogoManNotificationUseCase,
     private val lastReadLogoManNotificationUseCase: LastReadLogoManNotificationUseCase,
     private val dismissLogoManNotificationUseCase: DismissLogoManNotificationUseCase,
@@ -59,7 +55,6 @@ class HomeViewModel(
 
     val sitePages = MutableLiveData<List<SitePage>>()
     val topSitesPageIndex = MutableLiveData<Int>()
-    val contentHubItems = getContentHubItemsUseCase()
     val logoManNotification = MediatorLiveData<StateNotification?>()
     val isShoppingSearchEnabled = MutableLiveData<Boolean>().apply { value = isHomeScreenShoppingButtonEnabledUseCase() }
     val shouldShowNewMenuItemHint: LiveData<Boolean> = shouldShowNewMenuItemHintUseCase()

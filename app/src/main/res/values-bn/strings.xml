@@ -22,8 +22,6 @@
   <string name="about_link_support">সহায়তা</string>
   <string name="about_link_your_rights">আপনার অধিকারগুলো / লাইসেন্সগুলো</string>
   <string name="about_link_privacy">গোপনীয়তা সংক্রান্ত নীতি</string>
-  <string name="life_feed">লাইফ ফিড</string>
-  <string name="about_link_life_feed">%1$s সম্পর্কে আরও জানুন</string>
   <string name="preference_search_engine_default">ডিফল্ট সার্চ ইঞ্জিন</string>
   <string name="preference_language">ভাষা</string>
   <string name="preference_language_systemdefault">সিস্টেম ডিফল্ট</string>

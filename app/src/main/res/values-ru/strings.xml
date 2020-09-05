@@ -24,8 +24,6 @@
   <string name="about_link_support">Поддержка</string>
   <string name="about_link_your_rights">Ваши права / Лицензии</string>
   <string name="about_link_privacy">Уведомление о конфиденциальности</string>
-  <string name="life_feed">Ленты новостей</string>
-  <string name="about_link_life_feed">Узнайте больше о %1$s</string>
   <string name="preference_search_engine_default">Поисковая система по умолчанию</string>
   <string name="preference_language">Язык</string>
   <string name="preference_language_systemdefault">Язык устройства</string>

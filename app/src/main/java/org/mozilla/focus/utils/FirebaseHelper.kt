@@ -25,11 +25,6 @@ object FirebaseHelper {
 
     private val TAG = "FirebaseHelper"
 
-    // keys for user properties
-    const val USER_PROPERTY_TRACKER = "tracker"
-    const val USER_PROPERTY_EXPERIMENT_BUCKET = "experiment_bucket"
-    const val USER_PROPERTY_DEFAULT_BROWSER_NAME = "default_browser_name"
-
     // keys for remote config default value
     const val RATE_APP_DIALOG_TEXT_TITLE = "rate_app_dialog_text_title"
     const val RATE_APP_DIALOG_TEXT_CONTENT = "rate_app_dialog_text_content"
@@ -65,13 +60,8 @@ object FirebaseHelper {
     const val BOOL_IN_APP_UPDATE_SHOW_INTRO = "bool_in_app_update_show_intro"
     const val STR_IN_APP_UPDATE_CONFIG = "str_in_app_update_config"
 
-    const val STR_CONTENT_HUB_ITEMS_V2_5 = "str_content_hub_items_v2_5"
-    const val BOOL_CONTENT_HUB_ITEM_TEXT_ENABLED = "bool_content_hub_item_text_enabled"
-
     const val STR_TOP_SITES_FIXED_ITEM_V2_5 = "str_top_sites_fixed_items_v2_5"
     const val STR_TOP_SITES_DEFAULT_ITEMS_V2_5 = "str_top_sites_default_items_v2_5"
-
-    const val STR_EXPERIMENT_NAME = "str_experiment_name"
 
     private const val NEWLINE_PLACE_HOLDER = "<BR>"
 

@@ -9,9 +9,6 @@ import org.mozilla.focus.utils.NewFeatureNotice
 import org.mozilla.focus.utils.Settings
 import org.mozilla.rocket.chrome.domain.ShouldShowNewMenuItemHintUseCase
 import org.mozilla.rocket.home.HomeViewModel
-import org.mozilla.rocket.home.contenthub.data.ContentHubRepo
-import org.mozilla.rocket.home.contenthub.domain.GetContentHubItemsUseCase
-import org.mozilla.rocket.home.contenthub.domain.ReadContentHubItemUseCase
 import org.mozilla.rocket.home.data.ContentPrefRepo
 import org.mozilla.rocket.home.domain.IsHomeScreenShoppingButtonEnabledUseCase
 import org.mozilla.rocket.home.domain.SetContentPrefUseCase
@@ -48,8 +45,6 @@ object HomeModule {
         isTopSiteFullyPinnedUseCase: IsTopSiteFullyPinnedUseCase,
         pinTopSiteUseCase: PinTopSiteUseCase,
         removeTopSiteUseCase: RemoveTopSiteUseCase,
-        getContentHubItemsUseCase: GetContentHubItemsUseCase,
-        readContentHubItemUseCase: ReadContentHubItemUseCase,
         getLogoManNotificationUseCase: GetLogoManNotificationUseCase,
         lastReadLogoManNotificationUseCase: LastReadLogoManNotificationUseCase,
         dismissLogoManNotificationUseCase: DismissLogoManNotificationUseCase,
@@ -67,8 +62,6 @@ object HomeModule {
         isTopSiteFullyPinnedUseCase,
         pinTopSiteUseCase,
         removeTopSiteUseCase,
-        getContentHubItemsUseCase,
-        readContentHubItemUseCase,
         getLogoManNotificationUseCase,
         lastReadLogoManNotificationUseCase,
         dismissLogoManNotificationUseCase,
@@ -121,24 +114,6 @@ object HomeModule {
     @Provides
     fun providePinSiteManager(appContext: Context): PinSiteManager =
             PinSiteManager(SharedPreferencePinSiteDelegate(appContext))
-
-    @JvmStatic
-    @Singleton
-    @Provides
-    fun provideGetContentHubItemsUseCase(
-        contentHubRepo: ContentHubRepo,
-        contentPrefRepo: ContentPrefRepo
-    ): GetContentHubItemsUseCase = GetContentHubItemsUseCase(contentHubRepo, contentPrefRepo)
-
-    @JvmStatic
-    @Singleton
-    @Provides
-    fun provideReadContentHubItemUseCase(contentHubRepo: ContentHubRepo): ReadContentHubItemUseCase = ReadContentHubItemUseCase(contentHubRepo)
-
-    @JvmStatic
-    @Singleton
-    @Provides
-    fun provideContentHubRepo(appContext: Context): ContentHubRepo = ContentHubRepo(appContext)
 
     @JvmStatic
     @Singleton

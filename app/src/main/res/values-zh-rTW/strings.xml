@@ -24,8 +24,6 @@
   <string name="about_link_support">技術支援</string>
   <string name="about_link_your_rights">您的權利 / 授權條款</string>
   <string name="about_link_privacy">隱私權公告</string>
-  <string name="life_feed">生活情報站</string>
-  <string name="about_link_life_feed">了解%1$s的更多資訊</string>
   <string name="preference_search_engine_default">預設搜尋引擎</string>
   <string name="preference_language">語言</string>
   <string name="preference_language_systemdefault">系統預設</string>

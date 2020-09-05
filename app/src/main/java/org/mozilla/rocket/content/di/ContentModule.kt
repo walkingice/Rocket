@@ -5,14 +5,9 @@ import dagger.Provides
 import org.mozilla.rocket.content.common.ui.ContentTabBottomBarViewModel
 import org.mozilla.rocket.content.common.ui.ContentTabTelemetryViewModel
 import org.mozilla.rocket.content.common.ui.TabSwipeTelemetryViewModel
-import org.mozilla.rocket.content.common.ui.VerticalTelemetryViewModel
 
 @Module
 object ContentModule {
-
-    @JvmStatic
-    @Provides
-    fun provideVerticalTelemetryViewModel(): VerticalTelemetryViewModel = VerticalTelemetryViewModel()
 
     @JvmStatic
     @Provides

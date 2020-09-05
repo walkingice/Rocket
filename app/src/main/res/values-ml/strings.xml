@@ -22,8 +22,6 @@
   <string name="about_link_support">പിന്തുണ</string>
   <string name="about_link_your_rights">നിങ്ങളുടെ അവകാശങ്ങള്‍/ ലൈസന്‍സുകള്‍</string>
   <string name="about_link_privacy">സ്വകാര്യതാ അറിയിപ്പ്</string>
-  <string name="life_feed">ലൈഫ് ഫീഡ്</string>
-  <string name="about_link_life_feed">%1$s നെക്കുറിച്ച് കൂടുതലറിയുക</string>
   <string name="preference_search_engine_default">സ്വതവേയുള്ള സെര്‍ച്ച് എഞ്ചിന്‍</string>
   <string name="preference_language">ഭാഷ</string>
   <string name="preference_language_systemdefault">സിസ്റ്റത്തിൽ സ്വതവേയുള്ളതു്</string>
