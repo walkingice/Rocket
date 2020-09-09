@@ -134,10 +134,13 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
 
     @Inject
     lateinit var downloadIndicatorViewModelCreator: Lazy<DownloadIndicatorViewModel>
+
     @Inject
     lateinit var bottomBarViewModelCreator: Lazy<BottomBarViewModel>
+
     @Inject
     lateinit var chromeViewModelCreator: Lazy<ChromeViewModel>
+
     @Inject
     lateinit var promptMessageViewModelCreator: Lazy<ShoppingSearchPromptViewModel>
     private lateinit var chromeViewModel: ChromeViewModel
@@ -205,11 +208,18 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 when (actionId) {
                     ACTION_DOWNLOAD -> {
                         if (getContext() == null) {
-                            Log.w(ScreenNavigator.BROWSER_FRAGMENT_TAG, "No context to use, abort callback onDownloadStart")
+                            Log.w(
+                                ScreenNavigator.BROWSER_FRAGMENT_TAG,
+                                "No context to use, abort callback onDownloadStart"
+                            )
                             return
                         }
                         val download = params as Download
-                        if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                        if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(
+                                requireContext(),
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            )
+                        ) {
                             // We do have the permission to write to the external storage. Proceed with the download.
                             queueDownload(download)
                         }
@@ -251,7 +261,11 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 doActionGrantedOrSetting(actionId, params)
             }
 
-            override fun doActionNoPermission(permission: String, actionId: Int, params: Parcelable?) {
+            override fun doActionNoPermission(
+                permission: String,
+                actionId: Int,
+                params: Parcelable?
+            ) {
                 when (actionId) {
                     ACTION_DOWNLOAD -> {
                     }
@@ -272,10 +286,12 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             }
 
             override fun makeAskAgainSnackBar(actionId: Int): Snackbar {
-                return PermissionHandler.makeAskAgainSnackBar(this@BrowserFragment,
-                        requireActivity().findViewById(R.id.container),
-                        getAskAgainSnackBarString(actionId),
-                        browser_bottom_bar)
+                return PermissionHandler.makeAskAgainSnackBar(
+                    this@BrowserFragment,
+                    requireActivity().findViewById(R.id.container),
+                    getAskAgainSnackBarString(actionId),
+                    browser_bottom_bar
+                )
             }
 
             private fun getAskAgainSnackBarString(actionId: Int): Int {
@@ -300,15 +316,28 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
 
             override fun requestPermissions(actionId: Int) {
                 when (actionId) {
-                    ACTION_DOWNLOAD, ACTION_CAPTURE -> this@BrowserFragment.requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), actionId)
-                    ACTION_PICK_FILE -> this@BrowserFragment.requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), actionId)
-                    ACTION_GEO_LOCATION -> this@BrowserFragment.requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), actionId)
+                    ACTION_DOWNLOAD, ACTION_CAPTURE -> this@BrowserFragment.requestPermissions(
+                        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                        actionId
+                    )
+                    ACTION_PICK_FILE -> this@BrowserFragment.requestPermissions(
+                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                        actionId
+                    )
+                    ACTION_GEO_LOCATION -> this@BrowserFragment.requestPermissions(
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        actionId
+                    )
                     else -> throw IllegalArgumentException("Unknown Action")
                 }
             }
 
             override fun permissionDeniedToast(actionId: Int) {
-                Toast.makeText(getContext(), getPermissionDeniedToastString(actionId), Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    getContext(),
+                    getPermissionDeniedToastString(actionId),
+                    Toast.LENGTH_LONG
+                ).show()
             }
         })
     }
@@ -341,48 +370,61 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         display_url.text = UrlUtils.stripUserInfo(url)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        rootView = inflater.inflate(R.layout.fragment_browser, container, false) as ThemedCoordinatorLayout
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        rootView =
+            inflater.inflate(R.layout.fragment_browser, container, false) as ThemedCoordinatorLayout
         shoppingSearchViewStub = rootView.shopping_search_stub
         return rootView
     }
 
     private fun observeShoppingSearchPromptMessageViewModel() {
-        shoppingSearchPromptMessageViewModel.openShoppingSearch.observe(viewLifecycleOwner, Observer {
-            startActivity(getStartIntent(requireContext()))
-            ScreenNavigator.get(context).popToHomeScreen(false)
-        })
-        shoppingSearchPromptMessageViewModel.promptVisibilityState.observe(viewLifecycleOwner, Observer { visibilityState: VisibilityState? ->
-            if (shoppingSearchViewStub.parent != null) {
-                setupShoppingSearchPrompt(shoppingSearchViewStub.inflate())
-            }
-            if (visibilityState is Expanded) {
-                changeShoppingSearchPromptMessageState(BottomSheetBehavior.STATE_EXPANDED)
-            } else {
-                changeShoppingSearchPromptMessageState(BottomSheetBehavior.STATE_HIDDEN)
-            }
-        })
-        shoppingSearchPromptMessageViewModel.shoppingSiteList.observe(viewLifecycleOwner, Observer<List<ShoppingSiteItem?>> {
-            shoppingSearchPromptMessageViewModel.checkShoppingSearchPromptVisibility(url)
-        })
+        shoppingSearchPromptMessageViewModel.openShoppingSearch.observe(
+            viewLifecycleOwner,
+            Observer {
+                startActivity(getStartIntent(requireContext()))
+                ScreenNavigator.get(context).popToHomeScreen(false)
+            })
+        shoppingSearchPromptMessageViewModel.promptVisibilityState.observe(
+            viewLifecycleOwner,
+            Observer { visibilityState: VisibilityState? ->
+                if (shoppingSearchViewStub.parent != null) {
+                    setupShoppingSearchPrompt(shoppingSearchViewStub.inflate())
+                }
+                if (visibilityState is Expanded) {
+                    changeShoppingSearchPromptMessageState(BottomSheetBehavior.STATE_EXPANDED)
+                } else {
+                    changeShoppingSearchPromptMessageState(BottomSheetBehavior.STATE_HIDDEN)
+                }
+            })
+        shoppingSearchPromptMessageViewModel.shoppingSiteList.observe(
+            viewLifecycleOwner,
+            Observer<List<ShoppingSiteItem?>> {
+                shoppingSearchPromptMessageViewModel.checkShoppingSearchPromptVisibility(url)
+            })
     }
 
     private fun setupShoppingSearchPrompt(view: View) {
-        shoppingSearchPromptMessageBehavior = BottomSheetBehavior.from(view.findViewById<CoordinatorLayout>(R.id.bottom_sheet)).apply {
-            setBottomSheetCallback(object : BottomSheetCallback() {
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    when (newState) {
-                        BottomSheetBehavior.STATE_EXPANDED -> shoppingSearchPromptMessageViewModel.onPromptIsShown()
-                        BottomSheetBehavior.STATE_HIDDEN -> shoppingSearchPromptMessageViewModel.onPromptIsDismissed()
-                        BottomSheetBehavior.STATE_DRAGGING -> shoppingSearchPromptMessageViewModel.onPromptIsDragged()
-                    }
-                }
+        shoppingSearchPromptMessageBehavior =
+            BottomSheetBehavior.from(view.findViewById<CoordinatorLayout>(R.id.bottom_sheet))
+                .apply {
+                    setBottomSheetCallback(object : BottomSheetCallback() {
+                        override fun onStateChanged(bottomSheet: View, newState: Int) {
+                            when (newState) {
+                                BottomSheetBehavior.STATE_EXPANDED -> shoppingSearchPromptMessageViewModel.onPromptIsShown()
+                                BottomSheetBehavior.STATE_HIDDEN -> shoppingSearchPromptMessageViewModel.onPromptIsDismissed()
+                                BottomSheetBehavior.STATE_DRAGGING -> shoppingSearchPromptMessageViewModel.onPromptIsDragged()
+                            }
+                        }
 
-                override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                    // Do nothing
+                        override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                            // Do nothing
+                        }
+                    })
                 }
-            })
-        }
         view.findViewById<Button>(R.id.bottom_sheet_search).setOnClickListener {
             shoppingSearchPromptMessageViewModel.onShoppingSearchPromptButtonClicked()
         }
@@ -393,18 +435,31 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     }
 
     private fun observeChromeAction() {
-        chromeViewModel.isTurboModeEnabled.observe(viewLifecycleOwner, Observer { enabled: Boolean ->
-            setContentBlockingEnabled(enabled)
-        })
-        chromeViewModel.isBlockImageEnabled.observe(viewLifecycleOwner, Observer { enabled: Boolean ->
-            setImageBlockingEnabled(enabled)
-        })
-        chromeViewModel.isBlockJavaScriptEnabled.observe(viewLifecycleOwner, Observer { enabled: Boolean ->
-            setJavaScriptBlockingEnabled(enabled)
-        })
-        chromeViewModel.doScreenshot.observe(viewLifecycleOwner, Observer { telemetryData: ScreenCaptureTelemetryData? ->
-            permissionHandler.tryAction(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, ACTION_CAPTURE, telemetryData)
-        })
+        chromeViewModel.isTurboModeEnabled.observe(
+            viewLifecycleOwner,
+            Observer { enabled: Boolean ->
+                setContentBlockingEnabled(enabled)
+            })
+        chromeViewModel.isBlockImageEnabled.observe(
+            viewLifecycleOwner,
+            Observer { enabled: Boolean ->
+                setImageBlockingEnabled(enabled)
+            })
+        chromeViewModel.isBlockJavaScriptEnabled.observe(
+            viewLifecycleOwner,
+            Observer { enabled: Boolean ->
+                setJavaScriptBlockingEnabled(enabled)
+            })
+        chromeViewModel.doScreenshot.observe(
+            viewLifecycleOwner,
+            Observer { telemetryData: ScreenCaptureTelemetryData? ->
+                permissionHandler.tryAction(
+                    this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    ACTION_CAPTURE,
+                    telemetryData
+                )
+            })
         chromeViewModel.refreshOrStop.observe(viewLifecycleOwner, Observer {
             if (isLoading) {
                 stop()
@@ -434,7 +489,9 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     }
 
     private fun observeDarkTheme() {
-        chromeViewModel.isDarkTheme.observe(viewLifecycleOwner, Observer { setDarkThemeEnabled(it) })
+        chromeViewModel.isDarkTheme.observe(
+            viewLifecycleOwner,
+            Observer { setDarkThemeEnabled(it) })
     }
 
     private fun setupBottomBar() {
@@ -443,7 +500,11 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 when (type) {
                     BottomBarItemAdapter.TYPE_TAB_COUNTER -> {
                         chromeViewModel.showTabTray.call()
-                        TelemetryWrapper.showTabTrayToolbar(Extra_Value.WEBVIEW, position, isInLandscape())
+                        TelemetryWrapper.showTabTrayToolbar(
+                            Extra_Value.WEBVIEW,
+                            position,
+                            isInLandscape()
+                        )
                     }
                     BottomBarItemAdapter.TYPE_MENU -> {
                         chromeViewModel.showBrowserMenu.call()
@@ -451,29 +512,52 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                     }
                     BottomBarItemAdapter.TYPE_HOME -> {
                         chromeViewModel.showNewTab.call()
-                        TelemetryWrapper.clickAddTabToolbar(Extra_Value.WEBVIEW, position, isInLandscape())
+                        TelemetryWrapper.clickAddTabToolbar(
+                            Extra_Value.WEBVIEW,
+                            position,
+                            isInLandscape()
+                        )
                     }
                     BottomBarItemAdapter.TYPE_SEARCH -> {
                         chromeViewModel.showUrlInput.value = url
-                        TelemetryWrapper.clickToolbarSearch(Extra_Value.WEBVIEW, position, isInLandscape())
+                        TelemetryWrapper.clickToolbarSearch(
+                            Extra_Value.WEBVIEW,
+                            position,
+                            isInLandscape()
+                        )
                     }
-                    BottomBarItemAdapter.TYPE_CAPTURE -> chromeViewModel.onDoScreenshot(ScreenCaptureTelemetryData(Extra_Value.WEBVIEW, position))
+                    BottomBarItemAdapter.TYPE_CAPTURE -> chromeViewModel.onDoScreenshot(
+                        ScreenCaptureTelemetryData(Extra_Value.WEBVIEW, position)
+                    )
                     BottomBarItemAdapter.TYPE_PIN_SHORTCUT -> {
                         chromeViewModel.pinShortcut.call()
                         TelemetryWrapper.clickAddToHome(Extra_Value.WEBVIEW, position)
                     }
                     BottomBarItemAdapter.TYPE_BOOKMARK -> {
-                        val isActivated = bottomBarItemAdapter.getItem(BottomBarItemAdapter.TYPE_BOOKMARK)?.view?.isActivated == true
-                        TelemetryWrapper.clickToolbarBookmark(!isActivated, Extra_Value.WEBVIEW, position)
+                        val isActivated =
+                            bottomBarItemAdapter.getItem(BottomBarItemAdapter.TYPE_BOOKMARK)?.view?.isActivated == true
+                        TelemetryWrapper.clickToolbarBookmark(
+                            !isActivated,
+                            Extra_Value.WEBVIEW,
+                            position
+                        )
                         chromeViewModel.toggleBookmark()
                     }
                     BottomBarItemAdapter.TYPE_REFRESH -> {
                         chromeViewModel.refreshOrStop.call()
-                        TelemetryWrapper.clickToolbarReload(Extra_Value.WEBVIEW, position, isInLandscape())
+                        TelemetryWrapper.clickToolbarReload(
+                            Extra_Value.WEBVIEW,
+                            position,
+                            isInLandscape()
+                        )
                     }
                     BottomBarItemAdapter.TYPE_SHARE -> {
                         chromeViewModel.share.call()
-                        TelemetryWrapper.clickToolbarShare(Extra_Value.WEBVIEW, position, isInLandscape())
+                        TelemetryWrapper.clickToolbarShare(
+                            Extra_Value.WEBVIEW,
+                            position,
+                            isInLandscape()
+                        )
                     }
                     BottomBarItemAdapter.TYPE_NEXT -> {
                         chromeViewModel.goNext.call()
@@ -494,30 +578,33 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 return false
             }
         })
-        bottomBarItemAdapter = BottomBarItemAdapter(browser_bottom_bar, BottomBarItemAdapter.Theme.Light)
-        bottomBarViewModel.items.observe(viewLifecycleOwner, Observer { types: List<BottomBarItemAdapter.ItemData> ->
-            bottomBarItemAdapter.setItems(types)
-        })
+        bottomBarItemAdapter =
+            BottomBarItemAdapter(browser_bottom_bar, BottomBarItemAdapter.Theme.Light)
+        bottomBarViewModel.items.observe(
+            viewLifecycleOwner,
+            Observer { types: List<BottomBarItemAdapter.ItemData> ->
+                bottomBarItemAdapter.setItems(types)
+            })
         chromeViewModel.isDarkTheme.switchFrom(bottomBarViewModel.items)
-                .observe(viewLifecycleOwner, Observer { isDarkTheme ->
-                    bottomBarItemAdapter.setDarkTheme(isDarkTheme)
-                })
+            .observe(viewLifecycleOwner, Observer { isDarkTheme ->
+                bottomBarItemAdapter.setDarkTheme(isDarkTheme)
+            })
         chromeViewModel.tabCount.switchFrom(bottomBarViewModel.items)
-                .observe(viewLifecycleOwner, Observer { count: Int ->
-                    bottomBarItemAdapter.setTabCount(count, true)
-                })
+            .observe(viewLifecycleOwner, Observer { count: Int ->
+                bottomBarItemAdapter.setTabCount(count, true)
+            })
         chromeViewModel.isRefreshing.switchFrom(bottomBarViewModel.items)
-                .observe(viewLifecycleOwner, Observer { isRefreshing: Boolean ->
-                    bottomBarItemAdapter.setRefreshing(isRefreshing)
-                })
+            .observe(viewLifecycleOwner, Observer { isRefreshing: Boolean ->
+                bottomBarItemAdapter.setRefreshing(isRefreshing)
+            })
         chromeViewModel.canGoForward.switchFrom(bottomBarViewModel.items)
-                .observe(viewLifecycleOwner, Observer { canGoForward: Boolean ->
-                    bottomBarItemAdapter.setCanGoForward(canGoForward)
-                })
+            .observe(viewLifecycleOwner, Observer { canGoForward: Boolean ->
+                bottomBarItemAdapter.setCanGoForward(canGoForward)
+            })
         chromeViewModel.isCurrentUrlBookmarked.switchFrom(bottomBarViewModel.items)
-                .observe(viewLifecycleOwner, Observer { isBookmark: Boolean ->
-                    bottomBarItemAdapter.setBookmark(isBookmark)
-                })
+            .observe(viewLifecycleOwner, Observer { isBookmark: Boolean ->
+                bottomBarItemAdapter.setBookmark(isBookmark)
+            })
         setupDownloadIndicator()
     }
 
@@ -528,26 +615,38 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     private fun setupDownloadIndicator() {
         val downloadIndicatorViewModel = getActivityViewModel(downloadIndicatorViewModelCreator)
         downloadIndicatorViewModel.downloadIndicatorObservable.switchFrom(bottomBarViewModel.items)
-                .observe(viewLifecycleOwner, Observer { status: DownloadIndicatorViewModel.Status ->
-                    when (status) {
-                        DownloadIndicatorViewModel.Status.DOWNLOADING -> bottomBarItemAdapter.setDownloadState(BottomBarItemAdapter.DOWNLOAD_STATE_DOWNLOADING)
-                        DownloadIndicatorViewModel.Status.UNREAD -> bottomBarItemAdapter.setDownloadState(BottomBarItemAdapter.DOWNLOAD_STATE_UNREAD)
-                        DownloadIndicatorViewModel.Status.WARNING -> bottomBarItemAdapter.setDownloadState(BottomBarItemAdapter.DOWNLOAD_STATE_WARNING)
-                        DownloadIndicatorViewModel.Status.DEFAULT -> bottomBarItemAdapter.setDownloadState(BottomBarItemAdapter.DOWNLOAD_STATE_DEFAULT)
-                    }
-                    val eventHistory = Settings.getInstance(activity).eventHistory
-                    if (!eventHistory.contains(Settings.Event.ShowDownloadIndicatorIntro) && status !== DownloadIndicatorViewModel.Status.DEFAULT) {
-                        eventHistory.add(Settings.Event.ShowDownloadIndicatorIntro)
-                        val menuItem = bottomBarItemAdapter.getItem(BottomBarItemAdapter.TYPE_MENU)
-                        if (menuItem?.view != null) {
-                            initDownloadIndicatorIntroView(this, menuItem.view, rootView, object : OnViewInflated {
+            .observe(viewLifecycleOwner, Observer { status: DownloadIndicatorViewModel.Status ->
+                when (status) {
+                    DownloadIndicatorViewModel.Status.DOWNLOADING -> bottomBarItemAdapter.setDownloadState(
+                        BottomBarItemAdapter.DOWNLOAD_STATE_DOWNLOADING
+                    )
+                    DownloadIndicatorViewModel.Status.UNREAD -> bottomBarItemAdapter.setDownloadState(
+                        BottomBarItemAdapter.DOWNLOAD_STATE_UNREAD
+                    )
+                    DownloadIndicatorViewModel.Status.WARNING -> bottomBarItemAdapter.setDownloadState(
+                        BottomBarItemAdapter.DOWNLOAD_STATE_WARNING
+                    )
+                    DownloadIndicatorViewModel.Status.DEFAULT -> bottomBarItemAdapter.setDownloadState(
+                        BottomBarItemAdapter.DOWNLOAD_STATE_DEFAULT
+                    )
+                }
+                val eventHistory = Settings.getInstance(activity).eventHistory
+                if (!eventHistory.contains(Settings.Event.ShowDownloadIndicatorIntro) && status !== DownloadIndicatorViewModel.Status.DEFAULT) {
+                    eventHistory.add(Settings.Event.ShowDownloadIndicatorIntro)
+                    val menuItem = bottomBarItemAdapter.getItem(BottomBarItemAdapter.TYPE_MENU)
+                    if (menuItem?.view != null) {
+                        initDownloadIndicatorIntroView(
+                            this,
+                            menuItem.view,
+                            rootView,
+                            object : OnViewInflated {
                                 override fun onInflated(view: View) {
                                     downloadIndicatorIntro = view
                                 }
                             })
-                        }
                     }
-                })
+                }
+            })
     }
 
     override fun onViewCreated(container: View, savedInstanceState: Bundle?) {
@@ -593,7 +692,8 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         permissionHandler.onActivityResult(activity, requestCode, resultCode, data)
         if (requestCode == FileChooseAction.REQUEST_CODE_CHOOSE_FILE) {
-            val done = fileChooseAction == null || fileChooseAction?.onFileChose(resultCode, data) == true
+            val done =
+                fileChooseAction == null || fileChooseAction?.onFileChose(resultCode, data) == true
             if (done) {
                 fileChooseAction = null
             }
@@ -614,7 +714,8 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     }
 
     private fun updateBottomBarLayout() {
-        val bottomBarHeight: Int = browser_bottom_bar.resources.getDimensionPixelOffset(R.dimen.fixed_menu_height)
+        val bottomBarHeight: Int =
+            browser_bottom_bar.resources.getDimensionPixelOffset(R.dimen.fixed_menu_height)
         browser_bottom_bar.layoutParams = browser_bottom_bar.layoutParams.apply {
             height = bottomBarHeight
         }
@@ -627,16 +728,20 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     // then add to the full screen size again when the device is rotated.
     private fun refreshVideoContainer() {
         if (video_container.visibility == View.VISIBLE) {
-            updateVideoContainerWithLayoutParams(FrameLayout.LayoutParams(
-                (video_container.height * 0.99).toInt(),
-                (video_container.width * 0.99).toInt()
-            ))
+            updateVideoContainerWithLayoutParams(
+                FrameLayout.LayoutParams(
+                    (video_container.height * 0.99).toInt(),
+                    (video_container.width * 0.99).toInt()
+                )
+            )
             video_container.post {
                 if (video_container.visibility == View.VISIBLE) {
-                    updateVideoContainerWithLayoutParams(FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    ))
+                    updateVideoContainerWithLayoutParams(
+                        FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                    )
                 }
             }
         }
@@ -672,7 +777,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 es.detach()
                 val tabView = es.tabView
                 if (tabView != null) {
-                    webview_slot.removeView(tabView.view)
+                    webview_slot.removeView(tabView.getView())
                 }
             }
         }
@@ -685,7 +790,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             if (es != null) {
                 val tabView = es.tabView
                 if (tabView != null) {
-                    webview_slot.addView(tabView.view)
+                    webview_slot.addView(tabView.getView())
                 }
             }
         }
@@ -799,7 +904,15 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         }
         capturingFragment.show(childFragmentManager, "capturingFragment")
         // Post delay to wait for Dialog to show
-        Handler().postDelayed(CaptureRunnable(context, this, capturingFragment, requireActivity().findViewById(R.id.container), telemetryData), CAPTURE_WAIT_INTERVAL.toLong())
+        Handler().postDelayed(
+            CaptureRunnable(
+                context,
+                this,
+                capturingFragment,
+                requireActivity().findViewById(R.id.container),
+                telemetryData
+            ), CAPTURE_WAIT_INTERVAL.toLong()
+        )
     }
 
     private fun updateIsLoading(isLoading: Boolean) {
@@ -808,8 +921,17 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         currentListener?.isLoadingChanged(isLoading)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        permissionHandler.onRequestPermissionsResult(context, requestCode, permissions, grantResults)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        permissionHandler.onRequestPermissionsResult(
+            context,
+            requestCode,
+            permissions,
+            grantResults
+        )
     }
 
     /**
@@ -855,18 +977,28 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
 
     @VisibleForTesting
     fun buildGeoPromptDialog(): AlertDialog {
-        val customContent = LayoutInflater.from(context).inflate(R.layout.dialog_permission_request, null)
+        val customContent =
+            LayoutInflater.from(context).inflate(R.layout.dialog_permission_request, null)
         val checkBox = customContent.findViewById<CheckedTextView>(R.id.cache_my_decision)
-        checkBox.text = getString(R.string.geolocation_dialog_message_cache_it, getString(R.string.app_name))
+        checkBox.text =
+            getString(R.string.geolocation_dialog_message_cache_it, getString(R.string.app_name))
         checkBox.setOnClickListener { checkBox.toggle() }
         val builder = AlertDialog.Builder(requireContext())
         builder.setView(customContent)
-                .setMessage(getString(R.string.geolocation_dialog_message, geolocationOrigin))
-                .setCancelable(true)
-                .setPositiveButton(getString(R.string.geolocation_dialog_allow)) { _, _ -> acceptGeoRequest(checkBox.isChecked) }
-                .setNegativeButton(getString(R.string.geolocation_dialog_block)) { _, _ -> rejectGeoRequest(checkBox.isChecked) }
-                .setOnDismissListener { rejectGeoRequest(false) }
-                .setOnCancelListener { rejectGeoRequest(false) }
+            .setMessage(getString(R.string.geolocation_dialog_message, geolocationOrigin))
+            .setCancelable(true)
+            .setPositiveButton(getString(R.string.geolocation_dialog_allow)) { _, _ ->
+                acceptGeoRequest(
+                    checkBox.isChecked
+                )
+            }
+            .setNegativeButton(getString(R.string.geolocation_dialog_block)) { _, _ ->
+                rejectGeoRequest(
+                    checkBox.isChecked
+                )
+            }
+            .setOnDismissListener { rejectGeoRequest(false) }
+            .setOnCancelListener { rejectGeoRequest(false) }
         return builder.create()
     }
 
@@ -903,7 +1035,10 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             // No SafeIntent needed here because intent.getAction() is safe (SafeIntent simply calls intent.getAction()
             // without any wrapping):
             val intent = activity.intent
-            val isFromInternal = intent != null && intent.getBooleanExtra(IntentUtils.EXTRA_IS_INTERNAL_REQUEST, false)
+            val isFromInternal = intent != null && intent.getBooleanExtra(
+                IntentUtils.EXTRA_IS_INTERNAL_REQUEST,
+                false
+            )
             return intent != null && Intent.ACTION_VIEW == intent.action && !isFromInternal
         }
 
@@ -1040,7 +1175,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         val webView = current as WebView
         val content = getPageBitmap(webView) ?: return false
         // Failed to capture
-        callback.onCaptureComplete(current.getTitle(), current.getUrl(), content)
+        callback.onCaptureComplete(current.title, current.url, content)
         return true
     }
 
@@ -1055,7 +1190,11 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         val displayMetrics = DisplayMetrics()
         requireActivity().windowManager.defaultDisplay.getMetrics(displayMetrics)
         return try {
-            val bitmap = Bitmap.createBitmap(webView.width, (webView.contentHeight * displayMetrics.density).toInt(), Bitmap.Config.RGB_565)
+            val bitmap = Bitmap.createBitmap(
+                webView.width,
+                (webView.contentHeight * displayMetrics.density).toInt(),
+                Bitmap.Config.RGB_565
+            )
             val canvas = Canvas(bitmap)
             webView.draw(canvas)
             bitmap
@@ -1158,12 +1297,18 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
 
         override fun handleExternalUrl(url: String?): Boolean {
             if (context == null) {
-                Log.w(ScreenNavigator.BROWSER_FRAGMENT_TAG, "No context to use, abort callback handleExternalUrl")
+                Log.w(
+                    ScreenNavigator.BROWSER_FRAGMENT_TAG,
+                    "No context to use, abort callback handleExternalUrl"
+                )
                 return false
             }
             val navigationState = chromeViewModel.navigationState.value
             if (navigationState != null && navigationState.isHome) {
-                Log.w(ScreenNavigator.BROWSER_FRAGMENT_TAG, "Ignore external url when browser page is not on the front")
+                Log.w(
+                    ScreenNavigator.BROWSER_FRAGMENT_TAG,
+                    "Ignore external url when browser page is not on the front"
+                )
                 return false
             }
             return IntentUtils.handleExternalUri(context, url)
@@ -1185,7 +1330,8 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 val progressIsForLoadedUrl = TextUtils.equals(currentUrl, loadedUrl)
                 // Some new url may give 100 directly and then start from 0 again. don't treat
                 // as loaded for these urls;
-                val urlBarLoadingToFinished = progress_bar.max != progress_bar.progress && progress == progress_bar.max
+                val urlBarLoadingToFinished =
+                    progress_bar.max != progress_bar.progress && progress == progress_bar.max
                 if (urlBarLoadingToFinished) {
                     loadedUrl = currentUrl
                 }
@@ -1208,8 +1354,14 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             return try {
                 requireNotNull(filePathCallback)
                 requireNotNull(fileChooserParams)
-                fileChooseAction = FileChooseAction(this@BrowserFragment, filePathCallback, fileChooserParams)
-                permissionHandler.tryAction(this@BrowserFragment, Manifest.permission.READ_EXTERNAL_STORAGE, ACTION_PICK_FILE, null)
+                fileChooseAction =
+                    FileChooseAction(this@BrowserFragment, filePathCallback, fileChooserParams)
+                permissionHandler.tryAction(
+                    this@BrowserFragment,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    ACTION_PICK_FILE,
+                    null
+                )
                 true
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -1230,10 +1382,14 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         override fun onReceivedIcon(icon: Bitmap?) {}
         override fun onLongPress(session: Session, hitTarget: HitTarget) {
             if (activity == null) {
-                Log.w(ScreenNavigator.BROWSER_FRAGMENT_TAG, "No context to use, abort callback onLongPress")
+                Log.w(
+                    ScreenNavigator.BROWSER_FRAGMENT_TAG,
+                    "No context to use, abort callback onLongPress"
+                )
                 return
             }
-            webContextMenu = WebContextMenu.show(false, requireActivity(), downloadCallback, hitTarget)
+            webContextMenu =
+                WebContextMenu.show(false, requireActivity(), downloadCallback, hitTarget)
         }
 
         override fun onEnterFullScreen(callback: FullscreenCallback, view: View?) {
@@ -1254,7 +1410,8 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
 
                 // Add view to video container and make it visible
                 val params = FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+                )
                 video_container.addView(view, params)
                 video_container.visibility = View.VISIBLE
 
@@ -1300,7 +1457,10 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             }
         }
 
-        override fun onGeolocationPermissionsShowPrompt(origin: String, callback: GeolocationPermissions.Callback?) {
+        override fun onGeolocationPermissionsShowPrompt(
+            origin: String,
+            callback: GeolocationPermissions.Callback?
+        ) {
             if (session == null) {
                 return
             }
@@ -1309,10 +1469,12 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             }
             geolocationOrigin = origin
             geolocationCallback = callback
-            permissionHandler.tryAction(this@BrowserFragment,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    ACTION_GEO_LOCATION,
-                    null)
+            permissionHandler.tryAction(
+                this@BrowserFragment,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                ACTION_GEO_LOCATION,
+                null
+            )
         }
 
         fun changeSession(nextSession: Session?) {
@@ -1337,39 +1499,54 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             findInPage.onFindResultReceived(result)
         }
 
-        override fun onDownload(session: Session, download: mozilla.components.browser.session.Download): Boolean {
+        override fun onDownload(
+            session: Session,
+            download: mozilla.components.browser.session.Download
+        ): Boolean {
             val activity = activity
             if (activity == null || !activity.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
                 return false
             }
-            val d = Download(download.url,
-                    download.fileName,
-                    download.userAgent,
-                    "",
-                    download.contentType,
-                    requireNotNull(download.contentLength),
-                    false)
-            permissionHandler.tryAction(this@BrowserFragment, Manifest.permission.WRITE_EXTERNAL_STORAGE, ACTION_DOWNLOAD, d)
+            val d = Download(
+                download.url,
+                download.fileName,
+                download.userAgent,
+                "",
+                download.contentType,
+                requireNotNull(download.contentLength),
+                false
+            )
+            permissionHandler.tryAction(
+                this@BrowserFragment,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                ACTION_DOWNLOAD,
+                d
+            )
             return true
         }
 
-        override fun onNavigationStateChanged(session: Session, canGoBack: Boolean, canGoForward: Boolean) {
+        override fun onNavigationStateChanged(
+            session: Session,
+            canGoBack: Boolean,
+            canGoForward: Boolean
+        ) {
             chromeViewModel.onNavigationStateChanged(canGoBack, canGoForward)
         }
 
         override fun onHttpAuthRequest(callback: HttpAuthCallback, host: String?, realm: String?) {
             val builder = HttpAuthenticationDialogBuilder.Builder(activity, host, realm)
-                    .setOkListener { _: String?, _: String?, username: String?, password: String? ->
-                        callback.proceed(username, password)
-                    }
-                    .setCancelListener { callback.cancel() }
-                    .build()
+                .setOkListener { _: String?, _: String?, username: String?, password: String? ->
+                    callback.proceed(username, password)
+                }
+                .setCancelListener { callback.cancel() }
+                .build()
             builder.createDialog()
             builder.show()
         }
     }
 
-    private inner class SessionManagerObserver(private val sessionObserver: SessionObserver) : SessionManager.Observer {
+    private inner class SessionManagerObserver(private val sessionObserver: SessionObserver) :
+        SessionManager.Observer {
         private var tabTransitionAnimator: ValueAnimator? = null
 
         override fun onFocusChanged(session: Session?, factor: Factor) {
@@ -1404,15 +1581,17 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
 
         private fun transitToTab(targetTab: Session) {
             val tabView = targetTab.engineSession?.tabView
-                    ?: throw RuntimeException("Tabview should be created at this moment and never be null")
+                ?: throw RuntimeException("Tabview should be created at this moment and never be null")
             // ensure it does not have attach to parent earlier.
             targetTab.engineSession?.detach()
             val outView = findExistingTabView(webview_slot)
             webview_slot.removeView(outView)
-            val inView = tabView.view
+            val inView = tabView.getView()
             webview_slot.addView(inView)
             this.sessionObserver.changeSession(targetTab)
-            startTransitionAnimation(null, inView, null)
+            if (inView != null) {
+                startTransitionAnimation(null, inView, null)
+            }
         }
 
         private fun refreshChrome(tab: Session) {
@@ -1444,26 +1623,27 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 outView.alpha = 1f
             }
             val duration = inView.resources.getInteger(R.integer.tab_transition_time)
-            tabTransitionAnimator = ValueAnimator.ofFloat(0f, 1f).setDuration(duration.toLong()).apply {
-                addUpdateListener { animation ->
-                    val alpha = animation.animatedValue as Float
-                    if (outView != null) {
-                        outView.alpha = 1 - alpha
-                    }
-                    inView.alpha = alpha
-                }
-                addListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        finishCallback?.run()
-                        inView.alpha = 1f
+            tabTransitionAnimator =
+                ValueAnimator.ofFloat(0f, 1f).setDuration(duration.toLong()).apply {
+                    addUpdateListener { animation ->
+                        val alpha = animation.animatedValue as Float
                         if (outView != null) {
-                            outView.alpha = 1f
+                            outView.alpha = 1 - alpha
                         }
+                        inView.alpha = alpha
                     }
-                })
-            }.also {
-                it.start()
-            }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator) {
+                            finishCallback?.run()
+                            inView.alpha = 1f
+                            if (outView != null) {
+                                outView.alpha = 1f
+                            }
+                        }
+                    })
+                }.also {
+                    it.start()
+                }
         }
 
         private fun findExistingTabView(parent: ViewGroup): View? {
@@ -1471,7 +1651,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             for (childIdx in 0 until viewCount) {
                 val childView = parent.getChildAt(childIdx)
                 if (childView is TabView) {
-                    return (childView as TabView).view
+                    return (childView as TabView).getView()
                 }
             }
             return null
@@ -1487,10 +1667,15 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
 
         private fun onTabAddedByContextMenu(tab: Session, arguments: Bundle) {
             if (!TabUtil.toFocus(arguments)) {
-                Snackbar.make(rootView, R.string.new_background_tab_hint, Snackbar.LENGTH_LONG).apply {
-                    setAction(R.string.new_background_tab_switch) { sessionManager.switchToTab(tab.id) }
-                    anchorView = browser_bottom_bar
-                }.show()
+                Snackbar.make(rootView, R.string.new_background_tab_hint, Snackbar.LENGTH_LONG)
+                    .apply {
+                        setAction(R.string.new_background_tab_switch) {
+                            sessionManager.switchToTab(
+                                tab.id
+                            )
+                        }
+                        anchorView = browser_bottom_bar
+                    }.show()
             }
         }
 
@@ -1502,7 +1687,11 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             return sessionObserver.handleExternalUrl(url)
         }
 
-        override fun onShowFileChooser(es: TabViewEngineSession, filePathCallback: ValueCallback<Array<Uri>>?, fileChooserParams: FileChooserParams?): Boolean {
+        override fun onShowFileChooser(
+            es: TabViewEngineSession,
+            filePathCallback: ValueCallback<Array<Uri>>?,
+            fileChooserParams: FileChooserParams?
+        ): Boolean {
             return sessionObserver.onShowFileChooser(es, filePathCallback, fileChooserParams)
         }
 
@@ -1517,7 +1706,12 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             if (activity == null || !activity.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
                 return
             }
-            permissionHandler.tryAction(this@BrowserFragment, Manifest.permission.WRITE_EXTERNAL_STORAGE, ACTION_DOWNLOAD, download)
+            permissionHandler.tryAction(
+                this@BrowserFragment,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                ACTION_DOWNLOAD,
+                download
+            )
         }
     }
 

@@ -261,10 +261,11 @@ class SessionManager @JvmOverloads constructor(
         val url = if (TextUtils.isEmpty(session.url)) session.initialUrl else session.url
         val tabView = tabViewProvider.create()
         session.engineSession?.tabView = tabView
-        if (session.engineSession?.webViewState != null) {
-            tabView.restoreViewState(session.engineSession?.webViewState)
-        } else if (!TextUtils.isEmpty(url)) {
-            tabView.loadUrl(url)
+        val webViewState = session.engineSession?.webViewState
+        if (webViewState != null) {
+            tabView.restoreViewState(webViewState)
+        } else {
+            url?.let { tabView.loadUrl(it) }
         }
     }
 
