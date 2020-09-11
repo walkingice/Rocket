@@ -101,9 +101,8 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
             homeViewModel.onTopSitesPagePositionChanged(position)
         }
     }
-    private val toastObserver = Observer<ToastMessage> {
-        appContext.showFxToast(it)
-    }
+
+    private lateinit var toastObserver: Observer<ToastMessage>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         appComponent().inject(this)
@@ -114,7 +113,18 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         defaultBrowserPreferenceViewModel = getActivityViewModel(defaultBrowserPreferenceViewModelCreator)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // toastObserver is an instance which lives for long time
+        // do not directly store `appContext` reference inside toastObserver
+        // otherwise, toastObserver stores `homeFragment.appContext` - which leaks HomeFragment
+        val applicationContext = appContext
+        toastObserver = Observer { applicationContext.showFxToast(it) }
+        homeViewModel.showToast.observeForever(toastObserver)
+
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
@@ -508,7 +518,6 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         main_list.postDelayed({ main_list.setCurrentItem(page, 300) }, 100)
 
     private fun observeActions() {
-        homeViewModel.showToast.observeForever(toastObserver)
         homeViewModel.executeUriAction.observe(viewLifecycleOwner, Observer { action ->
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(action), appContext, RocketLauncherActivity::class.java))
         })
