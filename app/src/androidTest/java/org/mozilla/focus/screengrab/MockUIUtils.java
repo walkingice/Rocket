@@ -1,7 +1,6 @@
 package org.mozilla.focus.screengrab;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.os.SystemClock;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AlertDialog;
@@ -10,7 +9,7 @@ import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
 import org.mozilla.focus.R;
-import org.mozilla.focus.activity.MainActivity;
+import org.mozilla.rocket.permission.GeolocationPermissionController;
 
 public class MockUIUtils {
 
@@ -34,7 +33,8 @@ public class MockUIUtils {
 
     static void showGeoPromptDialog(@NotNull Activity activity, String url) {
         activity.runOnUiThread(() -> {
-            AlertDialog dialog = ((MainActivity) activity).getVisibleBrowserFragment().buildGeoPromptDialog();
+            GeolocationPermissionController controller = new GeolocationPermissionController();
+            AlertDialog dialog = controller.buildGeoPromptDialog(activity);
             dialog.show();
         });
     }

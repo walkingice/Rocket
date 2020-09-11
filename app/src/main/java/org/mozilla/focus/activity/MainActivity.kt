@@ -602,10 +602,7 @@ class MainActivity : BaseActivity(),
     private fun dismissAllMenus() {
         homeMenu.dismiss()
         browserMenu.dismiss()
-        visibleBrowserFragment?.run {
-            dismissWebContextMenu()
-            dismissGeoDialog()
-        }
+        visibleBrowserFragment?.run { dismissAllMenus() }
         mDialogFragment?.dismissAllowingStateLoss()
         myshotOnBoardingDialog?.run {
             dismiss()

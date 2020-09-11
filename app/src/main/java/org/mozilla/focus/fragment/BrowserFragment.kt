@@ -35,11 +35,9 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient.FileChooserParams
 import android.webkit.WebView
 import android.widget.Button
-import android.widget.CheckedTextView
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AlertDialog
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -87,7 +85,6 @@ import org.mozilla.focus.utils.ViewUtils
 import org.mozilla.focus.viewmodel.ShoppingSearchPromptViewModel
 import org.mozilla.focus.viewmodel.ShoppingSearchPromptViewModel.VisibilityState
 import org.mozilla.focus.viewmodel.ShoppingSearchPromptViewModel.VisibilityState.Expanded
-import org.mozilla.focus.web.GeoPermissionCache
 import org.mozilla.focus.web.HttpAuthenticationDialogBuilder
 import org.mozilla.focus.widget.BackKeyHandleable
 import org.mozilla.focus.widget.FindInPage
@@ -108,6 +105,7 @@ import org.mozilla.rocket.extension.switchFrom
 import org.mozilla.rocket.landing.PortraitComponent
 import org.mozilla.rocket.landing.PortraitStateModel
 import org.mozilla.rocket.nightmode.themed.ThemedCoordinatorLayout
+import org.mozilla.rocket.permission.GeolocationPermissionController
 import org.mozilla.rocket.shopping.search.ui.ShoppingSearchActivity.Companion.getStartIntent
 import org.mozilla.rocket.shopping.search.ui.adapter.ShoppingSiteItem
 import org.mozilla.rocket.tabs.Session
@@ -160,10 +158,8 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     private lateinit var statusBarBgTransition: TransitionDrawable
     private var webContextMenu: Dialog? = null
 
-    // GeoLocationPermission
-    private var geolocationOrigin: String? = null
-    private var geolocationCallback: GeolocationPermissions.Callback? = null
-    private var geoDialog: AlertDialog? = null
+    private val geolocationController: GeolocationPermissionController
+            by lazy { GeolocationPermissionController() }
 
     private var fullscreenCallback: FullscreenCallback? = null
     var isLoading = false
@@ -225,7 +221,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                         }
                     }
                     ACTION_PICK_FILE -> fileChooseAction?.startChooserActivity()
-                    ACTION_GEO_LOCATION -> showGeolocationPermissionPrompt()
+                    ACTION_GEO_LOCATION -> mayShowGeolocationDialog()
                     ACTION_CAPTURE -> showLoadingAndCapture(params as ScreenCaptureTelemetryData)
                     else -> throw IllegalArgumentException("Unknown actionId")
                 }
@@ -247,7 +243,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 when (actionId) {
                     ACTION_DOWNLOAD -> actionDownloadGranted(params)
                     ACTION_PICK_FILE -> actionPickFileGranted()
-                    ACTION_GEO_LOCATION -> showGeolocationPermissionPrompt()
+                    ACTION_GEO_LOCATION -> mayShowGeolocationDialog()
                     ACTION_CAPTURE -> actionCaptureGranted(params as ScreenCaptureTelemetryData)
                     else -> throw IllegalArgumentException("Unknown actionId")
                 }
@@ -273,12 +269,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                         it.cancel()
                         fileChooseAction = null
                     }
-                    ACTION_GEO_LOCATION -> if (geolocationCallback != null) {
-                        // I'm not sure why it's so. This method already on Main thread.
-                        // But if I don't do this, webview will keeps requesting for permission.
-                        // See https://github.com/mozilla-tw/Rocket/blob/765f6a1ddbc2b9058813e930f63c62a9797c5fa0/app/src/webkit/java/org/mozilla/focus/webkit/FocusWebChromeClient.java#L126
-                        ThreadUtils.postToMainThread { rejectGeoRequest(false) }
-                    }
+                    ACTION_GEO_LOCATION -> geolocationController.rejectGeoRequest(false)
                     ACTION_CAPTURE -> {
                     }
                     else -> throw IllegalArgumentException("Unknown actionId")
@@ -827,7 +818,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         if (systemVisibility != ViewUtils.SYSTEM_UI_VISIBILITY_NONE) {
             sessionManager.focusSession?.engineSession?.tabView?.performExitFullScreen()
         }
-        dismissGeoDialog()
+        geolocationController.dismissDialog()
         super.onStop()
     }
 
@@ -943,87 +934,6 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             return
         }
         chromeViewModel.onEnqueueDownload(download, url)
-    }
-
-    /*
-     * show webview geolocation permission prompt
-     */
-    private fun showGeolocationPermissionPrompt() {
-        if (!isPopupWindowAllowed) {
-            return
-        }
-        if (geolocationCallback == null) {
-            return
-        }
-        if (geoDialog?.isShowing == true) {
-            return
-        }
-        val allowed = GeoPermissionCache.getAllowed(geolocationOrigin)
-        if (allowed != null) {
-            geolocationCallback?.invoke(geolocationOrigin, allowed, false)
-        } else {
-            geoDialog = buildGeoPromptDialog().also {
-                it.show()
-            }
-        }
-    }
-
-    fun dismissGeoDialog() {
-        geoDialog?.let {
-            it.dismiss()
-            geoDialog = null
-        }
-    }
-
-    @VisibleForTesting
-    fun buildGeoPromptDialog(): AlertDialog {
-        val customContent =
-            LayoutInflater.from(context).inflate(R.layout.dialog_permission_request, null)
-        val checkBox = customContent.findViewById<CheckedTextView>(R.id.cache_my_decision)
-        checkBox.text =
-            getString(R.string.geolocation_dialog_message_cache_it, getString(R.string.app_name))
-        checkBox.setOnClickListener { checkBox.toggle() }
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setView(customContent)
-            .setMessage(getString(R.string.geolocation_dialog_message, geolocationOrigin))
-            .setCancelable(true)
-            .setPositiveButton(getString(R.string.geolocation_dialog_allow)) { _, _ ->
-                acceptGeoRequest(
-                    checkBox.isChecked
-                )
-            }
-            .setNegativeButton(getString(R.string.geolocation_dialog_block)) { _, _ ->
-                rejectGeoRequest(
-                    checkBox.isChecked
-                )
-            }
-            .setOnDismissListener { rejectGeoRequest(false) }
-            .setOnCancelListener { rejectGeoRequest(false) }
-        return builder.create()
-    }
-
-    private fun acceptGeoRequest(cacheIt: Boolean) {
-        if (geolocationCallback == null) {
-            return
-        }
-        if (cacheIt) {
-            GeoPermissionCache.putAllowed(geolocationOrigin, java.lang.Boolean.TRUE)
-        }
-        geolocationCallback?.invoke(geolocationOrigin, true, false)
-        geolocationOrigin = ""
-        geolocationCallback = null
-    }
-
-    private fun rejectGeoRequest(cacheIt: Boolean) {
-        if (geolocationCallback == null) {
-            return
-        }
-        if (cacheIt) {
-            GeoPermissionCache.putAllowed(geolocationOrigin, java.lang.Boolean.FALSE)
-        }
-        geolocationCallback?.invoke(geolocationOrigin, false, false)
-        geolocationOrigin = ""
-        geolocationCallback = null
     }
 
     // No SafeIntent needed here because intent.getAction() is safe (SafeIntent simply calls intent.getAction()
@@ -1179,7 +1089,18 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         return true
     }
 
-    fun dismissWebContextMenu() {
+    fun dismissAllMenus() {
+        dismissWebContextMenu()
+        geolocationController.dismissDialog()
+    }
+
+    private fun mayShowGeolocationDialog() {
+        if (isPopupWindowAllowed) {
+            geolocationController.showPermissionDialog(requireContext())
+        }
+    }
+
+    private fun dismissWebContextMenu() {
         webContextMenu?.let {
             it.dismiss()
             webContextMenu = null
@@ -1467,8 +1388,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             if (!isForegroundSession(session) || !isPopupWindowAllowed) {
                 return
             }
-            geolocationOrigin = origin
-            geolocationCallback = callback
+            geolocationController.set(origin, callback)
             permissionHandler.tryAction(
                 this@BrowserFragment,
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -1595,9 +1515,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         }
 
         private fun refreshChrome(tab: Session) {
-            geolocationOrigin = ""
-            geolocationCallback = null
-            dismissGeoDialog()
+            geolocationController.reset()
             updateURL(tab.url)
             shoppingSearchPromptMessageViewModel.checkShoppingSearchPromptVisibility(tab.url)
             progress_bar.progress = 0
