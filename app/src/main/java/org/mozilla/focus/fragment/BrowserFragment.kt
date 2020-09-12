@@ -49,6 +49,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.snackbar.Snackbar
 import dagger.Lazy
+import javax.inject.Inject
 import kotlinx.android.synthetic.main.activity_content_tab.appbar
 import kotlinx.android.synthetic.main.fragment_browser.browser_bottom_bar
 import kotlinx.android.synthetic.main.fragment_browser.inset_cover
@@ -103,6 +104,7 @@ import org.mozilla.rocket.download.DownloadIndicatorIntroViewHelper.OnViewInflat
 import org.mozilla.rocket.download.DownloadIndicatorIntroViewHelper.initDownloadIndicatorIntroView
 import org.mozilla.rocket.download.DownloadIndicatorViewModel
 import org.mozilla.rocket.extension.switchFrom
+import org.mozilla.rocket.history.SessionHistoryInserter
 import org.mozilla.rocket.landing.PortraitComponent
 import org.mozilla.rocket.landing.PortraitStateModel
 import org.mozilla.rocket.nightmode.themed.ThemedCoordinatorLayout
@@ -123,8 +125,6 @@ import org.mozilla.rocket.tabs.web.Download
 import org.mozilla.threadutils.ThreadUtils
 import org.mozilla.urlutils.UrlUtils
 import java.lang.ref.WeakReference
-import java.util.WeakHashMap
-import javax.inject.Inject
 
 /**
  * Fragment for displaying the browser UI.
@@ -1172,7 +1172,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
 
     private inner class SessionObserver : Session.Observer, TabViewEngineSession.Client {
         private var session: Session? = null
-        private val historyInserter = HistoryInserter()
+        private val historyInserter = SessionHistoryInserter()
 
         // Some url may report progress from 0 again for the same url. filter them out to avoid
         // progress bar regression when scrolling.
@@ -1181,7 +1181,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             if (loading) {
                 historyInserter.onTabStarted(session)
             } else {
-                historyInserter.onTabFinished(session)
+                historyInserter.onTabFinished(session, url)
             }
             if (!isForegroundSession(session)) {
                 return
@@ -1651,60 +1651,6 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 ACTION_DOWNLOAD,
                 download
             )
-        }
-    }
-
-    /**
-     * TODO: This class records some intermediate data of each tab to avoid inserting duplicate
-     * history, maybe it'd be better to make these data as per-tab data
-     */
-    private inner class HistoryInserter {
-        private val failingUrls = WeakHashMap<Session, String?>()
-
-        // Some url may have two onPageFinished for the same url. filter them out to avoid
-        // adding twice to the history.
-        private val lastInsertedUrls = WeakHashMap<Session, String>()
-        fun onTabStarted(tab: Session) {
-            lastInsertedUrls.remove(tab)
-        }
-
-        fun onTabFinished(tab: Session) {
-            insertBrowsingHistory(tab)
-        }
-
-        fun updateFailingUrl(tab: Session, url: String?, updateFromError: Boolean) {
-            val failingUrl = failingUrls[tab]
-            if (!updateFromError && url != failingUrl) {
-                failingUrls.remove(tab)
-            } else {
-                failingUrls[tab] = url
-            }
-        }
-
-        private fun insertBrowsingHistory(tab: Session) {
-            val urlToBeInserted = url
-            val lastInsertedUrl = getLastInsertedUrl(tab)
-            if (TextUtils.isEmpty(urlToBeInserted)) {
-                return
-            }
-            if (urlToBeInserted == getFailingUrl(tab)) {
-                return
-            }
-            if (urlToBeInserted == lastInsertedUrl) {
-                return
-            }
-            tab.engineSession?.tabView?.insertBrowsingHistory()
-            lastInsertedUrls[tab] = urlToBeInserted
-        }
-
-        private fun getFailingUrl(tab: Session): String {
-            val url = failingUrls[tab]
-            return requireNotNull(if (TextUtils.isEmpty(url)) "" else url)
-        }
-
-        private fun getLastInsertedUrl(tab: Session): String {
-            val url = lastInsertedUrls[tab]
-            return requireNotNull(if (TextUtils.isEmpty(url)) "" else url)
         }
     }
 
