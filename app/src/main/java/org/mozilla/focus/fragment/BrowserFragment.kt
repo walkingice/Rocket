@@ -100,6 +100,7 @@ import org.mozilla.rocket.content.appComponent
 import org.mozilla.rocket.content.getActivityViewModel
 import org.mozilla.rocket.content.view.BottomBar
 import org.mozilla.rocket.content.view.BottomBar.BottomBarBehavior.Companion.slideUp
+import org.mozilla.rocket.download.BrowserDownloadCallback
 import org.mozilla.rocket.download.DownloadIndicatorIntroViewHelper.OnViewInflated
 import org.mozilla.rocket.download.DownloadIndicatorIntroViewHelper.initDownloadIndicatorIntroView
 import org.mozilla.rocket.download.DownloadIndicatorViewModel
@@ -149,7 +150,6 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     private lateinit var shoppingSearchPromptMessageBehavior: BottomSheetBehavior<*>
 
     private var systemVisibility = ViewUtils.SYSTEM_UI_VISIBILITY_NONE
-    private val downloadCallback = DownloadCallback()
 
     private lateinit var findInPage: FindInPage
     private lateinit var rootView: ThemedCoordinatorLayout
@@ -1324,8 +1324,12 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 )
                 return
             }
-            webContextMenu =
-                WebContextMenu.show(false, requireActivity(), downloadCallback, hitTarget)
+            webContextMenu = WebContextMenu.show(
+                false,
+                requireActivity(),
+                BrowserDownloadCallback(this@BrowserFragment, permissionHandler),
+                hitTarget
+            )
         }
 
         override fun onEnterFullScreen(callback: FullscreenCallback, view: View?) {
@@ -1639,21 +1643,6 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         }
     }
 
-    internal inner class DownloadCallback : org.mozilla.rocket.tabs.web.DownloadCallback {
-        override fun onDownloadStart(download: Download) {
-            val activity = activity
-            if (activity == null || !activity.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                return
-            }
-            permissionHandler.tryAction(
-                this@BrowserFragment,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                ACTION_DOWNLOAD,
-                download
-            )
-        }
-    }
-
     fun checkToShowMyShotOnBoarding() {
         chromeViewModel.checkToShowMyShotOnBoarding()
     }
@@ -1689,7 +1678,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         private const val SITE_GLOBE = 0
         private const val SITE_LOCK = 1
         private const val BUNDLE_MAX_SIZE = 300 * 1000 // 300K
-        private const val ACTION_DOWNLOAD = 0
+        const val ACTION_DOWNLOAD = 0
         private const val ACTION_PICK_FILE = 1
         private const val ACTION_GEO_LOCATION = 2
         private const val ACTION_CAPTURE = 3
