@@ -113,7 +113,7 @@ class PrivateModeActivity : BaseActivity(),
 
     override fun onDestroy() {
         super.onDestroy()
-        stopPrivateMode()
+        stopPrivateMode(false)
         sessionManagerLegacy?.destroy()
     }
 
@@ -260,7 +260,7 @@ class PrivateModeActivity : BaseActivity(),
     }
 
     private fun dropBrowserFragment() {
-        stopPrivateMode()
+        stopPrivateMode(false)
         Toast.makeText(this, R.string.private_browsing_erase_done, Toast.LENGTH_LONG).show()
     }
 
@@ -318,13 +318,16 @@ class PrivateModeActivity : BaseActivity(),
         PrivateSessionNotificationService.start(this)
     }
 
-    private fun stopPrivateMode() {
+    private fun stopPrivateMode(removeTask: Boolean) {
         if (isAcBrowserEngineEnabled()) {
             sessionManager.removeAll()
         }
         PrivateSessionNotificationService.stop(this)
         PrivateMode.getInstance(this).sanitize()
         tabViewProvider.purify(this)
+        if (removeTask) {
+            finishAndRemoveTask()
+        }
     }
 
     private fun isSanitizeIntent(intent: Intent?): Boolean {
@@ -333,9 +336,8 @@ class PrivateModeActivity : BaseActivity(),
 
     private fun sanitize() {
         TelemetryWrapper.erasePrivateModeNotification()
-        stopPrivateMode()
+        stopPrivateMode(true)
         Toast.makeText(this, R.string.private_browsing_erase_done, Toast.LENGTH_LONG).show()
-        finishAndRemoveTask()
     }
 
     private fun handleIntent(intent: Intent?) {
