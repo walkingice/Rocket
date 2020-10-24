@@ -312,8 +312,13 @@ class BrowserFragment : LocaleAwareFragment(),
             goBack()
             return true
         }
+        val selectedSession = sessionManager.selectedSession
         sessionManager.remove()
-        ScreenNavigator.get(activity).popToHomeScreen(true)
+        if (selectedSession?.source == Session.Source.CUSTOM_TAB) {
+            activity?.finishAndRemoveTask()
+        } else {
+            ScreenNavigator.get(activity).popToHomeScreen(true)
+        }
         chromeViewModel.dropCurrentPage.call()
         return true
     }
@@ -344,7 +349,12 @@ class BrowserFragment : LocaleAwareFragment(),
             displayUrlView.text = url
             val selectedSession = sessionManager.selectedSession
             if (selectedSession == null) {
-                val newSession = Session(url)
+                val source = if (isFromExternal) {
+                    Session.Source.CUSTOM_TAB
+                } else {
+                    Session.Source.NONE
+                }
+                val newSession = Session(url, source = source)
                 sessionManager.add(newSession)
                 engineView.render(sessionManager.getOrCreateEngineSession(newSession))
             } else {
