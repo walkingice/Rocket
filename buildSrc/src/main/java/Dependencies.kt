@@ -31,7 +31,7 @@ object Versions {
     const val paging = "2.1.2"
     const val findbugs = "3.0.1"
     const val lottie = "3.4.0"
-    const val leakcanary = "2.0-beta-3"
+    const val leakcanary = "2.6"
     const val android_components = "0.52.0"
     const val android_components_awesomebar = "0.56.0"
     const val annotation = "1.1.0"
