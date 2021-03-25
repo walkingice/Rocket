@@ -284,8 +284,6 @@ public class WebkitView extends NestedWebView implements TabView {
         if (!webViewClient.shouldOverrideUrlLoading(this, url)) {
             super.loadUrl(url);
         }
-
-        webViewClient.notifyCurrentURL(url);
     }
 
     public void reload() {
