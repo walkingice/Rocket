@@ -181,6 +181,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     private val managerObserver: SessionManager.Observer = SessionManagerObserver(sessionObserver)
     private var downloadIndicatorIntro: View? = null
     private var landscapeStartTime = 0L
+    private var loadedUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         this.appComponent().inject(this)
@@ -1045,10 +1046,10 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             if (current == null || !current.canGoBack()) {
                 return
             }
-            val webBackForwardList = (current as WebView).copyBackForwardList()
-            val item = webBackForwardList.getItemAtIndex(webBackForwardList.currentIndex - 1)
-            updateURL(item.url)
             current.goBack()
+            if ((current as WebView).originalUrl != null) {
+                loadedUrl = (current as WebView).originalUrl
+            }
         }
     }
 
@@ -1056,10 +1057,10 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         val currentTab = sessionManager.focusSession
         if (currentTab != null) {
             val current = currentTab.engineSession?.tabView ?: return
-            val webBackForwardList = (current as WebView).copyBackForwardList()
-            val item = webBackForwardList.getItemAtIndex(webBackForwardList.currentIndex + 1)
-            updateURL(item.url)
             current.goForward()
+            if ((current as WebView).originalUrl != null) {
+                loadedUrl = (current as WebView).originalUrl
+            }
         }
     }
 
@@ -1174,7 +1175,6 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
 
         // Some url may report progress from 0 again for the same url. filter them out to avoid
         // progress bar regression when scrolling.
-        private var loadedUrl: String? = null
         override fun onLoadingStateChanged(session: Session, loading: Boolean) {
             isLoading = loading
             if (loading) {
@@ -1241,6 +1241,19 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             }
         }
 
+        // Remove URL fragment to prevent progress bar update when location.hash change (follow Chrome and Firefox for Android behavior)
+        fun removeUrlFragment(url: String): String {
+            val endPos: Int = when {
+                url.indexOf("#") > 0 -> {
+                    url.indexOf("#")
+                }
+                else -> {
+                    url.length
+                }
+            }
+            return url.substring(0, endPos)
+        }
+
         override fun onProgress(session: Session, progress: Int) {
             if (!isForegroundSession(session)) {
                 return
@@ -1248,7 +1261,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             hideFindInPage()
             if (sessionManager.focusSession != null) {
                 val currentUrl = sessionManager.focusSession?.url
-                val progressIsForLoadedUrl = TextUtils.equals(currentUrl, loadedUrl)
+                val progressIsForLoadedUrl = TextUtils.equals(currentUrl?.let { removeUrlFragment(it) }, loadedUrl?.let { removeUrlFragment(it) })
                 // Some new url may give 100 directly and then start from 0 again. don't treat
                 // as loaded for these urls;
                 val urlBarLoadingToFinished =
@@ -1256,7 +1269,8 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 if (urlBarLoadingToFinished) {
                     loadedUrl = currentUrl
                 }
-                if (progressIsForLoadedUrl) {
+                // Some URL cause progress bar to stuck at loading state, allowing progress update to progress_bar.max solve the issue
+                if (progressIsForLoadedUrl && progress != progress_bar.max) {
                     return
                 }
             }
