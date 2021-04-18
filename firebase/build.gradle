@@ -7,12 +7,10 @@ apply from: '../buildSrc/findbugs.gradle'
 
 android {
 
-
     compileSdkVersion Versions.compile_sdk
     defaultConfig {
         minSdkVersion Versions.min_sdk
     }
-
 
     buildTypes {
 
@@ -82,13 +80,14 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlin}"
 
-    implementation "com.google.firebase:firebase-analytics:${Versions.analytics}"
-    implementation "com.google.firebase:firebase-config:${Versions.firebase_config}"
-    api "com.google.firebase:firebase-messaging:${Versions.fcm}"
-    implementation "com.google.firebase:firebase-crashlytics:${Versions.crashlytics}"
-    implementation "com.google.firebase:firebase-auth:${Versions.firebase_auth}"
-    previewImplementation 'com.google.firebase:firebase-perf:19.0.7'
-    debugImplementation 'com.google.firebase:firebase-perf:19.0.7'
+    implementation platform("com.google.firebase:firebase-bom:${Versions.firebase_bom}")
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-config'
+    api 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-crashlytics'
+    implementation 'com.google.firebase:firebase-auth'
+    previewImplementation 'com.google.firebase:firebase-perf'
+    debugImplementation 'com.google.firebase:firebase-perf'
 }
 
 
