@@ -5,9 +5,6 @@
 package org.mozilla.focus.fragment
 
 import android.Manifest
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.ValueAnimator
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
@@ -17,7 +14,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.TransitionDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Parcelable
@@ -26,14 +22,10 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.view.ViewStub
 import android.view.WindowInsets
-import android.webkit.GeolocationPermissions
-import android.webkit.ValueCallback
-import android.webkit.WebChromeClient.FileChooserParams
 import android.webkit.WebView
 import android.widget.Button
 import android.widget.FrameLayout
@@ -42,34 +34,28 @@ import androidx.annotation.VisibleForTesting
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.snackbar.Snackbar
 import dagger.Lazy
-import javax.inject.Inject
 import kotlinx.android.synthetic.main.activity_content_tab.appbar
 import kotlinx.android.synthetic.main.fragment_browser.browser_bottom_bar
 import kotlinx.android.synthetic.main.fragment_browser.inset_cover
 import kotlinx.android.synthetic.main.fragment_browser.main_content
-import kotlinx.android.synthetic.main.fragment_browser.progress_bar
 import kotlinx.android.synthetic.main.fragment_browser.url_bar_divider
 import kotlinx.android.synthetic.main.fragment_browser.urlbar
 import kotlinx.android.synthetic.main.fragment_browser.video_container
 import kotlinx.android.synthetic.main.fragment_browser.view.shopping_search_stub
-import kotlinx.android.synthetic.main.fragment_browser.webview_container
 import kotlinx.android.synthetic.main.fragment_browser.webview_slot
 import kotlinx.android.synthetic.main.toolbar.display_url
 import kotlinx.android.synthetic.main.toolbar.site_identity
 import kotlinx.android.synthetic.main.toolbar.toolbar_root
-import mozilla.components.browser.session.Session.FindResult
 import org.mozilla.focus.BuildConfig
 import org.mozilla.focus.R
 import org.mozilla.focus.activity.MainActivity
 import org.mozilla.focus.locale.LocaleAwareFragment
-import org.mozilla.focus.menu.WebContextMenu
 import org.mozilla.focus.navigation.ScreenNavigator
 import org.mozilla.focus.navigation.ScreenNavigator.BrowserScreen
 import org.mozilla.focus.screenshot.CaptureRunnable
@@ -87,7 +73,6 @@ import org.mozilla.focus.utils.ViewUtils
 import org.mozilla.focus.viewmodel.ShoppingSearchPromptViewModel
 import org.mozilla.focus.viewmodel.ShoppingSearchPromptViewModel.VisibilityState
 import org.mozilla.focus.viewmodel.ShoppingSearchPromptViewModel.VisibilityState.Expanded
-import org.mozilla.focus.web.HttpAuthenticationDialogBuilder
 import org.mozilla.focus.widget.BackKeyHandleable
 import org.mozilla.focus.widget.FindInPage
 import org.mozilla.permissionhandler.PermissionHandle
@@ -100,32 +85,27 @@ import org.mozilla.rocket.content.appComponent
 import org.mozilla.rocket.content.getActivityViewModel
 import org.mozilla.rocket.content.view.BottomBar
 import org.mozilla.rocket.content.view.BottomBar.BottomBarBehavior.Companion.slideUp
-import org.mozilla.rocket.download.BrowserDownloadCallback
 import org.mozilla.rocket.download.DownloadIndicatorIntroViewHelper.OnViewInflated
 import org.mozilla.rocket.download.DownloadIndicatorIntroViewHelper.initDownloadIndicatorIntroView
 import org.mozilla.rocket.download.DownloadIndicatorViewModel
 import org.mozilla.rocket.extension.switchFrom
-import org.mozilla.rocket.history.SessionHistoryInserter
 import org.mozilla.rocket.landing.PortraitComponent
 import org.mozilla.rocket.landing.PortraitStateModel
 import org.mozilla.rocket.nightmode.themed.ThemedCoordinatorLayout
 import org.mozilla.rocket.permission.GeolocationPermissionController
+import org.mozilla.rocket.sessions.SessionManagerObserver
+import org.mozilla.rocket.sessions.SessionObserver
 import org.mozilla.rocket.shopping.search.ui.ShoppingSearchActivity.Companion.getStartIntent
 import org.mozilla.rocket.shopping.search.ui.adapter.ShoppingSiteItem
-import org.mozilla.rocket.tabs.Session
 import org.mozilla.rocket.tabs.SessionManager
-import org.mozilla.rocket.tabs.SessionManager.Factor
-import org.mozilla.rocket.tabs.TabView
 import org.mozilla.rocket.tabs.TabView.FullscreenCallback
-import org.mozilla.rocket.tabs.TabView.HitTarget
-import org.mozilla.rocket.tabs.TabViewClient.HttpAuthCallback
-import org.mozilla.rocket.tabs.TabViewEngineSession
 import org.mozilla.rocket.tabs.TabsSessionProvider
 import org.mozilla.rocket.tabs.utils.TabUtil
 import org.mozilla.rocket.tabs.web.Download
 import org.mozilla.threadutils.ThreadUtils
 import org.mozilla.urlutils.UrlUtils
 import java.lang.ref.WeakReference
+import javax.inject.Inject
 
 /**
  * Fragment for displaying the browser UI.
@@ -143,28 +123,27 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
 
     @Inject
     lateinit var promptMessageViewModelCreator: Lazy<ShoppingSearchPromptViewModel>
-    private lateinit var chromeViewModel: ChromeViewModel
-    private lateinit var bottomBarViewModel: BottomBarViewModel
+    lateinit var chromeViewModel: ChromeViewModel
+    lateinit var bottomBarViewModel: BottomBarViewModel
     private lateinit var bottomBarItemAdapter: BottomBarItemAdapter
-    private lateinit var shoppingSearchPromptMessageViewModel: ShoppingSearchPromptViewModel
+    lateinit var shoppingSearchPromptMessageViewModel: ShoppingSearchPromptViewModel
     private lateinit var shoppingSearchPromptMessageBehavior: BottomSheetBehavior<*>
 
-    private var systemVisibility = ViewUtils.SYSTEM_UI_VISIBILITY_NONE
+    var systemVisibility = ViewUtils.SYSTEM_UI_VISIBILITY_NONE
 
-    private lateinit var findInPage: FindInPage
-    private lateinit var rootView: ThemedCoordinatorLayout
-    private lateinit var shoppingSearchViewStub: ViewStub
-    private lateinit var sessionManager: SessionManager
-    private lateinit var appBarBgTransition: TransitionDrawable
-    private lateinit var statusBarBgTransition: TransitionDrawable
-    private var webContextMenu: Dialog? = null
+    lateinit var findInPage: FindInPage
+    lateinit var rootView: ThemedCoordinatorLayout
+    lateinit var shoppingSearchViewStub: ViewStub
+    lateinit var sessionManager: SessionManager
+    lateinit var appBarBgTransition: TransitionDrawable
+    lateinit var statusBarBgTransition: TransitionDrawable
+    var webContextMenu: Dialog? = null
 
-    private val geolocationController: GeolocationPermissionController
+    val geolocationController: GeolocationPermissionController
             by lazy { GeolocationPermissionController() }
 
-    private var fullscreenCallback: FullscreenCallback? = null
+    var fullscreenCallback: FullscreenCallback? = null
     var isLoading = false
-        private set
 
     // Set an initial WeakReference so we never have to handle loadStateListenerWeakReference being null
     // (i.e. so we can always just .get()).
@@ -174,15 +153,16 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     var captureStateListener: CaptureStateListener? = null
 
     // pending action for file-choosing
-    private var fileChooseAction: FileChooseAction? = null
-    private lateinit var permissionHandler: PermissionHandler
+    var fileChooseAction: FileChooseAction? = null
+    lateinit var permissionHandler: PermissionHandler
     private var hasPendingScreenCaptureTask = false
     private var pendingScreenCaptureTelemetryData: ScreenCaptureTelemetryData? = null
-    private val sessionObserver = SessionObserver()
-    private val managerObserver: SessionManager.Observer = SessionManagerObserver(sessionObserver)
+    private val sessionObserver = SessionObserver(this)
+    private val managerObserver: SessionManager.Observer =
+        SessionManagerObserver(this, sessionObserver)
     private var downloadIndicatorIntro: View? = null
     private var landscapeStartTime = 0L
-    private var loadedUrl: String? = null
+    var loadedUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         this.appComponent().inject(this)
@@ -356,7 +336,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         }
     }
 
-    private fun updateURL(url: String?) {
+    fun updateURL(url: String?) {
         if (UrlUtils.isInternalErrorURL(url)) {
             return
         }
@@ -908,7 +888,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         )
     }
 
-    private fun updateIsLoading(isLoading: Boolean) {
+    fun updateIsLoading(isLoading: Boolean) {
         this.isLoading = isLoading
         val currentListener = loadStateListenerWeakReference.get()
         currentListener?.isLoadingChanged(isLoading)
@@ -940,7 +920,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
 
     // No SafeIntent needed here because intent.getAction() is safe (SafeIntent simply calls intent.getAction()
     // without any wrapping):
-    private val isStartedFromExternalApp: Boolean
+    val isStartedFromExternalApp: Boolean
         get() {
             val activity = activity ?: return false
 
@@ -1033,9 +1013,9 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     val url: String
         get() = display_url.text.toString()
 
-    private fun canGoForward(): Boolean = sessionManager.focusSession?.canGoForward == true
+    fun canGoForward(): Boolean = sessionManager.focusSession?.canGoForward == true
 
-    private fun canGoBack(): Boolean = sessionManager.focusSession?.canGoBack == true
+    fun canGoBack(): Boolean = sessionManager.focusSession?.canGoBack == true
 
     private fun goBack() {
         val currentTab = sessionManager.focusSession
@@ -1130,7 +1110,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         }
     }
 
-    private val isPopupWindowAllowed: Boolean
+    val isPopupWindowAllowed: Boolean
         get() = ScreenNavigator.get(context).isBrowserInForeground &&
                 isAdded && !TabTray.isShowing(parentFragmentManager)
 
@@ -1166,481 +1146,8 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             }
         }
 
-    private fun hideFindInPage() {
+    fun hideFindInPage() {
         findInPage.hide()
-    }
-
-    private inner class SessionObserver : Session.Observer, TabViewEngineSession.Client {
-        private var session: Session? = null
-        private val historyInserter = SessionHistoryInserter()
-
-        // Some url may report progress from 0 again for the same url. filter them out to avoid
-        // progress bar regression when scrolling.
-        override fun onLoadingStateChanged(session: Session, loading: Boolean) {
-            isLoading = loading
-            if (loading) {
-                historyInserter.onTabStarted(session)
-            } else {
-                historyInserter.onTabFinished(session, url)
-            }
-            if (!isForegroundSession(session)) {
-                return
-            }
-            if (loading) {
-                loadedUrl = null
-                chromeViewModel.onPageLoadingStarted()
-                updateIsLoading(true)
-                updateURL(session.url)
-                appBarBgTransition.resetTransition()
-                statusBarBgTransition.resetTransition()
-            } else {
-                // The URL which is supplied in onTabFinished() could be fake (see #301), but webview's
-                // URL is always correct _except_ for error pages
-                updateUrlFromWebView(session)
-                chromeViewModel.onPageLoadingStopped()
-                updateIsLoading(false)
-                appBarBgTransition.startTransition(ANIMATION_DURATION)
-                statusBarBgTransition.startTransition(ANIMATION_DURATION)
-            }
-        }
-
-        override fun onSecurityChanged(session: Session, isSecure: Boolean) {
-            site_identity.setImageLevel(if (isSecure) SITE_LOCK else SITE_GLOBE)
-        }
-
-        override fun onUrlChanged(session: Session, url: String?) {
-            chromeViewModel.onFocusedUrlChanged(url)
-            if (!isForegroundSession(session)) {
-                return
-            }
-            // Prevent updateURL when directly entering URL in the address bar.
-            if (chromeViewModel.openUrl.value?.url ?: "" != url) {
-                updateURL(url)
-            } else if (chromeViewModel.openUrl.value?.url ?: "" != "") {
-                chromeViewModel.openUrl.value!!.url = ""
-            }
-
-            shoppingSearchPromptMessageViewModel.checkShoppingSearchPromptVisibility(url)
-        }
-
-        override fun handleExternalUrl(url: String?): Boolean {
-            if (context == null) {
-                Log.w(
-                    ScreenNavigator.BROWSER_FRAGMENT_TAG,
-                    "No context to use, abort callback handleExternalUrl"
-                )
-                return false
-            }
-            val navigationState = chromeViewModel.navigationState.value
-            if (navigationState != null && navigationState.isHome) {
-                Log.w(
-                    ScreenNavigator.BROWSER_FRAGMENT_TAG,
-                    "Ignore external url when browser page is not on the front"
-                )
-                return false
-            }
-            return IntentUtils.handleExternalUri(context, url)
-        }
-
-        override fun updateFailingUrl(url: String?, updateFromError: Boolean) {
-            session?.let {
-                historyInserter.updateFailingUrl(it, url, updateFromError)
-            }
-        }
-
-        // Remove URL fragment to prevent progress bar update when location.hash change (follow Chrome and Firefox for Android behavior)
-        fun removeUrlFragment(url: String): String {
-            val endPos: Int = when {
-                url.indexOf("#") > 0 -> {
-                    url.indexOf("#")
-                }
-                else -> {
-                    url.length
-                }
-            }
-            return url.substring(0, endPos)
-        }
-
-        override fun onProgress(session: Session, progress: Int) {
-            if (!isForegroundSession(session)) {
-                return
-            }
-            hideFindInPage()
-            if (sessionManager.focusSession != null) {
-                val currentUrl = sessionManager.focusSession?.url
-                val progressIsForLoadedUrl = TextUtils.equals(currentUrl?.let { removeUrlFragment(it) }, loadedUrl?.let { removeUrlFragment(it) })
-                // Some new url may give 100 directly and then start from 0 again. don't treat
-                // as loaded for these urls;
-                val urlBarLoadingToFinished =
-                    progress_bar.max != progress_bar.progress && progress == progress_bar.max
-                if (urlBarLoadingToFinished) {
-                    loadedUrl = currentUrl
-                }
-                // Some URL cause progress bar to stuck at loading state, allowing progress update to progress_bar.max solve the issue
-                if (progressIsForLoadedUrl && progress != progress_bar.max) {
-                    return
-                }
-            }
-            progress_bar.progress = progress
-        }
-
-        override fun onShowFileChooser(
-            es: TabViewEngineSession,
-            filePathCallback: ValueCallback<Array<Uri>>?,
-            fileChooserParams: FileChooserParams?
-        ): Boolean {
-            if (!isForegroundSession(session)) {
-                return false
-            }
-            TelemetryWrapper.browseFilePermissionEvent()
-            return try {
-                requireNotNull(filePathCallback)
-                requireNotNull(fileChooserParams)
-                fileChooseAction =
-                    FileChooseAction(this@BrowserFragment, filePathCallback, fileChooserParams)
-                permissionHandler.tryAction(
-                    this@BrowserFragment,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    ACTION_PICK_FILE,
-                    null
-                )
-                true
-            } catch (e: Exception) {
-                e.printStackTrace()
-                false
-            }
-        }
-
-        override fun onTitleChanged(session: Session, title: String?) {
-            chromeViewModel.onFocusedTitleChanged(title)
-        }
-
-        override fun onReceivedIcon(icon: Bitmap?) {}
-        override fun onLongPress(session: Session, hitTarget: HitTarget) {
-            if (activity == null) {
-                Log.w(
-                    ScreenNavigator.BROWSER_FRAGMENT_TAG,
-                    "No context to use, abort callback onLongPress"
-                )
-                return
-            }
-            webContextMenu = WebContextMenu.show(
-                false,
-                requireActivity(),
-                BrowserDownloadCallback(this@BrowserFragment, permissionHandler),
-                hitTarget
-            )
-        }
-
-        override fun onEnterFullScreen(callback: FullscreenCallback, view: View?) {
-            if (session == null) {
-                return
-            }
-            if (!isForegroundSession(session)) {
-                callback.fullScreenExited()
-                return
-            }
-            fullscreenCallback = callback
-            if (session?.engineSession?.tabView != null && view != null) {
-                // Hide browser UI and web content
-                appbar.visibility = View.INVISIBLE
-                webview_container.visibility = View.INVISIBLE
-                shoppingSearchViewStub.visibility = View.INVISIBLE
-                browser_bottom_bar.visibility = View.INVISIBLE
-
-                // Add view to video container and make it visible
-                val params = FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                video_container.addView(view, params)
-                video_container.visibility = View.VISIBLE
-
-                // Switch to immersive mode: Hide system bars other UI controls
-                systemVisibility = ViewUtils.switchToImmersiveMode(activity)
-            }
-        }
-
-        override fun onExitFullScreen() {
-            if (session == null) {
-                return
-            }
-            // Remove custom video views and hide container
-            video_container.removeAllViews()
-            video_container.visibility = View.GONE
-
-            // Show browser UI and web content again
-            appbar.visibility = View.VISIBLE
-            webview_container.visibility = View.VISIBLE
-            shoppingSearchViewStub.visibility = View.VISIBLE
-            browser_bottom_bar.visibility = View.VISIBLE
-            if (systemVisibility != ViewUtils.SYSTEM_UI_VISIBILITY_NONE) {
-                ViewUtils.exitImmersiveMode(systemVisibility, activity)
-            }
-
-            // Notify renderer that we left fullscreen mode.
-            fullscreenCallback?.let {
-                it.fullScreenExited()
-                fullscreenCallback = null
-            }
-
-            // WebView gets focus, but unable to open the keyboard after exit Fullscreen for Android 7.0+
-            // We guess some component in WebView might lock focus
-            // So when user touches the input text box on Webview, it will not trigger to open the keyboard
-            // It may be a WebView bug.
-            // The workaround is clearing WebView focus
-            // The WebView will be normal when it gets focus again.
-            // If android change behavior after, can remove this.
-            session?.engineSession?.tabView?.let {
-                if (it is WebView) {
-                    it.clearFocus()
-                }
-            }
-        }
-
-        override fun onGeolocationPermissionsShowPrompt(
-            origin: String,
-            callback: GeolocationPermissions.Callback?
-        ) {
-            if (session == null) {
-                return
-            }
-            if (!isForegroundSession(session) || !isPopupWindowAllowed) {
-                return
-            }
-            geolocationController.set(origin, callback)
-            permissionHandler.tryAction(
-                this@BrowserFragment,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                ACTION_GEO_LOCATION,
-                null
-            )
-        }
-
-        fun changeSession(nextSession: Session?) {
-            session?.unregister(this)
-            session = nextSession?.also {
-                it.register(this)
-            }
-        }
-
-        private fun updateUrlFromWebView(source: Session) {
-            if (sessionManager.focusSession != null) {
-                val viewURL = sessionManager.focusSession?.url
-                onUrlChanged(source, viewURL)
-            }
-        }
-
-        private fun isForegroundSession(tab: Session?): Boolean {
-            return sessionManager.focusSession == tab
-        }
-
-        override fun onFindResult(session: Session, result: FindResult) {
-            findInPage.onFindResultReceived(result)
-        }
-
-        override fun onDownload(
-            session: Session,
-            download: mozilla.components.browser.session.Download
-        ): Boolean {
-            val activity = activity
-            if (activity == null || !activity.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-                return false
-            }
-            val d = Download(
-                download.url,
-                download.fileName,
-                download.userAgent,
-                "",
-                download.contentType,
-                requireNotNull(download.contentLength),
-                false
-            )
-            permissionHandler.tryAction(
-                this@BrowserFragment,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                ACTION_DOWNLOAD,
-                d
-            )
-            return true
-        }
-
-        override fun onNavigationStateChanged(
-            session: Session,
-            canGoBack: Boolean,
-            canGoForward: Boolean
-        ) {
-            chromeViewModel.onNavigationStateChanged(canGoBack, canGoForward)
-        }
-
-        override fun onHttpAuthRequest(callback: HttpAuthCallback, host: String?, realm: String?) {
-            val builder = HttpAuthenticationDialogBuilder.Builder(activity, host, realm)
-                .setOkListener { _: String?, _: String?, username: String?, password: String? ->
-                    callback.proceed(username, password)
-                }
-                .setCancelListener { callback.cancel() }
-                .build()
-            builder.createDialog()
-            builder.show()
-        }
-    }
-
-    private inner class SessionManagerObserver(private val sessionObserver: SessionObserver) :
-        SessionManager.Observer {
-        private var tabTransitionAnimator: ValueAnimator? = null
-
-        override fun onFocusChanged(session: Session?, factor: Factor) {
-            chromeViewModel.onFocusedUrlChanged(session?.url)
-            chromeViewModel.onFocusedTitleChanged(session?.title)
-            if (session == null) {
-                if (factor === Factor.FACTOR_NO_FOCUS && !isStartedFromExternalApp) {
-                    ScreenNavigator.get(context).popToHomeScreen(true)
-                } else {
-                    requireActivity().finish()
-                }
-            } else {
-                transitToTab(session)
-                refreshChrome(session)
-            }
-        }
-
-        override fun onSessionAdded(session: Session, arguments: Bundle?) {
-            if (arguments == null) {
-                return
-            }
-            when (arguments.getInt(EXTRA_NEW_TAB_SRC, -1)) {
-                SRC_CONTEXT_MENU -> onTabAddedByContextMenu(session, arguments)
-                else -> {
-                }
-            }
-        }
-
-        override fun onSessionCountChanged(count: Int) {
-            chromeViewModel.onTabCountChanged(count)
-        }
-
-        private fun transitToTab(targetTab: Session) {
-            val tabView = targetTab.engineSession?.tabView
-                ?: throw RuntimeException("Tabview should be created at this moment and never be null")
-            // ensure it does not have attach to parent earlier.
-            targetTab.engineSession?.detach()
-            val outView = findExistingTabView(webview_slot)
-            webview_slot.removeView(outView)
-            val inView = tabView.getView()
-            webview_slot.addView(inView)
-            this.sessionObserver.changeSession(targetTab)
-            if (inView != null) {
-                startTransitionAnimation(null, inView, null)
-            }
-        }
-
-        private fun refreshChrome(tab: Session) {
-            geolocationController.reset()
-            updateURL(tab.url)
-            shoppingSearchPromptMessageViewModel.checkShoppingSearchPromptVisibility(tab.url)
-
-            if (tab.progress == 0 || tab.progress == 100) {
-                progress_bar.visibility = GONE
-            } else {
-                progress_bar.progress = tab.progress
-            }
-
-            val identity = if (tab.securityInfo.secure) SITE_LOCK else SITE_GLOBE
-            site_identity.setImageLevel(identity)
-            hideFindInPage()
-            val current = sessionManager.focusSession
-            if (current != null) {
-                chromeViewModel.onNavigationStateChanged(canGoBack(), canGoForward())
-            }
-            // check if newer config exists whenever navigating to Browser screen
-            bottomBarViewModel.refresh()
-        }
-
-        private fun startTransitionAnimation(
-            outView: View?,
-            inView: View,
-            finishCallback: Runnable?
-        ) {
-            stopTabTransition()
-            inView.alpha = 0f
-            if (outView != null) {
-                outView.alpha = 1f
-            }
-            val duration = inView.resources.getInteger(R.integer.tab_transition_time)
-            tabTransitionAnimator =
-                ValueAnimator.ofFloat(0f, 1f).setDuration(duration.toLong()).apply {
-                    addUpdateListener { animation ->
-                        val alpha = animation.animatedValue as Float
-                        if (outView != null) {
-                            outView.alpha = 1 - alpha
-                        }
-                        inView.alpha = alpha
-                    }
-                    addListener(object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator) {
-                            finishCallback?.run()
-                            inView.alpha = 1f
-                            if (outView != null) {
-                                outView.alpha = 1f
-                            }
-                        }
-                    })
-                }.also {
-                    it.start()
-                }
-        }
-
-        private fun findExistingTabView(parent: ViewGroup): View? {
-            val viewCount = parent.childCount
-            for (childIdx in 0 until viewCount) {
-                val childView = parent.getChildAt(childIdx)
-                if (childView is TabView) {
-                    return (childView as TabView).getView()
-                }
-            }
-            return null
-        }
-
-        private fun stopTabTransition() {
-            tabTransitionAnimator?.run {
-                if (isRunning) {
-                    end()
-                }
-            }
-        }
-
-        private fun onTabAddedByContextMenu(tab: Session, arguments: Bundle) {
-            if (!TabUtil.toFocus(arguments)) {
-                Snackbar.make(rootView, R.string.new_background_tab_hint, Snackbar.LENGTH_LONG)
-                    .apply {
-                        setAction(R.string.new_background_tab_switch) {
-                            sessionManager.switchToTab(
-                                tab.id
-                            )
-                        }
-                        anchorView = browser_bottom_bar
-                    }.show()
-            }
-        }
-
-        override fun updateFailingUrl(url: String?, updateFromError: Boolean) {
-            sessionObserver.updateFailingUrl(url, updateFromError)
-        }
-
-        override fun handleExternalUrl(url: String?): Boolean {
-            return sessionObserver.handleExternalUrl(url)
-        }
-
-        override fun onShowFileChooser(
-            es: TabViewEngineSession,
-            filePathCallback: ValueCallback<Array<Uri>>?,
-            fileChooserParams: FileChooserParams?
-        ): Boolean {
-            return sessionObserver.onShowFileChooser(es, filePathCallback, fileChooserParams)
-        }
-
-        override fun onHttpAuthRequest(callback: HttpAuthCallback, host: String?, realm: String?) {
-            sessionObserver.onHttpAuthRequest(callback, host, realm)
-        }
     }
 
     fun checkToShowMyShotOnBoarding() {
@@ -1674,14 +1181,14 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         const val EXTRA_NEW_TAB_SRC = "extra_bkg_tab_src"
         const val SRC_CONTEXT_MENU = 0
 
-        private const val ANIMATION_DURATION = 300
-        private const val SITE_GLOBE = 0
-        private const val SITE_LOCK = 1
-        private const val BUNDLE_MAX_SIZE = 300 * 1000 // 300K
+        const val ANIMATION_DURATION = 300
+        const val SITE_GLOBE = 0
+        const val SITE_LOCK = 1
+        const val BUNDLE_MAX_SIZE = 300 * 1000 // 300K
         const val ACTION_DOWNLOAD = 0
-        private const val ACTION_PICK_FILE = 1
-        private const val ACTION_GEO_LOCATION = 2
-        private const val ACTION_CAPTURE = 3
-        private const val CAPTURE_WAIT_INTERVAL = 150
+        const val ACTION_PICK_FILE = 1
+        const val ACTION_GEO_LOCATION = 2
+        const val ACTION_CAPTURE = 3
+        const val CAPTURE_WAIT_INTERVAL = 150
     }
 }
