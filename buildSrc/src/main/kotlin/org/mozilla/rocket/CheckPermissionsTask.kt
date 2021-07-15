@@ -1,6 +1,7 @@
 package org.mozilla.rocket
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.io.IOException
@@ -8,8 +9,11 @@ import java.util.concurrent.TimeUnit
 
 open class CheckPermissionsTask : DefaultTask() {
 
+    @Internal
     lateinit var permissionsFilePath: String
+    @Internal
     lateinit var aapt2DirPath: String
+    @Internal
     lateinit var apkFilePaths: List<File>
 
     @TaskAction
