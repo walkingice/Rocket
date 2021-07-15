@@ -71,8 +71,8 @@ class PrivateMode private constructor(context: Context) {
 
         @JvmStatic
         fun getInstance(context: Context): PrivateMode =
-                INSTANCE ?: synchronized(this) {
-                    INSTANCE ?: PrivateMode(context).also { INSTANCE = it }
-                }
+            INSTANCE ?: synchronized(this) {
+                INSTANCE ?: PrivateMode(context).also { INSTANCE = it }
+            }
     }
 }

@@ -99,20 +99,24 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class MainActivity : BaseActivity(),
-        ThemeManager.ThemeHost,
-        TabsSessionProvider.SessionHost,
-        ScreenNavigator.Provider,
-        ScreenNavigator.HostActivity,
-        PromotionViewContract,
-        InAppUpdateController.ViewDelegate {
+class MainActivity :
+    BaseActivity(),
+    ThemeManager.ThemeHost,
+    TabsSessionProvider.SessionHost,
+    ScreenNavigator.Provider,
+    ScreenNavigator.HostActivity,
+    PromotionViewContract,
+    InAppUpdateController.ViewDelegate {
 
     @Inject
     lateinit var downloadIndicatorViewModelCreator: Lazy<DownloadIndicatorViewModel>
+
     @Inject
     lateinit var chromeViewModelCreator: Lazy<ChromeViewModel>
+
     @Inject
     lateinit var tabModelStore: TabModelStore
+
     @Inject
     lateinit var defaultBrowserRepository: DefaultBrowserRepository
 
@@ -178,9 +182,9 @@ class MainActivity : BaseActivity(),
         themeManager = ThemeManager(this)
         screenNavigator = ScreenNavigator(this)
         appUpdateController = InAppUpdateController(
-                this,
-                AppUpdateManagerFactory.create(this),
-                this
+            this,
+            AppUpdateManagerFactory.create(this),
+            this
         )
 
         setContentView(R.layout.activity_main)
@@ -218,7 +222,8 @@ class MainActivity : BaseActivity(),
     private fun initViews() {
         var visibility = window.decorView.systemUiVisibility
         // do not overwrite existing value
-        visibility = visibility or (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+        visibility =
+            visibility or (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
         window.decorView.systemUiVisibility = visibility
         setUpMenu()
     }
@@ -260,7 +265,12 @@ class MainActivity : BaseActivity(),
                         }
                     }
                     Constants.ACTION_NOTIFY_RELOCATE_FINISH -> {
-                        chromeViewModel.onRelocateFinished(intent.getLongExtra(Constants.EXTRA_ROW_ID, -1))
+                        chromeViewModel.onRelocateFinished(
+                            intent.getLongExtra(
+                                Constants.EXTRA_ROW_ID,
+                                -1
+                            )
+                        )
                     }
                 }
             }
@@ -269,15 +279,19 @@ class MainActivity : BaseActivity(),
 
     private fun checkFirstrunNotification() {
         if (!FirstLaunchWorker.isNotificationFired(this)) {
-            sendBroadcast(Intent(this, PeriodicReceiver::class.java).apply {
-                action = FirstLaunchWorker.ACTION
-            })
+            sendBroadcast(
+                Intent(this, PeriodicReceiver::class.java).apply {
+                    action = FirstLaunchWorker.ACTION
+                }
+            )
         }
     }
 
     private fun registerFirebaseEventReceiver() {
-        LocalBroadcastManager.getInstance(this).registerReceiver(firebaseEventReceiver,
-                IntentFilter(FIREBASE_READY))
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            firebaseEventReceiver,
+            IntentFilter(FIREBASE_READY)
+        )
     }
 
     private fun unregisterFirebaseEventReceiver() {
@@ -292,52 +306,86 @@ class MainActivity : BaseActivity(),
     }
 
     private fun observeNavigation() {
-        screenNavigator.navigationState.observe(this, Observer { state -> chromeViewModel.navigationState.setValue(state) })
+        screenNavigator.navigationState.observe(
+            this,
+            Observer { state -> chromeViewModel.navigationState.setValue(state) }
+        )
     }
 
     private fun monitorOrientationState() {
         val orientationState = OrientationState(
-                object : NavigationModel {
-                    override val navigationState: LiveData<ScreenNavigator.NavigationState>
-                        get() = screenNavigator.navigationState
-                }, portraitStateModel
+            object : NavigationModel {
+                override val navigationState: LiveData<ScreenNavigator.NavigationState>
+                    get() = screenNavigator.navigationState
+            },
+            portraitStateModel
         )
 
-        orientationState.observe(this, Observer { orientation ->
-            if (orientation != null) {
-                requestedOrientation = orientation
+        orientationState.observe(
+            this,
+            Observer { orientation ->
+                if (orientation != null) {
+                    requestedOrientation = orientation
+                }
             }
-        })
+        )
     }
 
     private fun observeChromeAction() {
         chromeViewModel.run {
             showToast.nonNullObserve(this@MainActivity) { message ->
-                Toast.makeText(this@MainActivity, getString(message.stringResId!!, *message.args), message.duration).show()
+                Toast.makeText(
+                    this@MainActivity,
+                    getString(message.stringResId!!, *message.args),
+                    message.duration
+                ).show()
             }
             openUrl.nonNullObserve(this@MainActivity) { action ->
-                screenNavigator.showBrowserScreen(action.url, action.withNewTab, action.isFromExternal)
+                screenNavigator.showBrowserScreen(
+                    action.url,
+                    action.withNewTab,
+                    action.isFromExternal
+                )
             }
-            showTabTray.observe(this@MainActivity, Observer {
-                TabTray.show(supportFragmentManager)
-            })
+            showTabTray.observe(
+                this@MainActivity,
+                Observer {
+                    TabTray.show(supportFragmentManager)
+                }
+            )
             showHomeMenu.observe(this@MainActivity, Observer { homeMenu.show() })
             showBrowserMenu.observe(this@MainActivity, Observer { browserMenu.show() })
-            showNewTab.observe(this@MainActivity, Observer {
-                screenNavigator.addHomeScreen(true)
-            })
-            showUrlInput.observe(this@MainActivity, Observer { url ->
-                if (!supportFragmentManager.isStateSaved) {
-                    screenNavigator.addUrlScreen(url)
+            showNewTab.observe(
+                this@MainActivity,
+                Observer {
+                    screenNavigator.addHomeScreen(true)
                 }
-            })
+            )
+            showUrlInput.observe(
+                this@MainActivity,
+                Observer { url ->
+                    if (!supportFragmentManager.isStateSaved) {
+                        screenNavigator.addUrlScreen(url)
+                    }
+                }
+            )
             dismissUrlInput.observe(this@MainActivity, Observer { screenNavigator.popUrlScreen() })
             pinShortcut.observe(this@MainActivity, Observer { requestPinShortcut() })
-            bookmarkAdded.nonNullObserve(this@MainActivity) { itemId -> showBookmarkAddedSnackbar(itemId) }
-            share.observe(this@MainActivity, Observer {
-                visibleBrowserFragment?.let { shareText(it.url) }
-            })
-            showDownloadPanel.observe(this@MainActivity, Observer { showListPanel(ListPanelDialog.TYPE_DOWNLOADS) })
+            bookmarkAdded.nonNullObserve(this@MainActivity) { itemId ->
+                showBookmarkAddedSnackbar(
+                    itemId
+                )
+            }
+            share.observe(
+                this@MainActivity,
+                Observer {
+                    visibleBrowserFragment?.let { shareText(it.url) }
+                }
+            )
+            showDownloadPanel.observe(
+                this@MainActivity,
+                Observer { showListPanel(ListPanelDialog.TYPE_DOWNLOADS) }
+            )
             isMyShotOnBoardingPending.nonNullObserve(this@MainActivity) { isPending ->
                 if (isPending) {
                     this@MainActivity.showMyShotOnBoarding()
@@ -349,39 +397,70 @@ class MainActivity : BaseActivity(),
             driveDefaultBrowser.observe(this@MainActivity, Observer { driveDefaultBrowser() })
             exitApp.observe(this@MainActivity, Observer { exitApp() })
             openPreference.observe(this@MainActivity, Observer { openPreferences() })
-            showBookmarks.observe(this@MainActivity, Observer { showListPanel(ListPanelDialog.TYPE_BOOKMARKS) })
-            showHistory.observe(this@MainActivity, Observer { showListPanel(ListPanelDialog.TYPE_HISTORY) })
-            showScreenshots.observe(this@MainActivity, Observer { showListPanel(ListPanelDialog.TYPE_SCREENSHOTS) })
+            showBookmarks.observe(
+                this@MainActivity,
+                Observer { showListPanel(ListPanelDialog.TYPE_BOOKMARKS) }
+            )
+            showHistory.observe(
+                this@MainActivity,
+                Observer { showListPanel(ListPanelDialog.TYPE_HISTORY) }
+            )
+            showScreenshots.observe(
+                this@MainActivity,
+                Observer { showListPanel(ListPanelDialog.TYPE_SCREENSHOTS) }
+            )
             togglePrivateMode.observe(this@MainActivity, Observer { openPrivateMode() })
-            downloadState.observe(this@MainActivity, Observer { downloadState ->
-                when (downloadState) {
-                    is DownloadsRepository.DownloadState.StorageUnavailable ->
-                        Toast.makeText(this@MainActivity, R.string.message_storage_unavailable_cancel_download, Toast.LENGTH_LONG).show()
-                    is DownloadsRepository.DownloadState.FileNotSupported ->
-                        Toast.makeText(this@MainActivity, R.string.download_file_not_supported, Toast.LENGTH_LONG).show()
-                    is DownloadsRepository.DownloadState.Success ->
-                        if (!downloadState.isStartFromContextMenu) {
-                            Toast.makeText(this@MainActivity, R.string.download_started, Toast.LENGTH_LONG).show()
-                        }
+            downloadState.observe(
+                this@MainActivity,
+                Observer { downloadState ->
+                    when (downloadState) {
+                        is DownloadsRepository.DownloadState.StorageUnavailable ->
+                            Toast.makeText(
+                                this@MainActivity,
+                                R.string.message_storage_unavailable_cancel_download,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        is DownloadsRepository.DownloadState.FileNotSupported ->
+                            Toast.makeText(
+                                this@MainActivity,
+                                R.string.download_file_not_supported,
+                                Toast.LENGTH_LONG
+                            ).show()
+                        is DownloadsRepository.DownloadState.Success ->
+                            if (!downloadState.isStartFromContextMenu) {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    R.string.download_started,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                    }
                 }
-            })
-            showDownloadFinishedSnackBar.observe(this@MainActivity, Observer { downloadInfo ->
-                val message = getString(R.string.download_completed, downloadInfo.fileName)
-                Snackbar.make(container, message, Snackbar.LENGTH_LONG).apply {
-                    // Set the open action only if we can.
-                    if (downloadInfo.existInDownloadManager()) {
-                        setAction(R.string.open) {
-                            try {
-                                IntentUtils.intentOpenFile(this@MainActivity, downloadInfo.fileUri, downloadInfo.mimeType)
-                            } catch (e: URISyntaxException) {
-                                e.printStackTrace()
+            )
+            showDownloadFinishedSnackBar.observe(
+                this@MainActivity,
+                Observer { downloadInfo ->
+                    val message = getString(R.string.download_completed, downloadInfo.fileName)
+                    Snackbar.make(container, message, Snackbar.LENGTH_LONG).apply {
+                        // Set the open action only if we can.
+                        if (downloadInfo.existInDownloadManager()) {
+                            setAction(R.string.open) {
+                                try {
+                                    IntentUtils.intentOpenFile(
+                                        this@MainActivity,
+                                        downloadInfo.fileUri,
+                                        downloadInfo.mimeType
+                                    )
+                                } catch (e: URISyntaxException) {
+                                    e.printStackTrace()
+                                }
                             }
                         }
+                        anchorView = browser.browser_bottom_bar
+                        show()
                     }
-                    anchorView = browser.browser_bottom_bar
-                    show()
                 }
-            })
+            )
         }
     }
 
@@ -399,7 +478,11 @@ class MainActivity : BaseActivity(),
             addAction(Constants.ACTION_NOTIFY_RELOCATE_FINISH)
         }
         LocalBroadcastManager.getInstance(this).registerReceiver(uiMessageReceiver, uiActionFilter)
-        contentResolver.registerContentObserver(DownloadContract.Download.CONTENT_URI, true, downloadObserver)
+        contentResolver.registerContentObserver(
+            DownloadContract.Download.CONTENT_URI,
+            true,
+            downloadObserver
+        )
         downloadIndicatorViewModel.updateIndicator()
         chromeViewModel.checkIfPrivateBrowsingActive()
         chromeViewModel.onSessionStarted()
@@ -414,7 +497,8 @@ class MainActivity : BaseActivity(),
                 return
             }
             val rootView = findViewById<ViewGroup>(android.R.id.content).getChildAt(0) as ViewGroup
-            val failMessageText = getString(R.string.message_set_default_incomplet, getString(R.string.app_name))
+            val failMessageText =
+                getString(R.string.message_set_default_incomplet, getString(R.string.app_name))
             Snackbar.make(rootView, failMessageText, TimeUnit.SECONDS.toMillis(8).toInt())
                 .setAction(R.string.private_browsing_dialog_add_shortcut_yes) {
                     startActivity(IntentUtils.createSetDefaultBrowserIntent(this))
@@ -490,7 +574,8 @@ class MainActivity : BaseActivity(),
                 mDialogFragment?.let {
                     val fragment = it.childFragmentManager.findFragmentById(R.id.main_content)
                     if (fragment is ScreenshotGridFragment && data != null) {
-                        val id = data.getLongExtra(ScreenshotViewerActivity.EXTRA_SCREENSHOT_ITEM_ID, -1)
+                        val id =
+                            data.getLongExtra(ScreenshotViewerActivity.EXTRA_SCREENSHOT_ITEM_ID, -1)
                         fragment.notifyItemDelete(id)
                     }
                 }
@@ -498,14 +583,20 @@ class MainActivity : BaseActivity(),
                 if (data != null) {
                     val url = data.getStringExtra(ScreenshotViewerActivity.EXTRA_URL)
                     mDialogFragment?.dismissAllowingStateLoss()
-                    chromeViewModel.openUrl.value = OpenUrlAction(url, withNewTab = true, isFromExternal = false)
+                    chromeViewModel.openUrl.value =
+                        OpenUrlAction(url, withNewTab = true, isFromExternal = false)
                 }
             }
         } else if (requestCode == AddNewTopSitesActivity.REQUEST_CODE_ADD_NEW_TOP_SITES) {
             if (resultCode == AddNewTopSitesActivity.RESULT_CODE_ADD_NEW_TOP_SITES) {
-                val fragment = supportFragmentManager.findFragmentByTag(ScreenNavigator.HOME_FRAGMENT_TAG)
+                val fragment =
+                    supportFragmentManager.findFragmentByTag(ScreenNavigator.HOME_FRAGMENT_TAG)
                 if (fragment is HomeFragment && data != null) {
-                    fragment.notifyAddNewTopSiteResult(data.getParcelableExtra(AddNewTopSitesActivity.ADD_NEW_TOP_SITES_EXTRA))
+                    fragment.notifyAddNewTopSiteResult(
+                        data.getParcelableExtra(
+                            AddNewTopSitesActivity.ADD_NEW_TOP_SITES_EXTRA
+                        )
+                    )
                 }
             }
         }
@@ -533,8 +624,8 @@ class MainActivity : BaseActivity(),
         val isToastShowing = exitToast?.view?.windowToken != null
         if (!isToastShowing) {
             Toast.makeText(this, R.string.message_exit_app, Toast.LENGTH_LONG)
-                    .also { exitToast = it }
-                    .show()
+                .also { exitToast = it }
+                .show()
             TelemetryWrapper.showExitToast()
             handled = true
         }
@@ -574,17 +665,24 @@ class MainActivity : BaseActivity(),
     }
 
     override fun postSurveyNotification() {
-        val intent = IntentUtils.createInternalOpenUrlIntent(this,
-                surveyUrl, true)
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT)
+        val intent = IntentUtils.createInternalOpenUrlIntent(
+            this,
+            surveyUrl, true
+        )
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent,
+            PendingIntent.FLAG_ONE_SHOT
+        )
 
         val builder = NotificationUtil.importantBuilder(this)
-                .setContentTitle(getString(R.string.survey_notification_title, "\uD83D\uDE4C"))
-                .setContentText(getString(R.string.survey_notification_description))
-                .setStyle(NotificationCompat.BigTextStyle().bigText(
-                        getString(R.string.survey_notification_description)))
-                .setContentIntent(pendingIntent)
+            .setContentTitle(getString(R.string.survey_notification_title, "\uD83D\uDE4C"))
+            .setContentText(getString(R.string.survey_notification_description))
+            .setStyle(
+                NotificationCompat.BigTextStyle().bigText(
+                    getString(R.string.survey_notification_description)
+                )
+            )
+            .setContentIntent(pendingIntent)
 
         NotificationUtil.sendNotification(this, NotificationId.SURVEY_ON_3RD_LAUNCH, builder)
     }
@@ -623,7 +721,8 @@ class MainActivity : BaseActivity(),
     private fun exitApp() {
         GeoPermissionCache.clear()
         if (PrivateMode.getInstance(this).hasPrivateSession()) {
-            val intent = PrivateSessionNotificationService.buildIntent(this.applicationContext, true)
+            val intent =
+                PrivateSessionNotificationService.buildIntent(this.applicationContext, true)
             startActivity(intent)
         }
         finish()
@@ -647,7 +746,12 @@ class MainActivity : BaseActivity(),
     private fun showBookmarkAddedSnackbar(bookmarkItemId: String) {
         Snackbar.make(container, R.string.bookmark_saved, Snackbar.LENGTH_LONG).apply {
             setAction(R.string.bookmark_saved_edit) {
-                startActivity(Intent(this@MainActivity, EditBookmarkActivity::class.java).putExtra(ITEM_UUID_KEY, bookmarkItemId))
+                startActivity(
+                    Intent(this@MainActivity, EditBookmarkActivity::class.java).putExtra(
+                        ITEM_UUID_KEY,
+                        bookmarkItemId
+                    )
+                )
             }
             anchorView = browser.browser_bottom_bar
         }.show()
@@ -675,7 +779,10 @@ class MainActivity : BaseActivity(),
             // Besides, RocketLauncherActivity not exported so using the alias-name is required.
             setClassName(this@MainActivity, AppConstants.LAUNCHER_ACTIVITY_ALIAS)
             data = Uri.parse(url)
-            putExtra(LaunchIntentDispatcher.LaunchMethod.EXTRA_BOOL_HOME_SCREEN_SHORTCUT.value, true)
+            putExtra(
+                LaunchIntentDispatcher.LaunchMethod.EXTRA_BOOL_HOME_SCREEN_SHORTCUT.value,
+                true
+            )
         }
         ShortcutUtils.requestPinShortcut(this, shortcut, focusTab.title, url, bitmap)
     }
@@ -689,21 +796,21 @@ class MainActivity : BaseActivity(),
     override fun createFirstRunScreen(): ScreenNavigator.FirstrunScreen = FirstrunFragment.create()
 
     override fun getFirstRunScreen(): ScreenNavigator.FirstrunScreen? =
-            supportFragmentManager.findFragmentByTag(ScreenNavigator.FIRST_RUN_FRAGMENT_TAG) as? ScreenNavigator.FirstrunScreen
+        supportFragmentManager.findFragmentByTag(ScreenNavigator.FIRST_RUN_FRAGMENT_TAG) as? ScreenNavigator.FirstrunScreen
 
     override fun getBrowserScreen(): BrowserFragment =
-            supportFragmentManager.findFragmentById(R.id.browser) as BrowserFragment
+        supportFragmentManager.findFragmentById(R.id.browser) as BrowserFragment
 
     override fun createUrlInputScreen(url: String?, parentFragmentTag: String): UrlInputFragment =
-            UrlInputFragment.create(url, parentFragmentTag, true)
+        UrlInputFragment.create(url, parentFragmentTag, true)
 
     override fun createHomeScreen(): ScreenNavigator.HomeScreen = HomeFragment()
 
     override fun getSessionManager(): SessionManager =
-            // TODO: Find a proper place to allocate and init SessionManager
-            sessionManager.takeIf { it != null } ?: SessionManager(MainTabViewProvider(this)).also {
-                sessionManager = it
-            }
+        // TODO: Find a proper place to allocate and init SessionManager
+        sessionManager.takeIf { it != null } ?: SessionManager(MainTabViewProvider(this)).also {
+            sessionManager = it
+        }
 
     override fun onPointerCaptureChanged(hasCapture: Boolean) {
         chromeViewModel.onSurveyNotificationPosted()
@@ -744,14 +851,17 @@ class MainActivity : BaseActivity(),
         val view = browserMenu.findViewById<View>(R.id.menu_screenshots)
         view?.post {
             myshotOnBoardingDialog = DialogUtils.showMyShotOnBoarding(
-                    this@MainActivity,
-                    view,
-                    DialogInterface.OnCancelListener { dismissAllMenus() },
-                    View.OnClickListener {
-                        val url = SupportUtils.getSumoURLForTopic(this@MainActivity, "screenshot-telemetry")
-                        chromeViewModel.openUrl.value = OpenUrlAction(url, withNewTab = true, isFromExternal = false)
-                        dismissAllMenus()
-                    })
+                this@MainActivity,
+                view,
+                DialogInterface.OnCancelListener { dismissAllMenus() },
+                View.OnClickListener {
+                    val url =
+                        SupportUtils.getSumoURLForTopic(this@MainActivity, "screenshot-telemetry")
+                    chromeViewModel.openUrl.value =
+                        OpenUrlAction(url, withNewTab = true, isFromExternal = false)
+                    dismissAllMenus()
+                }
+            )
             chromeViewModel.onMyShotOnBoardingDisplayed()
         }
         browserMenu.show()
@@ -768,16 +878,16 @@ class MainActivity : BaseActivity(),
     ): Boolean {
 
         val dialog = AlertDialog.Builder(this@MainActivity)
-                .setTitle(data.title)
-                .setMessage(data.description)
-                .setPositiveButton(data.positiveText) { _, _ ->
-                    positiveCallback.invoke()
-                }
-                .setNegativeButton(data.negativeText) { _, _ ->
-                    negativeCallback.invoke()
-                }
-                .setCancelable(false)
-                .create()
+            .setTitle(data.title)
+            .setMessage(data.description)
+            .setPositiveButton(data.positiveText) { _, _ ->
+                positiveCallback.invoke()
+            }
+            .setNegativeButton(data.negativeText) { _, _ ->
+                negativeCallback.invoke()
+            }
+            .setCancelable(false)
+            .create()
         dialog.setCanceledOnTouchOutside(false)
         dialogQueue.tryShow(object : DialogQueue.DialogDelegate {
             override fun setOnDismissListener(listener: () -> Unit) {
@@ -795,9 +905,9 @@ class MainActivity : BaseActivity(),
 
     override fun showInstallPrompt(actionCallback: () -> Unit) {
         Snackbar.make(
-                container,
-                getString(R.string.update_to_latest_app_snack_bar_message),
-                Snackbar.LENGTH_LONG
+            container,
+            getString(R.string.update_to_latest_app_snack_bar_message),
+            Snackbar.LENGTH_LONG
         ).setAction(getString(R.string.update_to_latest_app_snack_bar_update)) {
             actionCallback.invoke()
         }.show()
@@ -811,9 +921,9 @@ class MainActivity : BaseActivity(),
         postDownloadingNotification()
 
         Toast.makeText(
-                this@MainActivity,
-                getString(R.string.update_to_latest_app_toast),
-                Toast.LENGTH_SHORT
+            this@MainActivity,
+            getString(R.string.update_to_latest_app_toast),
+            Toast.LENGTH_SHORT
         ).show()
     }
 
@@ -823,33 +933,34 @@ class MainActivity : BaseActivity(),
         }
 
         val pendingIntent = PendingIntent.getActivity(
-                this,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         val builder = NotificationUtil.baseBuilder(this, NotificationUtil.Channel.LOW_PRIORITY)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setContentTitle(getString(R.string.update_to_latest_app_notification))
-                .setLargeIcon(null)
-                .setAutoCancel(true)
-                .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentTitle(getString(R.string.update_to_latest_app_notification))
+            .setLargeIcon(null)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
 
         NotificationUtil.sendNotification(this, NotificationId.IN_APP_UPDATE, builder)
     }
 
     private fun postDownloadingNotification() {
         val builder = NotificationUtil.baseBuilder(this, NotificationUtil.Channel.LOW_PRIORITY)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setContentTitle(getString(R.string.update_to_latest_app_toast))
-                .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentTitle(getString(R.string.update_to_latest_app_toast))
+            .setAutoCancel(true)
 
         NotificationUtil.sendNotification(this, NotificationId.IN_APP_UPDATE, builder)
     }
 
     // a TabViewProvider and it should only be used in this activity
-    private class MainTabViewProvider internal constructor(private val activity: Activity) : TabViewProvider() {
+    private class MainTabViewProvider internal constructor(private val activity: Activity) :
+        TabViewProvider() {
 
         override fun create(): TabView {
             // FIXME: we should avoid casting here.

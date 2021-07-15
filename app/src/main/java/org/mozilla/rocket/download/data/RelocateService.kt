@@ -103,8 +103,11 @@ class RelocateService : IntentService(TAG) {
         }
 
         // To move file if we have correct permission
-        if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+        if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+        ) {
             moveFile(rowId, downloadId, srcFile, mediaType)
         } else {
             // if no permission, send broadcast to UI.
@@ -131,7 +134,8 @@ class RelocateService : IntentService(TAG) {
                 FileUtils.ensureDir(outputDir)
                 destFile = FileUtils.getFileSlot(outputDir, srcFile.name)
                 if (outputDir.usableSpace < srcFile.length()) {
-                    val msg: CharSequence = getString(R.string.message_removable_storage_space_not_enough)
+                    val msg: CharSequence =
+                        getString(R.string.message_removable_storage_space_not_enough)
                     broadcastUi(msg)
                     Log.w(TAG, msg.toString())
                     broadcastRelocateFinished(rowId)
@@ -141,8 +145,10 @@ class RelocateService : IntentService(TAG) {
                 // instead of rename, to use copy + remove for safety
                 val copied = FileUtils.copy(srcFile, destFile)
                 if (!copied) {
-                    Log.w(TAG, String.format("cannot copy file from %s to %s",
-                        srcFile.path, destFile.path))
+                    Log.w(
+                        TAG,
+                        String.format("cannot copy file from %s to %s", srcFile.path, destFile.path)
+                    )
                     broadcastRelocateFinished(rowId)
                     return
                 }
@@ -159,8 +165,10 @@ class RelocateService : IntentService(TAG) {
                 if (!settings.removableStorageStateOnCreate) {
                     // avoid sending same message continuously
                     if (settings.showedStorageMessage != Settings.STORAGE_MSG_TYPE_REMOVABLE_AVAILABLE) {
-                        settings.showedStorageMessage = Settings.STORAGE_MSG_TYPE_REMOVABLE_AVAILABLE
-                        val msg: CharSequence = getString(R.string.message_start_to_save_to_removable_storage)
+                        settings.showedStorageMessage =
+                            Settings.STORAGE_MSG_TYPE_REMOVABLE_AVAILABLE
+                        val msg: CharSequence =
+                            getString(R.string.message_start_to_save_to_removable_storage)
                         broadcastUi(msg)
                         Log.w(TAG, msg.toString())
                     }
@@ -174,7 +182,8 @@ class RelocateService : IntentService(TAG) {
                 // avoid sending same message continuously
                 if (settings.showedStorageMessage != Settings.STORAGE_MSG_TYPE_REMOVABLE_UNAVAILABLE) {
                     settings.showedStorageMessage = Settings.STORAGE_MSG_TYPE_REMOVABLE_UNAVAILABLE
-                    val msg: CharSequence = getString(R.string.message_fallback_save_to_primary_external)
+                    val msg: CharSequence =
+                        getString(R.string.message_fallback_save_to_primary_external)
                     broadcastUi(msg)
                     Log.w(TAG, msg.toString())
                 }
@@ -257,11 +266,16 @@ class RelocateService : IntentService(TAG) {
 
         // Configure the notification channel if needed
         private fun configForegroundChannel(context: Context) {
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             // NotificationChannel API is only available for Android O and above, so we need to add the check here so IDE won't complain
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val channelName = context.getString(R.string.app_name)
-                val notificationChannel = NotificationChannel(CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_HIGH)
+                val notificationChannel = NotificationChannel(
+                    CHANNEL_ID,
+                    channelName,
+                    NotificationManager.IMPORTANCE_HIGH
+                )
                 notificationManager.createNotificationChannel(notificationChannel)
             }
         }

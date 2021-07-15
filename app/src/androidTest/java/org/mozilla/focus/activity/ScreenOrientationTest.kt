@@ -17,8 +17,8 @@ import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.rule.ActivityTestRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.ActivityTestRule
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -42,9 +42,9 @@ class ScreenOrientationTest {
 
     @Rule @JvmField
     val activityTestRule = ActivityTestRule(
-            MainActivity::class.java,
-            true,
-            false
+        MainActivity::class.java,
+        true,
+        false
     )
 
     private var sessionLoadedIdlingResource: SessionLoadedIdlingResource? = null
@@ -166,7 +166,7 @@ class ScreenOrientationTest {
         sessionLoadedIdlingResource = SessionLoadedIdlingResource(activityTestRule.activity)
 
         onView(withId(R.id.home_fragment_fake_input))
-                .perform(click())
+            .perform(click())
         onView(withId(R.id.url_edit)).check(matches(isDisplayed()))
         onView(withId(R.id.url_edit)).perform(replaceText(TARGET_URL_SITE_1), pressImeActionButton())
 

@@ -65,7 +65,9 @@ class RecommendedSiteViewHolder(
     }
 
     private fun createFavicon(resources: Resources, url: String, backgroundColor: Int): Bitmap {
-        return DimenUtils.getInitialBitmap(resources, FavIconUtils.getRepresentativeCharacter(url),
-            backgroundColor)
+        return DimenUtils.getInitialBitmap(
+            resources, FavIconUtils.getRepresentativeCharacter(url),
+            backgroundColor
+        )
     }
 }

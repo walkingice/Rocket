@@ -42,14 +42,20 @@ class ChromeViewModel(
     private val storageHelper: StorageHelper,
     private val downloadsRepository: DownloadsRepository
 ) : ViewModel() {
-    val isNightMode: LiveData<NightModeSettings> = settings.isNightModeEnablLiveData.map { NightModeSettings(it, settings.nightModeBrightnessValue) }
+    val isNightMode: LiveData<NightModeSettings> = settings.isNightModeEnablLiveData.map {
+        NightModeSettings(
+            it,
+            settings.nightModeBrightnessValue
+        )
+    }
     val isDarkTheme: LiveData<Boolean> = settings.isDarkThemeEnableLiveData
     val tabCount = MutableLiveData<Int>()
     val isTabRestoredComplete = MutableLiveData<Boolean>()
     val navigationState = MutableLiveData<ScreenNavigator.NavigationState>()
     val currentUrl = MutableLiveData<String>()
     val currentTitle = MutableLiveData<String>()
-    var isCurrentUrlBookmarked: LiveData<Boolean> = currentUrl.switchMap(bookmarkRepo::getBookmarksByUrl).map { it.isNotEmpty() }
+    var isCurrentUrlBookmarked: LiveData<Boolean> =
+        currentUrl.switchMap(bookmarkRepo::getBookmarksByUrl).map { it.isNotEmpty() }
     val isRefreshing = MutableLiveData<Boolean>()
     val canGoBack = MutableLiveData<Boolean>()
     val canGoForward = MutableLiveData<Boolean>()
@@ -63,11 +69,11 @@ class ChromeViewModel(
 
     val shouldShowFirstrun: Boolean
         get() = newFeatureNotice.shouldShowLiteUpdate()
-                .also { shouldShow ->
-                    if (!shouldShow) {
-                        newFeatureNotice.setLiteUpdateDidShow()
-                    }
+            .also { shouldShow ->
+                if (!shouldShow) {
+                    newFeatureNotice.setLiteUpdateDidShow()
                 }
+            }
 
     val showToast = SingleLiveEvent<ToastMessage>()
     val openUrl = SingleLiveEvent<OpenUrlAction>()
@@ -80,6 +86,7 @@ class ChromeViewModel(
     val doScreenshot = SingleLiveEvent<ScreenCaptureTelemetryData>()
     val pinShortcut = SingleLiveEvent<Unit>()
     val bookmarkAdded = SingleLiveEvent<String>()
+
     // TODO: separate to startRefresh / stopLoading
     val refreshOrStop = SingleLiveEvent<Unit>()
     val share = SingleLiveEvent<Unit>()
@@ -145,7 +152,8 @@ class ChromeViewModel(
         TelemetryWrapper.menuNightModeChangeTo(isEnabled)
     }
 
-    private fun isFirstTimeEnableNightMode(): Boolean = settings.nightModeBrightnessValue == BRIGHTNESS_OVERRIDE_NONE
+    private fun isFirstTimeEnableNightMode(): Boolean =
+        settings.nightModeBrightnessValue == BRIGHTNESS_OVERRIDE_NONE
 
     fun onRestoreTabCountStarted() {
         isTabRestoredComplete.value = false
@@ -261,7 +269,7 @@ class ChromeViewModel(
         val url = currentUrl.value
         if (!url.isNullOrEmpty()) {
             val title = currentTitle.value.takeUnless { it.isNullOrEmpty() }
-                    ?: UrlUtils.stripCommonSubdomains(UrlUtils.stripHttp(url))
+                ?: UrlUtils.stripCommonSubdomains(UrlUtils.stripHttp(url))
             bookmarkId = bookmarkRepo.addBookmark(title, url)
         }
 
@@ -271,14 +279,16 @@ class ChromeViewModel(
     fun onTurboModeToggled() {
         val toEnable = !settings.shouldUseTurboMode()
         settings.setTurboMode(toEnable)
-        showToast.value = ToastMessage(if (toEnable) R.string.message_enable_turbo_mode else R.string.message_disable_turbo_mode)
+        showToast.value =
+            ToastMessage(if (toEnable) R.string.message_enable_turbo_mode else R.string.message_disable_turbo_mode)
         TelemetryWrapper.menuTurboChangeTo(toEnable)
     }
 
     fun onBlockImageToggled() {
         val toEnable = !settings.shouldBlockImages()
         settings.setBlockImages(toEnable)
-        showToast.value = ToastMessage(if (toEnable) R.string.message_enable_block_image else R.string.message_disable_block_image)
+        showToast.value =
+            ToastMessage(if (toEnable) R.string.message_enable_block_image else R.string.message_disable_block_image)
         TelemetryWrapper.menuBlockImageChangeTo(toEnable)
     }
 
@@ -319,8 +329,13 @@ class ChromeViewModel(
         themeSettingMenuClicked.call()
     }
 
-    fun onEnqueueDownload(download: Download, refererUrl: String?, shouldShowInDownloadList: Boolean = true) = viewModelScope.launch {
-        downloadState.value = downloadsRepository.enqueue(download, refererUrl, shouldShowInDownloadList)
+    fun onEnqueueDownload(
+        download: Download,
+        refererUrl: String?,
+        shouldShowInDownloadList: Boolean = true
+    ) = viewModelScope.launch {
+        downloadState.value =
+            downloadsRepository.enqueue(download, refererUrl, shouldShowInDownloadList)
     }
 
     fun onRelocateFinished(rowId: Long) = viewModelScope.launch {
@@ -351,8 +366,8 @@ class ChromeViewModel(
 
     data class ScreenCaptureTelemetryData(val mode: String, val position: Int) : Parcelable {
         constructor(source: Parcel) : this(
-                source.readString()!!,
-                source.readInt()
+            source.readString()!!,
+            source.readInt()
         )
 
         override fun describeContents() = 0
@@ -364,10 +379,14 @@ class ChromeViewModel(
 
         companion object {
             @JvmField
-            val CREATOR: Parcelable.Creator<ScreenCaptureTelemetryData> = object : Parcelable.Creator<ScreenCaptureTelemetryData> {
-                override fun createFromParcel(source: Parcel): ScreenCaptureTelemetryData = ScreenCaptureTelemetryData(source)
-                override fun newArray(size: Int): Array<ScreenCaptureTelemetryData?> = arrayOfNulls(size)
-            }
+            val CREATOR: Parcelable.Creator<ScreenCaptureTelemetryData> =
+                object : Parcelable.Creator<ScreenCaptureTelemetryData> {
+                    override fun createFromParcel(source: Parcel): ScreenCaptureTelemetryData =
+                        ScreenCaptureTelemetryData(source)
+
+                    override fun newArray(size: Int): Array<ScreenCaptureTelemetryData?> =
+                        arrayOfNulls(size)
+                }
         }
     }
 }

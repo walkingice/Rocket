@@ -12,13 +12,13 @@ class UpdateShoppingSitesUseCase(private val repository: ShoppingSearchRepositor
 }
 
 private fun List<ShoppingSiteItem>.toShoppingSites(): List<ShoppingSite> =
-        map { it.toShoppingSite() }
+    map { it.toShoppingSite() }
 
 private fun ShoppingSiteItem.toShoppingSite(): ShoppingSite =
-        ShoppingSite(
-            title,
-            searchUrl,
-            displayUrl,
-            showPrompt,
-            isChecked
-        )
+    ShoppingSite(
+        title,
+        searchUrl,
+        displayUrl,
+        showPrompt,
+        isChecked
+    )

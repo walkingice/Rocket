@@ -4,12 +4,15 @@ import android.graphics.Color
 import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_shopping_search_preference.*
+import kotlinx.android.synthetic.main.item_shopping_search_preference.preference_site_name
+import kotlinx.android.synthetic.main.item_shopping_search_preference.preference_site_switch
+import kotlinx.android.synthetic.main.item_shopping_search_preference.preference_site_url
 import org.mozilla.rocket.adapter.AdapterDelegate
 import org.mozilla.rocket.adapter.DelegateAdapter
 import org.mozilla.rocket.shopping.search.ui.ShoppingSearchPreferencesViewModel
 
-class PreferencesAdapterDelegate(private val viewModel: ShoppingSearchPreferencesViewModel) : AdapterDelegate, ItemMoveCallback.ItemTouchHelperContract {
+class PreferencesAdapterDelegate(private val viewModel: ShoppingSearchPreferencesViewModel) :
+    AdapterDelegate, ItemMoveCallback.ItemTouchHelperContract {
 
     override fun onRowClear(viewHolder: SiteViewHolder) {
         viewModel.onEditModeEnd()
@@ -63,12 +66,17 @@ data class ShoppingSiteItem(
     var isEnabled: Boolean = true
 }
 
-class ItemMoveCallback(private val delegate: PreferencesAdapterDelegate) : ItemTouchHelper.Callback() {
+class ItemMoveCallback(private val delegate: PreferencesAdapterDelegate) :
+    ItemTouchHelper.Callback() {
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
     }
 
-    override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+    override fun onMove(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+    ): Boolean {
         return if (viewHolder is SiteViewHolder && target is SiteViewHolder) {
             delegate.onRowMoved(viewHolder, target)
             true
@@ -77,7 +85,10 @@ class ItemMoveCallback(private val delegate: PreferencesAdapterDelegate) : ItemT
         }
     }
 
-    override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+    override fun getMovementFlags(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder
+    ): Int {
         val dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
         return makeMovementFlags(dragFlags, 0)
     }

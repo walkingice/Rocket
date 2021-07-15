@@ -56,7 +56,8 @@ class HomeViewModel(
     val sitePages = MutableLiveData<List<SitePage>>()
     val topSitesPageIndex = MutableLiveData<Int>()
     val logoManNotification = MediatorLiveData<StateNotification?>()
-    val isShoppingSearchEnabled = MutableLiveData<Boolean>().apply { value = isHomeScreenShoppingButtonEnabledUseCase() }
+    val isShoppingSearchEnabled =
+        MutableLiveData<Boolean>().apply { value = isHomeScreenShoppingButtonEnabledUseCase() }
     val shouldShowNewMenuItemHint: LiveData<Boolean> = shouldShowNewMenuItemHintUseCase()
 
     val toggleBackgroundColor = SingleLiveEvent<Unit>()
@@ -101,11 +102,11 @@ class HomeViewModel(
     private fun initLogoManData() {
         logoManNotification.addSource(
             getLogoManNotificationUseCase().first()
-                    .map {
-                        logoManClickAction = it?.action
-                        logoManType = it?.type
-                        it?.run { StateNotification(it.toUiModel(), true) }
-                    }
+                .map {
+                    logoManClickAction = it?.action
+                    logoManType = it?.type
+                    it?.run { StateNotification(it.toUiModel(), true) }
+                }
         ) {
             logoManNotification.value = it
         }
@@ -145,8 +146,8 @@ class HomeViewModel(
     }
 
     private fun List<Site>.toSitePages(): List<SitePage> = chunked(TOP_SITES_PER_PAGE)
-            .take(TOP_SITES_MAX_PAGE_SIZE)
-            .map { SitePage(it) }
+        .take(TOP_SITES_MAX_PAGE_SIZE)
+        .map { SitePage(it) }
 
     private fun List<Site>.addDummyTopSites(): List<Site> {
         val siteListWithDummySite = this.toMutableList()
@@ -161,7 +162,11 @@ class HomeViewModel(
         val logoManNotification = logoManNotification.value
         if (!hasLoggedShowLogoman && logoManNotification != null) {
             hasLoggedShowLogoman = true
-            TelemetryWrapper.showLogoman(logoManType, logoManClickAction?.getLink(), logoManNotification.notification.id)
+            TelemetryWrapper.showLogoman(
+                logoManType,
+                logoManClickAction?.getLink(),
+                logoManNotification.notification.id
+            )
         }
         TelemetryWrapper.showHome()
         updateTopSitesData()
@@ -201,7 +206,10 @@ class HomeViewModel(
 
     fun onShoppingButtonClicked() {
         openShoppingSearch.call()
-        TelemetryWrapper.clickToolbarTabSwipe(TelemetryWrapper.Extra_Value.SHOPPING, TelemetryWrapper.Extra_Value.HOME)
+        TelemetryWrapper.clickToolbarTabSwipe(
+            TelemetryWrapper.Extra_Value.SHOPPING,
+            TelemetryWrapper.Extra_Value.HOME
+        )
     }
 
     fun onPrivateModeButtonClicked() {
@@ -235,17 +243,19 @@ class HomeViewModel(
     }
 
     override fun onTopSiteLongClicked(site: Site, position: Int): Boolean =
-            if (site is Site.UrlSite.RemovableSite || site is Site.DummySite) {
-                val pageIndex = requireNotNull(topSitesPageIndex.value)
-                val topSitePosition = position + pageIndex * TOP_SITES_PER_PAGE
-                when (site) {
-                    is Site.UrlSite.RemovableSite -> showTopSiteMenu.value = ShowTopSiteMenuData(site, topSitePosition)
-                    is Site.DummySite -> showAddTopSiteMenu.call()
-                }
-                true
-            } else {
-                false
+        if (site is Site.UrlSite.RemovableSite || site is Site.DummySite) {
+            val pageIndex = requireNotNull(topSitesPageIndex.value)
+            val topSitePosition = position + pageIndex * TOP_SITES_PER_PAGE
+            when (site) {
+                is Site.UrlSite.RemovableSite ->
+                    showTopSiteMenu.value =
+                        ShowTopSiteMenuData(site, topSitePosition)
+                is Site.DummySite -> showAddTopSiteMenu.call()
             }
+            true
+        } else {
+            false
+        }
 
     fun onPinTopSiteClicked(site: Site, position: Int) = viewModelScope.launch {
         when (site) {
@@ -342,7 +352,11 @@ class HomeViewModel(
         logoManNotification?.animate = false
         if (!hasLoggedShowLogoman) {
             hasLoggedShowLogoman = true
-            TelemetryWrapper.showLogoman(logoManType, logoManClickAction?.getLink(), logoManNotification?.notification?.id)
+            TelemetryWrapper.showLogoman(
+                logoManType,
+                logoManClickAction?.getLink(),
+                logoManNotification?.notification?.id
+            )
         }
     }
 
@@ -355,7 +369,11 @@ class HomeViewModel(
                 dismissLogoManNotificationUseCase(notification)
             }
         }
-        TelemetryWrapper.clickLogoman(logoManType, logoManClickAction?.getLink(), logoManNotification.value?.notification?.id)
+        TelemetryWrapper.clickLogoman(
+            logoManType,
+            logoManClickAction?.getLink(),
+            logoManNotification.value?.notification?.id
+        )
     }
 
     private fun executeLogomanAction(logomanAction: GetLogoManNotificationUseCase.LogoManAction) {
@@ -401,5 +419,10 @@ class HomeViewModel(
 }
 
 private fun GetLogoManNotificationUseCase.Notification.toUiModel() = when (this) {
-    is GetLogoManNotificationUseCase.Notification.RemoteNotification -> Notification.RemoteNotification(id, title, subtitle, imageUrl)
+    is GetLogoManNotificationUseCase.Notification.RemoteNotification -> Notification.RemoteNotification(
+        id,
+        title,
+        subtitle,
+        imageUrl
+    )
 }

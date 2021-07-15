@@ -1,5 +1,6 @@
 package org.mozilla.focus.autobot
 
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -8,7 +9,6 @@ import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
-import androidx.recyclerview.widget.RecyclerView
 import org.mozilla.focus.R
 import org.mozilla.focus.utils.RecyclerViewTestUtils.clickChildViewWithId
 
@@ -18,19 +18,20 @@ class HistoryRobot(menuAutomation: MenuAutomation = MenuRobot()) : MenuAutomatio
 
     fun clickListItemActionMenu(position: Int) {
         onView(withId(R.id.browsing_history_recycler_view)).perform(
-                RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(position, clickChildViewWithId(R.id.history_item_btn_more)))
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(position, clickChildViewWithId(R.id.history_item_btn_more))
+        )
     }
 
     fun checkItemMenuDeleteIsDisplayed() {
         onView(withText(R.string.browsing_history_menu_delete))
-                .inRoot(RootMatchers.isPlatformPopup())
-                .check(matches(isDisplayed()))
+            .inRoot(RootMatchers.isPlatformPopup())
+            .check(matches(isDisplayed()))
     }
 
     fun clickItemMenuDelete() {
         onView(withText(R.string.browsing_history_menu_delete))
-                .inRoot(RootMatchers.isPlatformPopup())
-                .perform(click())
+            .inRoot(RootMatchers.isPlatformPopup())
+            .perform(click())
     }
 
     fun clickClearBrowsingHistory() {

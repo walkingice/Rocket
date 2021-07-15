@@ -8,5 +8,5 @@ import org.mozilla.rocket.extension.map
 class ShouldShowNewMenuItemHintUseCase(private val menuRepo: MenuRepo) {
 
     operator fun invoke(): LiveData<Boolean> = menuRepo.getReadMenuItemVersionLiveData()
-            .map { it < MENU_ITEM_VERSION }
+        .map { it < MENU_ITEM_VERSION }
 }

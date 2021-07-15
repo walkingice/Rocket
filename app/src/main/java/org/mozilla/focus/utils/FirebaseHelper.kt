@@ -189,12 +189,15 @@ object FirebaseHelper {
         }
         firebaseContract.setDeveloperModeEnabled(AppConstants.isFirebaseBuild())
         firebaseContract.init(applicationContext)
-        firebaseContract.enableRemoteConfig(applicationContext, object : FirebaseContract.Callback {
-            override fun onRemoteConfigFetched() {
-                LocalBroadcastManager.getInstance(applicationContext)
-                    .sendBroadcast(Intent(FIREBASE_READY))
+        firebaseContract.enableRemoteConfig(
+            applicationContext,
+            object : FirebaseContract.Callback {
+                override fun onRemoteConfigFetched() {
+                    LocalBroadcastManager.getInstance(applicationContext)
+                        .sendBroadcast(Intent(FIREBASE_READY))
+                }
             }
-        })
+        )
     }
 
     private fun getStringResourceByName(context: Context, resourceName: String): String {

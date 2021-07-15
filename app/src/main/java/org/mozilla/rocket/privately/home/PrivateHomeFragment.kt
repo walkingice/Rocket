@@ -36,8 +36,9 @@ import org.mozilla.rocket.widget.CustomViewDialogData
 import org.mozilla.rocket.widget.PromotionDialog
 import javax.inject.Inject
 
-class PrivateHomeFragment : LocaleAwareFragment(),
-        ScreenNavigator.HomeScreen {
+class PrivateHomeFragment :
+    LocaleAwareFragment(),
+    ScreenNavigator.HomeScreen {
 
     @Inject
     lateinit var chromeViewModelCreator: Lazy<ChromeViewModel>
@@ -56,7 +57,7 @@ class PrivateHomeFragment : LocaleAwareFragment(),
 
     @Override
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, state: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_private_homescreen, container, false)
+        inflater.inflate(R.layout.fragment_private_homescreen, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -65,9 +66,12 @@ class PrivateHomeFragment : LocaleAwareFragment(),
         initDescription()
 
         fakeInput.setOnClickListener { chromeViewModel.showUrlInput.call() }
-        chromeViewModel.isHomePageUrlInputShowing.observe(viewLifecycleOwner, Observer { isShowing ->
-            if (isShowing == true) hideFakeInput() else showFakeInput()
-        })
+        chromeViewModel.isHomePageUrlInputShowing.observe(
+            viewLifecycleOwner,
+            Observer { isShowing ->
+                if (isShowing == true) hideFakeInput() else showFakeInput()
+            }
+        )
         privateModeBtn = view.findViewById(R.id.pm_home_private_mode_btn)
         privateModeBtn.setOnClickListener {
             chromeViewModel.togglePrivateMode.call()
@@ -100,37 +104,46 @@ class PrivateHomeFragment : LocaleAwareFragment(),
     }
 
     private fun monitorShortcutPromotion(context: Context, model: ShortcutViewModel) {
-        model.eventPromoteShortcut.observe(viewLifecycleOwner, Observer { callback ->
-            val data = CustomViewDialogData().apply {
-                this.drawable = VectorDrawableCompat.create(resources, R.drawable.dialog_pbshortcut, null)
-                this.title = context.getString(R.string.private_browsing_dialog_add_shortcut_title_v2)
-                this.description = context.getString(R.string.private_browsing_dialog_add_shortcut_content_v2)
-                this.positiveText = context.getString(R.string.private_browsing_dialog_add_shortcut_yes_v2)
-                this.negativeText = context.getString(R.string.private_browsing_dialog_add_shortcut_no_v2)
-                this.showCloseButton = true
-            }
+        model.eventPromoteShortcut.observe(
+            viewLifecycleOwner,
+            Observer { callback ->
+                val data = CustomViewDialogData().apply {
+                    this.drawable = VectorDrawableCompat.create(resources, R.drawable.dialog_pbshortcut, null)
+                    this.title = context.getString(R.string.private_browsing_dialog_add_shortcut_title_v2)
+                    this.description = context.getString(R.string.private_browsing_dialog_add_shortcut_content_v2)
+                    this.positiveText = context.getString(R.string.private_browsing_dialog_add_shortcut_yes_v2)
+                    this.negativeText = context.getString(R.string.private_browsing_dialog_add_shortcut_no_v2)
+                    this.showCloseButton = true
+                }
 
-            PromotionDialog(context, data)
+                PromotionDialog(context, data)
                     .onPositive { callback?.onPositive() }
                     .onNegative { callback?.onNegative() }
                     .onClose { callback?.onNegative() }
                     .onCancel { callback?.onCancel() }
                     .setCancellable(false)
                     .show()
-        })
+            }
+        )
     }
 
     private fun monitorShortcutMessage(context: Context, model: ShortcutViewModel) {
-        model.eventShowMessage.observe(viewLifecycleOwner, Observer {
-            val msgId = it ?: return@Observer
-            Toast.makeText(context, msgId, Toast.LENGTH_SHORT).show()
-        })
+        model.eventShowMessage.observe(
+            viewLifecycleOwner,
+            Observer {
+                val msgId = it ?: return@Observer
+                Toast.makeText(context, msgId, Toast.LENGTH_SHORT).show()
+            }
+        )
     }
 
     private fun monitorShortcutCreation(context: Context, model: ShortcutViewModel) {
-        model.eventCreateShortcut.observe(viewLifecycleOwner, Observer {
-            ShortcutUtils.createShortcut(context)
-        })
+        model.eventCreateShortcut.observe(
+            viewLifecycleOwner,
+            Observer {
+                ShortcutUtils.createShortcut(context)
+            }
+        )
     }
 
     override fun applyLocale() {

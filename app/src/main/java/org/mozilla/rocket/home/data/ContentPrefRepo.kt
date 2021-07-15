@@ -10,14 +10,17 @@ import org.mozilla.strictmodeviolator.StrictModeViolation
 
 class ContentPrefRepo(private val appContext: Context) {
 
-    private val preference = StrictModeViolation.tempGrant({ builder ->
-        builder.permitDiskReads()
-    }, {
-        appContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    })
+    private val preference = StrictModeViolation.tempGrant(
+        { builder ->
+            builder.permitDiskReads()
+        },
+        {
+            appContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        }
+    )
 
     fun getContentPref(): ContentPref =
-            preference.getInt(SHARED_PREF_KEY_CONTENT_PREF, Browsing.id).toContentPref()
+        preference.getInt(SHARED_PREF_KEY_CONTENT_PREF, Browsing.id).toContentPref()
 
     fun setContentPref(contentPref: ContentPref) {
         preference.edit().putInt(SHARED_PREF_KEY_CONTENT_PREF, contentPref.id).apply()

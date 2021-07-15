@@ -33,27 +33,27 @@ class SpotlightDialog private constructor(
         }
 
         return AlertDialog.Builder(activity, R.style.TabTrayTheme)
-                .setView(focusView)
-                .create()
-                .apply {
-                    setOnDismissListener(dismissListener)
-                    setOnCancelListener(cancelListener)
-                }
-                .also { dialog ->
-                    if (cancelOnTouchOutside) {
-                        focusView.setOnClickListener { dialog.dismiss() }
-                        focusView.findViewById<View>(R.id.spotlight_placeholder).apply {
-                            setOnClickListener {
-                                dialog.dismiss()
-                                targetView.performClick()
-                            }
-                            setOnLongClickListener {
-                                dialog.dismiss()
-                                targetView.performLongClick()
-                            }
+            .setView(focusView)
+            .create()
+            .apply {
+                setOnDismissListener(dismissListener)
+                setOnCancelListener(cancelListener)
+            }
+            .also { dialog ->
+                if (cancelOnTouchOutside) {
+                    focusView.setOnClickListener { dialog.dismiss() }
+                    focusView.findViewById<View>(R.id.spotlight_placeholder).apply {
+                        setOnClickListener {
+                            dialog.dismiss()
+                            targetView.performClick()
+                        }
+                        setOnLongClickListener {
+                            dialog.dismiss()
+                            targetView.performLongClick()
                         }
                     }
                 }
+            }
     }
 
     private fun getFocusView(activity: Activity, targetView: View, spotlightConfigs: SpotlightConfigs): View {

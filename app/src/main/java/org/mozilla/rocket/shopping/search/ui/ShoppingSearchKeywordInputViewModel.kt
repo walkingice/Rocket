@@ -37,8 +37,8 @@ class ShoppingSearchKeywordInputViewModel(
 
     fun onStart(searchTerm: String) {
         currentUiModel = currentUiModel.copy(
-                description = getSearchDescription(),
-                logoManUrl = getSearchLogoManImageUrl()
+            description = getSearchDescription(),
+            logoManUrl = getSearchLogoManImageUrl()
         )
         emitUiModel()
         onTypingKeyword(searchTerm)
@@ -61,8 +61,8 @@ class ShoppingSearchKeywordInputViewModel(
                 styledSuggestions = applyStyle(keyword, fetchKeywordSuggestionResult.data)
             }
             currentUiModel = currentUiModel.copy(
-                    keywordSuggestions = styledSuggestions,
-                    hideClear = TextUtils.isEmpty(keyword)
+                keywordSuggestions = styledSuggestions,
+                hideClear = TextUtils.isEmpty(keyword)
             )
 
             withContext(Dispatchers.Main) {
@@ -89,7 +89,11 @@ class ShoppingSearchKeywordInputViewModel(
         } else {
             "null"
         }
-        TelemetryWrapper.useSearchSuggestionInTabSwipeSearchBar(TelemetryWrapper.Extra_Value.SHOPPING, isTrendingTerms, trendingTerms)
+        TelemetryWrapper.useSearchSuggestionInTabSwipeSearchBar(
+            TelemetryWrapper.Extra_Value.SHOPPING,
+            isTrendingTerms,
+            trendingTerms
+        )
     }
 
     private fun applyStyle(keyword: String, keywordSuggestions: List<String>): List<CharSequence> {
@@ -97,10 +101,12 @@ class ShoppingSearchKeywordInputViewModel(
             val idx = suggestion.toLowerCase(Locale.getDefault()).indexOf(keyword)
             if (idx != -1) {
                 SpannableStringBuilder(suggestion).apply {
-                    setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
+                    setSpan(
+                        android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
                         idx,
                         idx + keyword.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
                 }
             } else {
                 suggestion

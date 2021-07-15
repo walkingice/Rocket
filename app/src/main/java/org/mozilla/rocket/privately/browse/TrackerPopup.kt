@@ -8,24 +8,24 @@ package org.mozilla.rocket.privately.browse
 import android.app.Activity
 import android.content.Context
 import android.graphics.Rect
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import kotlinx.android.synthetic.main.view_tracker_popup.view.*
 import org.mozilla.focus.R
 
 class TrackerPopup(context: Context) : PopupWindow(
-        View.inflate(
-                context,
-                R.layout.view_tracker_popup,
-                null
-        ),
-        ViewGroup.LayoutParams.MATCH_PARENT,
-        ViewGroup.LayoutParams.WRAP_CONTENT,
-        true
+    View.inflate(
+        context,
+        R.layout.view_tracker_popup,
+        null
+    ),
+    ViewGroup.LayoutParams.MATCH_PARENT,
+    ViewGroup.LayoutParams.WRAP_CONTENT,
+    true
 ) {
 
     companion object {
@@ -61,12 +61,12 @@ class TrackerPopup(context: Context) : PopupWindow(
 
         val switchView = contentView.tracker_switch
         DrawableCompat.setTintList(
-                switchView.thumbDrawable,
-                ContextCompat.getColorStateList(context, R.color.switch_thumb_dark)
+            switchView.thumbDrawable,
+            ContextCompat.getColorStateList(context, R.color.switch_thumb_dark)
         )
         DrawableCompat.setTintList(
-                switchView.trackDrawable,
-                ContextCompat.getColorStateList(context, R.color.switch_track_dark)
+            switchView.trackDrawable,
+            ContextCompat.getColorStateList(context, R.color.switch_track_dark)
         )
 
         val counterBkg = DrawableCompat.wrap(view.tracker_count_container.background).mutate()
@@ -92,8 +92,10 @@ class TrackerPopup(context: Context) : PopupWindow(
 
     fun show(parentView: View) {
         val res = parentView.resources
-        val margin: Int = (res.getDimension(R.dimen.fixed_menu_height) +
-                res.getDimension(R.dimen.browser_tracker_popup_bottom_margin)).toInt()
+        val margin: Int = (
+            res.getDimension(R.dimen.fixed_menu_height) +
+                res.getDimension(R.dimen.browser_tracker_popup_bottom_margin)
+            ).toInt()
 
         this.width = (parentView.measuredWidth * WIDTH_TO_PARENT_WIDTH).toInt()
 

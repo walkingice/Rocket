@@ -79,8 +79,8 @@ open class FocusApplication : LocaleAwareApplication(), LifecycleObserver {
             synchronized(this@FocusApplication) {
                 if (appComponent == null) {
                     appComponent = DaggerAppComponent.builder()
-                            .appModule(AppModule(this))
-                            .build()
+                        .appModule(AppModule(this))
+                        .build()
                 }
             }
         }

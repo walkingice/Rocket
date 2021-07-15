@@ -78,12 +78,16 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
 
     @Inject
     lateinit var homeViewModelCreator: Lazy<HomeViewModel>
+
     @Inject
     lateinit var chromeViewModelCreator: Lazy<ChromeViewModel>
+
     @Inject
     lateinit var downloadIndicatorViewModelCreator: Lazy<DownloadIndicatorViewModel>
+
     @Inject
     lateinit var defaultBrowserPreferenceViewModelCreator: Lazy<DefaultBrowserPreferenceViewModel>
+
     @Inject
     lateinit var appContext: Context
 
@@ -110,7 +114,8 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         homeViewModel = getActivityViewModel(homeViewModelCreator)
         chromeViewModel = getActivityViewModel(chromeViewModelCreator)
         downloadIndicatorViewModel = getActivityViewModel(downloadIndicatorViewModelCreator)
-        defaultBrowserPreferenceViewModel = getActivityViewModel(defaultBrowserPreferenceViewModelCreator)
+        defaultBrowserPreferenceViewModel =
+            getActivityViewModel(defaultBrowserPreferenceViewModelCreator)
     }
 
     override fun onCreateView(
@@ -167,80 +172,124 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
             chromeViewModel.showTabTray.call()
             TelemetryWrapper.showTabTrayHome()
         }
-        chromeViewModel.tabCount.observe(viewLifecycleOwner, Observer {
-            setTabCount(it ?: 0)
-        })
-        homeViewModel.isShoppingSearchEnabled.observe(viewLifecycleOwner, Observer { isEnabled ->
-            shopping_button.isVisible = isEnabled
-            private_mode_button.isVisible = !isEnabled
-        })
+        chromeViewModel.tabCount.observe(
+            viewLifecycleOwner,
+            Observer {
+                setTabCount(it ?: 0)
+            }
+        )
+        homeViewModel.isShoppingSearchEnabled.observe(
+            viewLifecycleOwner,
+            Observer { isEnabled ->
+                shopping_button.isVisible = isEnabled
+                private_mode_button.isVisible = !isEnabled
+            }
+        )
         shopping_button.setOnClickListener { homeViewModel.onShoppingButtonClicked() }
-        homeViewModel.openShoppingSearch.observe(viewLifecycleOwner, Observer {
-            showShoppingSearch()
-        })
-        chromeViewModel.isPrivateBrowsingActive.observe(viewLifecycleOwner, Observer {
-            private_mode_button.isActivated = it
-        })
+        homeViewModel.openShoppingSearch.observe(
+            viewLifecycleOwner,
+            Observer {
+                showShoppingSearch()
+            }
+        )
+        chromeViewModel.isPrivateBrowsingActive.observe(
+            viewLifecycleOwner,
+            Observer {
+                private_mode_button.isActivated = it
+            }
+        )
         private_mode_button.setOnClickListener { homeViewModel.onPrivateModeButtonClicked() }
-        homeViewModel.openPrivateMode.observe(viewLifecycleOwner, Observer {
-            chromeViewModel.togglePrivateMode.call()
-        })
+        homeViewModel.openPrivateMode.observe(
+            viewLifecycleOwner,
+            Observer {
+                chromeViewModel.togglePrivateMode.call()
+            }
+        )
         homeViewModel.shouldShowNewMenuItemHint.switchMap {
             if (it) {
                 MutableLiveData<DownloadIndicatorViewModel.Status>().apply { DownloadIndicatorViewModel.Status.DEFAULT }
             } else {
                 downloadIndicatorViewModel.downloadIndicatorObservable
             }
-        }.observe(viewLifecycleOwner, Observer {
-            home_fragment_menu_button.apply {
-                when (it) {
-                    DownloadIndicatorViewModel.Status.DOWNLOADING -> setDownloadState(DOWNLOAD_STATE_DOWNLOADING)
-                    DownloadIndicatorViewModel.Status.UNREAD -> setDownloadState(DOWNLOAD_STATE_UNREAD)
-                    DownloadIndicatorViewModel.Status.WARNING -> setDownloadState(DOWNLOAD_STATE_WARNING)
-                    else -> setDownloadState(DOWNLOAD_STATE_DEFAULT)
+        }.observe(
+            viewLifecycleOwner,
+            Observer {
+                home_fragment_menu_button.apply {
+                    when (it) {
+                        DownloadIndicatorViewModel.Status.DOWNLOADING -> setDownloadState(
+                            DOWNLOAD_STATE_DOWNLOADING
+                        )
+                        DownloadIndicatorViewModel.Status.UNREAD -> setDownloadState(
+                            DOWNLOAD_STATE_UNREAD
+                        )
+                        DownloadIndicatorViewModel.Status.WARNING -> setDownloadState(
+                            DOWNLOAD_STATE_WARNING
+                        )
+                        else -> setDownloadState(DOWNLOAD_STATE_DEFAULT)
+                    }
                 }
             }
-        })
-        homeViewModel.shouldShowNewMenuItemHint.observe(viewLifecycleOwner, Observer {
-            menu_red_dot.isVisible = it
-        })
+        )
+        homeViewModel.shouldShowNewMenuItemHint.observe(
+            viewLifecycleOwner,
+            Observer {
+                menu_red_dot.isVisible = it
+            }
+        )
     }
 
     private fun initBackgroundView() {
         themeManager.subscribeThemeChange(home_background)
-        val backgroundGestureDetector = GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
-            override fun onDown(e: MotionEvent?): Boolean {
-                return true
-            }
+        val backgroundGestureDetector =
+            GestureDetector(
+                requireContext(),
+                object : GestureDetector.SimpleOnGestureListener() {
+                    override fun onDown(e: MotionEvent?): Boolean {
+                        return true
+                    }
 
-            override fun onDoubleTap(e: MotionEvent?): Boolean {
-                return homeViewModel.onBackgroundViewDoubleTap()
-            }
+                    override fun onDoubleTap(e: MotionEvent?): Boolean {
+                        return homeViewModel.onBackgroundViewDoubleTap()
+                    }
 
-            override fun onLongPress(e: MotionEvent?) {
-                homeViewModel.onBackgroundViewLongPress()
-            }
-        })
+                    override fun onLongPress(e: MotionEvent?) {
+                        homeViewModel.onBackgroundViewLongPress()
+                    }
+                }
+            )
         home_background.setOnTouchListener { _, event ->
             backgroundGestureDetector.onTouchEvent(event)
         }
-        homeViewModel.toggleBackgroundColor.observe(viewLifecycleOwner, Observer {
-            val themeSet = themeManager.toggleNextTheme()
-            TelemetryWrapper.changeThemeTo(themeSet.name)
-        })
-        homeViewModel.resetBackgroundColor.observe(viewLifecycleOwner, Observer {
-            themeManager.resetDefaultTheme()
-            TelemetryWrapper.resetThemeToDefault()
-        })
-        homeViewModel.homeBackgroundColorThemeClicked.observe(viewLifecycleOwner, Observer { themeSet ->
-            themeManager.setCurrentTheme(themeSet)
-        })
+        homeViewModel.toggleBackgroundColor.observe(
+            viewLifecycleOwner,
+            Observer {
+                val themeSet = themeManager.toggleNextTheme()
+                TelemetryWrapper.changeThemeTo(themeSet.name)
+            }
+        )
+        homeViewModel.resetBackgroundColor.observe(
+            viewLifecycleOwner,
+            Observer {
+                themeManager.resetDefaultTheme()
+                TelemetryWrapper.resetThemeToDefault()
+            }
+        )
+        homeViewModel.homeBackgroundColorThemeClicked.observe(
+            viewLifecycleOwner,
+            Observer { themeSet ->
+                themeManager.setCurrentTheme(themeSet)
+            }
+        )
     }
 
     private fun initTopSites() {
         topSitesAdapter = DelegateAdapter(
             AdapterDelegatesManager().apply {
-                add(SitePage::class, R.layout.item_top_site_page, SitePageAdapterDelegate(homeViewModel, chromeViewModel))
+                add(
+                    SitePage::class,
+                    R.layout.item_top_site_page,
+                    SitePageAdapterDelegate(homeViewModel, chromeViewModel)
+                )
             }
         )
         main_list.apply {
@@ -249,52 +298,75 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         }
         var savedTopSitesPagePosition = homeViewModel.topSitesPageIndex.value
         homeViewModel.run {
-            sitePages.observe(viewLifecycleOwner, Observer {
-                page_indicator.setSize(it.size)
-                topSitesAdapter.setData(it)
-                savedTopSitesPagePosition?.let { savedPosition ->
-                    savedTopSitesPagePosition = null
-                    main_list.setCurrentItem(savedPosition, false)
+            sitePages.observe(
+                viewLifecycleOwner,
+                Observer {
+                    page_indicator.setSize(it.size)
+                    topSitesAdapter.setData(it)
+                    savedTopSitesPagePosition?.let { savedPosition ->
+                        savedTopSitesPagePosition = null
+                        main_list.setCurrentItem(savedPosition, false)
+                    }
                 }
-            })
-            topSitesPageIndex.observe(viewLifecycleOwner, Observer {
-                page_indicator.setSelection(it)
-            })
-            openBrowser.observe(viewLifecycleOwner, Observer { url ->
-                ScreenNavigator.get(context).showBrowserScreen(url, true, false)
-            })
-            showTopSiteMenu.observe(viewLifecycleOwner, Observer { (site, position) ->
-                site as Site.UrlSite.RemovableSite
-                val anchorView = main_list.findViewWithTag<View>(TOP_SITE_LONG_CLICK_TARGET).apply { tag = null }
-                val allowToPin = !site.isPinned
-                showTopSiteMenu(anchorView, allowToPin, site, position)
-            })
-            showAddTopSiteMenu.observe(viewLifecycleOwner, Observer {
-                val anchorView = main_list.findViewWithTag<View>(TOP_SITE_LONG_CLICK_TARGET).apply { tag = null }
-                showAddTopSiteMenu(anchorView)
-            })
+            )
+            topSitesPageIndex.observe(
+                viewLifecycleOwner,
+                Observer {
+                    page_indicator.setSelection(it)
+                }
+            )
+            openBrowser.observe(
+                viewLifecycleOwner,
+                Observer { url ->
+                    ScreenNavigator.get(context).showBrowserScreen(url, true, false)
+                }
+            )
+            showTopSiteMenu.observe(
+                viewLifecycleOwner,
+                Observer { (site, position) ->
+                    site as Site.UrlSite.RemovableSite
+                    val anchorView =
+                        main_list.findViewWithTag<View>(TOP_SITE_LONG_CLICK_TARGET).apply { tag = null }
+                    val allowToPin = !site.isPinned
+                    showTopSiteMenu(anchorView, allowToPin, site, position)
+                }
+            )
+            showAddTopSiteMenu.observe(
+                viewLifecycleOwner,
+                Observer {
+                    val anchorView =
+                        main_list.findViewWithTag<View>(TOP_SITE_LONG_CLICK_TARGET).apply { tag = null }
+                    showAddTopSiteMenu(anchorView)
+                }
+            )
         }
-        chromeViewModel.clearBrowsingHistory.observe(viewLifecycleOwner, Observer {
-            homeViewModel.onClearBrowsingHistory()
-        })
+        chromeViewModel.clearBrowsingHistory.observe(
+            viewLifecycleOwner,
+            Observer {
+                homeViewModel.onClearBrowsingHistory()
+            }
+        )
     }
 
     private fun observeDarkTheme() {
-        chromeViewModel.isDarkTheme.observe(viewLifecycleOwner, Observer { darkThemeEnable ->
-            ViewUtils.updateStatusBarStyle(!darkThemeEnable, requireActivity().window)
-            topSitesAdapter.notifyDataSetChanged()
-            home_background.setDarkTheme(darkThemeEnable)
-            arc_view.setDarkTheme(darkThemeEnable)
-            arc_panel.setDarkTheme(darkThemeEnable)
-            search_panel.setDarkTheme(darkThemeEnable)
-            home_fragment_fake_input.setDarkTheme(darkThemeEnable)
-            home_fragment_fake_input_icon.setDarkTheme(darkThemeEnable)
-            home_fragment_fake_input_text.setDarkTheme(darkThemeEnable)
-            home_fragment_tab_counter.setDarkTheme(darkThemeEnable)
-            home_fragment_menu_button.setDarkTheme(darkThemeEnable)
-            shopping_button.setDarkTheme(darkThemeEnable)
-            private_mode_button.setDarkTheme(darkThemeEnable)
-        })
+        chromeViewModel.isDarkTheme.observe(
+            viewLifecycleOwner,
+            Observer { darkThemeEnable ->
+                ViewUtils.updateStatusBarStyle(!darkThemeEnable, requireActivity().window)
+                topSitesAdapter.notifyDataSetChanged()
+                home_background.setDarkTheme(darkThemeEnable)
+                arc_view.setDarkTheme(darkThemeEnable)
+                arc_panel.setDarkTheme(darkThemeEnable)
+                search_panel.setDarkTheme(darkThemeEnable)
+                home_fragment_fake_input.setDarkTheme(darkThemeEnable)
+                home_fragment_fake_input_icon.setDarkTheme(darkThemeEnable)
+                home_fragment_fake_input_text.setDarkTheme(darkThemeEnable)
+                home_fragment_tab_counter.setDarkTheme(darkThemeEnable)
+                home_fragment_menu_button.setDarkTheme(darkThemeEnable)
+                shopping_button.setDarkTheme(darkThemeEnable)
+                private_mode_button.setDarkTheme(darkThemeEnable)
+            }
+        )
     }
 
     override fun onStart() {
@@ -344,37 +416,37 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
 
     private fun showTopSiteMenu(anchorView: View, pinEnabled: Boolean, site: Site, position: Int) {
         PopupMenu(anchorView.context, anchorView, Gravity.CLIP_HORIZONTAL)
-                .apply {
-                    menuInflater.inflate(R.menu.menu_top_site_item, menu)
-                    menu.findItem(R.id.pin)?.apply {
-                        isVisible = pinEnabled
-                    }
-                    setOnMenuItemClickListener { item ->
-                        when (item.itemId) {
-                            R.id.pin -> homeViewModel.onPinTopSiteClicked(site, position)
-                            R.id.remove -> homeViewModel.onRemoveTopSiteClicked(site, position)
-                            else -> throw IllegalStateException("Unhandled menu item")
-                        }
-
-                        true
-                    }
+            .apply {
+                menuInflater.inflate(R.menu.menu_top_site_item, menu)
+                menu.findItem(R.id.pin)?.apply {
+                    isVisible = pinEnabled
                 }
-                .show()
+                setOnMenuItemClickListener { item ->
+                    when (item.itemId) {
+                        R.id.pin -> homeViewModel.onPinTopSiteClicked(site, position)
+                        R.id.remove -> homeViewModel.onRemoveTopSiteClicked(site, position)
+                        else -> throw IllegalStateException("Unhandled menu item")
+                    }
+
+                    true
+                }
+            }
+            .show()
     }
 
     private fun showAddTopSiteMenu(anchorView: View) {
         PopupMenu(anchorView.context, anchorView, Gravity.CLIP_HORIZONTAL)
-                .apply {
-                    menuInflater.inflate(R.menu.menu_add_top_site_item, menu)
-                    setOnMenuItemClickListener { item ->
-                        when (item.itemId) {
-                            R.id.add_top_sites -> homeViewModel.onAddTopSiteContextMenuClicked()
-                            else -> throw IllegalStateException("Unhandled menu item")
-                        }
-                        true
+            .apply {
+                menuInflater.inflate(R.menu.menu_add_top_site_item, menu)
+                setOnMenuItemClickListener { item ->
+                    when (item.itemId) {
+                        R.id.add_top_sites -> homeViewModel.onAddTopSiteContextMenuClicked()
+                        else -> throw IllegalStateException("Unhandled menu item")
                     }
+                    true
                 }
-                .show()
+            }
+            .show()
     }
 
     private fun setTabCount(count: Int, animationEnabled: Boolean = false) {
@@ -401,31 +473,44 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
 
     private fun showAddNewTopSitesPage() {
         activity?.let {
-            it.startActivityForResult(AddNewTopSitesActivity.getStartIntent(it), AddNewTopSitesActivity.REQUEST_CODE_ADD_NEW_TOP_SITES)
+            it.startActivityForResult(
+                AddNewTopSitesActivity.getStartIntent(it),
+                AddNewTopSitesActivity.REQUEST_CODE_ADD_NEW_TOP_SITES
+            )
         }
     }
 
     private fun initLogoManNotification() {
-        homeViewModel.logoManNotification.observe(viewLifecycleOwner, Observer {
-            it?.let { (notification, animate) ->
-                showLogoManNotification(notification, animate)
+        homeViewModel.logoManNotification.observe(
+            viewLifecycleOwner,
+            Observer {
+                it?.let { (notification, animate) ->
+                    showLogoManNotification(notification, animate)
+                }
             }
-        })
-        homeViewModel.hideLogoManNotification.observe(viewLifecycleOwner, Observer {
-            hideLogoManNotification()
-        })
-        logo_man_notification.setNotificationActionListener(object : LogoManNotification.NotificationActionListener {
-            override fun onNotificationClick() {
-                homeViewModel.onLogoManNotificationClicked()
+        )
+        homeViewModel.hideLogoManNotification.observe(
+            viewLifecycleOwner,
+            Observer {
+                hideLogoManNotification()
             }
+        )
+        logo_man_notification.setNotificationActionListener(object :
+                LogoManNotification.NotificationActionListener {
+                override fun onNotificationClick() {
+                    homeViewModel.onLogoManNotificationClicked()
+                }
 
-            override fun onNotificationDismiss() {
-                homeViewModel.onLogoManDismissed()
-            }
-        })
+                override fun onNotificationDismiss() {
+                    homeViewModel.onLogoManDismissed()
+                }
+            })
     }
 
-    private fun showLogoManNotification(notification: LogoManNotification.Notification, animate: Boolean) {
+    private fun showLogoManNotification(
+        notification: LogoManNotification.Notification,
+        animate: Boolean
+    ) {
         logo_man_notification.showNotification(notification, animate)
         homeViewModel.onLogoManShown()
     }
@@ -443,7 +528,11 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         shopping_button.post {
             if (isAdded) {
                 setOnboardingStatusBarColor()
-                DialogUtils.showShoppingSearchSpotlight(requireActivity(), shopping_button, dismissListener)
+                DialogUtils.showShoppingSearchSpotlight(
+                    requireActivity(),
+                    shopping_button,
+                    dismissListener
+                )
             }
         }
     }
@@ -459,58 +548,121 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
     }
 
     private fun initOnboardingSpotlight() {
-        homeViewModel.showShoppingSearchOnboardingSpotlight.observe(viewLifecycleOwner, Observer {
-            currentShoppingBtnVisibleState = shopping_button.isVisible
-            shopping_button.isVisible = true
-            private_mode_button.isVisible = false
-            showShoppingSearchSpotlight()
-        })
+        homeViewModel.showShoppingSearchOnboardingSpotlight.observe(
+            viewLifecycleOwner,
+            Observer {
+                currentShoppingBtnVisibleState = shopping_button.isVisible
+                shopping_button.isVisible = true
+                private_mode_button.isVisible = false
+                showShoppingSearchSpotlight()
+            }
+        )
     }
 
     private fun observeAddNewTopSites() {
-        homeViewModel.openAddNewTopSitesPage.observe(viewLifecycleOwner, Observer {
-            showAddNewTopSitesPage()
-        })
-        homeViewModel.addNewTopSiteFullyPinned.observe(viewLifecycleOwner, Observer {
-            context?.let {
-                Toast.makeText(it, R.string.add_top_site_toast, Toast.LENGTH_LONG).show()
+        homeViewModel.openAddNewTopSitesPage.observe(
+            viewLifecycleOwner,
+            Observer {
+                showAddNewTopSitesPage()
             }
-        })
-        chromeViewModel.addNewTopSiteMenuClicked.observe(viewLifecycleOwner, Observer {
-            homeViewModel.onAddTopSiteMenuClicked()
-        })
-        homeViewModel.addNewTopSiteSuccess.observe(viewLifecycleOwner, Observer { page ->
-            page?.let {
-                scrollToTopSitePage(it)
+        )
+        homeViewModel.addNewTopSiteFullyPinned.observe(
+            viewLifecycleOwner,
+            Observer {
+                context?.let {
+                    Toast.makeText(it, R.string.add_top_site_toast, Toast.LENGTH_LONG).show()
+                }
             }
-            Snackbar.make(main_list, getText(R.string.add_top_site_snackbar_1), Snackbar.LENGTH_LONG)
-                .setAction(R.string.add_top_site_button) { homeViewModel.onAddMoreTopSiteSnackBarClicked() }
-                .show()
-        })
-        homeViewModel.addExistingTopSite.observe(viewLifecycleOwner, Observer { page ->
-            page?.let {
-                scrollToTopSitePage(it)
+        )
+        chromeViewModel.addNewTopSiteMenuClicked.observe(
+            viewLifecycleOwner,
+            Observer {
+                homeViewModel.onAddTopSiteMenuClicked()
             }
-            Snackbar.make(main_list, getText(R.string.add_top_site_snackbar_2), Snackbar.LENGTH_LONG)
-                .setAction(R.string.add_top_site_button) { homeViewModel.onAddMoreTopSiteSnackBarClicked() }
-                .show()
-        })
+        )
+        homeViewModel.addNewTopSiteSuccess.observe(
+            viewLifecycleOwner,
+            Observer { page ->
+                page?.let {
+                    scrollToTopSitePage(it)
+                }
+                Snackbar.make(
+                    main_list,
+                    getText(R.string.add_top_site_snackbar_1),
+                    Snackbar.LENGTH_LONG
+                )
+                    .setAction(R.string.add_top_site_button) { homeViewModel.onAddMoreTopSiteSnackBarClicked() }
+                    .show()
+            }
+        )
+        homeViewModel.addExistingTopSite.observe(
+            viewLifecycleOwner,
+            Observer { page ->
+                page?.let {
+                    scrollToTopSitePage(it)
+                }
+                Snackbar.make(
+                    main_list,
+                    getText(R.string.add_top_site_snackbar_2),
+                    Snackbar.LENGTH_LONG
+                )
+                    .setAction(R.string.add_top_site_button) { homeViewModel.onAddMoreTopSiteSnackBarClicked() }
+                    .show()
+            }
+        )
     }
 
     private fun observeSetDefaultBrowser() {
         activity?.let { activity ->
             defaultBrowserHelper = DefaultBrowserHelper(activity, defaultBrowserPreferenceViewModel)
-            homeViewModel.tryToSetDefaultBrowser.observe(viewLifecycleOwner, Observer {
-                defaultBrowserPreferenceViewModel.performAction()
-            })
-            defaultBrowserPreferenceViewModel.openDefaultAppsSettings.observe(viewLifecycleOwner, Observer { defaultBrowserHelper.openDefaultAppsSettings() })
-            defaultBrowserPreferenceViewModel.openAppDetailSettings.observe(viewLifecycleOwner, Observer { defaultBrowserHelper.openAppDetailSettings() })
-            defaultBrowserPreferenceViewModel.openSumoPage.observe(viewLifecycleOwner, Observer { defaultBrowserHelper.openSumoPage() })
-            defaultBrowserPreferenceViewModel.triggerWebOpen.observe(viewLifecycleOwner, Observer { defaultBrowserHelper.triggerWebOpen() })
-            defaultBrowserPreferenceViewModel.openDefaultAppsSettingsTutorialDialog.observe(viewLifecycleOwner, Observer { DialogUtils.showGoToSystemAppsSettingsDialog(activity, defaultBrowserPreferenceViewModel) })
-            defaultBrowserPreferenceViewModel.openUrlTutorialDialog.observe(viewLifecycleOwner, Observer { DialogUtils.showOpenUrlDialog(activity, defaultBrowserPreferenceViewModel) })
-            defaultBrowserPreferenceViewModel.successToSetDefaultBrowser.observe(viewLifecycleOwner, Observer { defaultBrowserHelper.showSuccessMessage() })
-            defaultBrowserPreferenceViewModel.failToSetDefaultBrowser.observe(viewLifecycleOwner, Observer { defaultBrowserHelper.showFailMessage() })
+            homeViewModel.tryToSetDefaultBrowser.observe(
+                viewLifecycleOwner,
+                Observer {
+                    defaultBrowserPreferenceViewModel.performAction()
+                }
+            )
+            defaultBrowserPreferenceViewModel.openDefaultAppsSettings.observe(
+                viewLifecycleOwner,
+                Observer { defaultBrowserHelper.openDefaultAppsSettings() }
+            )
+            defaultBrowserPreferenceViewModel.openAppDetailSettings.observe(
+                viewLifecycleOwner,
+                Observer { defaultBrowserHelper.openAppDetailSettings() }
+            )
+            defaultBrowserPreferenceViewModel.openSumoPage.observe(
+                viewLifecycleOwner,
+                Observer { defaultBrowserHelper.openSumoPage() }
+            )
+            defaultBrowserPreferenceViewModel.triggerWebOpen.observe(
+                viewLifecycleOwner,
+                Observer { defaultBrowserHelper.triggerWebOpen() }
+            )
+            defaultBrowserPreferenceViewModel.openDefaultAppsSettingsTutorialDialog.observe(
+                viewLifecycleOwner,
+                Observer {
+                    DialogUtils.showGoToSystemAppsSettingsDialog(
+                        activity,
+                        defaultBrowserPreferenceViewModel
+                    )
+                }
+            )
+            defaultBrowserPreferenceViewModel.openUrlTutorialDialog.observe(
+                viewLifecycleOwner,
+                Observer {
+                    DialogUtils.showOpenUrlDialog(
+                        activity,
+                        defaultBrowserPreferenceViewModel
+                    )
+                }
+            )
+            defaultBrowserPreferenceViewModel.successToSetDefaultBrowser.observe(
+                viewLifecycleOwner,
+                Observer { defaultBrowserHelper.showSuccessMessage() }
+            )
+            defaultBrowserPreferenceViewModel.failToSetDefaultBrowser.observe(
+                viewLifecycleOwner,
+                Observer { defaultBrowserHelper.showFailMessage() }
+            )
         }
     }
 
@@ -518,33 +670,55 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         main_list.postDelayed({ main_list.setCurrentItem(page, 300) }, 100)
 
     private fun observeActions() {
-        homeViewModel.executeUriAction.observe(viewLifecycleOwner, Observer { action ->
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(action), appContext, RocketLauncherActivity::class.java))
-        })
-        homeViewModel.showKeyboard.observe(viewLifecycleOwner, Observer {
-            Looper.myQueue().addIdleHandler {
-                if (!isStateSaved) {
-                    home_fragment_fake_input.performClick()
-                }
-                false
-            }
-        })
-        chromeViewModel.themeSettingMenuClicked.observe(viewLifecycleOwner, Observer {
-            homeViewModel.onThemeSettingMenuClicked()
-        })
-        homeViewModel.showThemeSetting.observe(viewLifecycleOwner, Observer {
-            activity?.let {
-                DialogUtils.showThemeSettingDialog(it, homeViewModel)
-            }
-        })
-        homeViewModel.showSetAsDefaultBrowserOnboarding.observe(viewLifecycleOwner, Observer {
-            activity?.let {
-                DialogUtils.showSetAsDefaultBrowserDialog(
-                    it,
-                    { homeViewModel.onSetAsDefaultBrowserClicked() },
-                    { homeViewModel.onCancelSetAsDefaultBrowserClicked() }
+        homeViewModel.executeUriAction.observe(
+            viewLifecycleOwner,
+            Observer { action ->
+                startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(action),
+                        appContext,
+                        RocketLauncherActivity::class.java
+                    )
                 )
             }
-        })
+        )
+        homeViewModel.showKeyboard.observe(
+            viewLifecycleOwner,
+            Observer {
+                Looper.myQueue().addIdleHandler {
+                    if (!isStateSaved) {
+                        home_fragment_fake_input.performClick()
+                    }
+                    false
+                }
+            }
+        )
+        chromeViewModel.themeSettingMenuClicked.observe(
+            viewLifecycleOwner,
+            Observer {
+                homeViewModel.onThemeSettingMenuClicked()
+            }
+        )
+        homeViewModel.showThemeSetting.observe(
+            viewLifecycleOwner,
+            Observer {
+                activity?.let {
+                    DialogUtils.showThemeSettingDialog(it, homeViewModel)
+                }
+            }
+        )
+        homeViewModel.showSetAsDefaultBrowserOnboarding.observe(
+            viewLifecycleOwner,
+            Observer {
+                activity?.let {
+                    DialogUtils.showSetAsDefaultBrowserDialog(
+                        it,
+                        { homeViewModel.onSetAsDefaultBrowserClicked() },
+                        { homeViewModel.onCancelSetAsDefaultBrowserClicked() }
+                    )
+                }
+            }
+        )
     }
 }

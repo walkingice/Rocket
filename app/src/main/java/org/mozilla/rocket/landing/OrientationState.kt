@@ -5,10 +5,9 @@
 
 package org.mozilla.rocket.landing
 
+import android.content.pm.ActivityInfo
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import android.content.pm.ActivityInfo
-
 import org.mozilla.focus.navigation.ScreenNavigator
 
 class OrientationState(

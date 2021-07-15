@@ -26,7 +26,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import dagger.Lazy
 import kotlinx.android.synthetic.main.fragment_first_run.animation_description
 import kotlinx.android.synthetic.main.fragment_first_run.animation_layout
@@ -80,30 +79,36 @@ class FirstrunFragment : Fragment(), ScreenNavigator.FirstrunScreen {
         FirebaseHelper.cancelTrace("coldStart")
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_first_run, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? =
+        inflater.inflate(R.layout.fragment_first_run, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        description.text = getString(R.string.firstrun_fxlite_2_5_title_B, getString(R.string.app_name))
+        description.text =
+            getString(R.string.firstrun_fxlite_2_5_title_B, getString(R.string.app_name))
         select_button.setOnClickListener { goNext() }
         initContentPrefItems()
         observeActions()
     }
 
     private fun observeActions() {
-        firstrunViewModel.finishFirstRunEvent.observe(viewLifecycleOwner, Observer {
+        firstrunViewModel.finishFirstRunEvent.observe(viewLifecycleOwner) {
             // use handler to prevent the error when app come back from background
             // Error message: FragmentManager is already executing transactions
             Handler().post {
                 (activity as? MainActivity)?.firstrunFinished()
             }
-        })
+        }
     }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        returnTransition = TransitionInflater.from(context).inflateTransition(R.transition.firstrun_exit)
+        returnTransition =
+            TransitionInflater.from(context).inflateTransition(R.transition.firstrun_exit)
     }
 
     override fun onResume() {
@@ -114,9 +119,11 @@ class FirstrunFragment : Fragment(), ScreenNavigator.FirstrunScreen {
     private fun goNext() {
         NewFeatureNotice.getInstance(context).setFirstRunDidShow()
         NewFeatureNotice.getInstance(context).setLiteUpdateDidShow()
-        activity?.sendBroadcast(Intent(activity, PeriodicReceiver::class.java).apply {
-            action = FirstLaunchWorker.ACTION
-        })
+        activity?.sendBroadcast(
+            Intent(activity, PeriodicReceiver::class.java).apply {
+                action = FirstLaunchWorker.ACTION
+            }
+        )
 
         currentSelectedItem.let { selectedItem ->
             requireNotNull(selectedItem)
@@ -191,16 +198,20 @@ class FirstrunFragment : Fragment(), ScreenNavigator.FirstrunScreen {
         }
 
         val fadeInFadeOutAnimation = AnimationSet(false).apply {
-            addAnimation(AlphaAnimation(0f, 1f).apply {
-                interpolator = DecelerateInterpolator()
-                startOffset = DESCRIPTION_FADE_IN_OFFSET
-                duration = DESCRIPTION_FADE_IN_FADE_OUT_DURATION
-            })
-            addAnimation(AlphaAnimation(1f, 0f).apply {
-                interpolator = AccelerateInterpolator()
-                startOffset = DESCRIPTION_FADE_OUT_OFFSET
-                duration = DESCRIPTION_FADE_IN_FADE_OUT_DURATION
-            })
+            addAnimation(
+                AlphaAnimation(0f, 1f).apply {
+                    interpolator = DecelerateInterpolator()
+                    startOffset = DESCRIPTION_FADE_IN_OFFSET
+                    duration = DESCRIPTION_FADE_IN_FADE_OUT_DURATION
+                }
+            )
+            addAnimation(
+                AlphaAnimation(1f, 0f).apply {
+                    interpolator = AccelerateInterpolator()
+                    startOffset = DESCRIPTION_FADE_OUT_OFFSET
+                    duration = DESCRIPTION_FADE_IN_FADE_OUT_DURATION
+                }
+            )
             setAnimationListener(object : Animation.AnimationListener {
                 override fun onAnimationRepeat(animation: Animation?) {
                 }
@@ -260,8 +271,12 @@ class FirstrunFragment : Fragment(), ScreenNavigator.FirstrunScreen {
     }
 
     private sealed class ContentPrefItem(val viewId: Int, val textId: Int, val iconId: Int) {
-        object Browsing : ContentPrefItem(R.id.item_browsing, R.id.text_browsing, R.id.icon_browsing)
-        object Shopping : ContentPrefItem(R.id.item_shopping, R.id.text_shopping, R.id.icon_shopping)
+        object Browsing :
+            ContentPrefItem(R.id.item_browsing, R.id.text_browsing, R.id.icon_browsing)
+
+        object Shopping :
+            ContentPrefItem(R.id.item_shopping, R.id.text_shopping, R.id.icon_shopping)
+
         object Games : ContentPrefItem(R.id.item_games, R.id.text_games, R.id.icon_games)
         object News : ContentPrefItem(R.id.item_news, R.id.text_news, R.id.icon_news)
     }

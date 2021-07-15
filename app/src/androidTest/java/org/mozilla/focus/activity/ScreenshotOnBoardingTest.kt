@@ -41,9 +41,9 @@ class ScreenshotOnBoardingTest {
         context = InstrumentationRegistry.getInstrumentation().targetContext
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         BeforeTestTask.Builder()
-                .enableSreenshotOnBoarding(true)
-                .build()
-                .execute()
+            .enableSreenshotOnBoarding(true)
+            .build()
+            .execute()
         activityTestRule.launchActivity(Intent())
     }
 

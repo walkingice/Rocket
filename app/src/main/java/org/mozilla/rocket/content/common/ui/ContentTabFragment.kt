@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
-import androidx.lifecycle.Observer
 import dagger.Lazy
 import org.mozilla.focus.R
 import org.mozilla.focus.locale.LocaleAwareFragment
@@ -37,7 +36,11 @@ class ContentTabFragment : LocaleAwareFragment(), BackKeyHandleable {
         chromeViewModel = getActivityViewModel(chromeViewModelCreator)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_content_tab, container, false)
     }
 
@@ -121,29 +124,29 @@ class ContentTabFragment : LocaleAwareFragment(), BackKeyHandleable {
     private fun reload() = sessionManager.focusSession?.engineSession?.reload()
 
     private fun observeChromeAction() {
-        chromeViewModel.refreshOrStop.observe(viewLifecycleOwner, Observer {
+        chromeViewModel.refreshOrStop.observe(viewLifecycleOwner) {
             if (chromeViewModel.isRefreshing.value == true) {
                 stop()
             } else {
                 reload()
             }
-        })
-        chromeViewModel.goNext.observe(viewLifecycleOwner, Observer {
+        }
+        chromeViewModel.goNext.observe(viewLifecycleOwner) {
             if (chromeViewModel.canGoForward.value == true) {
                 goForward()
             }
-        })
+        }
 
         val forceDisableImageBlocking =
             arguments?.getBoolean(EXTRA_FORCE_DISABLE_IMAGE_BLOCKING) ?: false
         if (forceDisableImageBlocking) {
-            chromeViewModel.isRefreshing.observe(viewLifecycleOwner, Observer { isRefreshing ->
+            chromeViewModel.isRefreshing.observe(viewLifecycleOwner) { isRefreshing ->
                 if (!isRefreshing) {
                     tabSession?.engineSession?.tabView?.apply {
                         setImageBlockingEnabled(false)
                     }
                 }
-            })
+            }
         }
     }
 
@@ -152,7 +155,11 @@ class ContentTabFragment : LocaleAwareFragment(), BackKeyHandleable {
         private const val EXTRA_ENABLE_TURBO_MODE = "enable_turbo_mode"
         private const val EXTRA_FORCE_DISABLE_IMAGE_BLOCKING = "force_disable_image_blocking"
 
-        fun newInstance(url: String, enableTurboMode: Boolean = true, forceDisableImageBlocking: Boolean = false): ContentTabFragment {
+        fun newInstance(
+            url: String,
+            enableTurboMode: Boolean = true,
+            forceDisableImageBlocking: Boolean = false
+        ): ContentTabFragment {
             val args = Bundle().apply {
                 putString(EXTRA_URL, url)
                 putBoolean(EXTRA_ENABLE_TURBO_MODE, enableTurboMode)

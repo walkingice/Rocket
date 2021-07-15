@@ -52,18 +52,19 @@ class DownloadsLocalDataSource(private val appContext: Context) {
         }
     }
 
-    private suspend fun insert(downloadInfo: DownloadInfo) = suspendCoroutine<Long> { continuation ->
-        queryHandler.startInsert(
-            TOKEN,
-            object : AsyncInsertListener {
-                override fun onInsertComplete(id: Long) {
-                    continuation.resume(id)
-                }
-            },
-            DownloadContract.Download.CONTENT_URI,
-            getContentValuesFromDownloadInfo(downloadInfo)
-        )
-    }
+    private suspend fun insert(downloadInfo: DownloadInfo) =
+        suspendCoroutine<Long> { continuation ->
+            queryHandler.startInsert(
+                TOKEN,
+                object : AsyncInsertListener {
+                    override fun onInsertComplete(id: Long) {
+                        continuation.resume(id)
+                    }
+                },
+                DownloadContract.Download.CONTENT_URI,
+                getContentValuesFromDownloadInfo(downloadInfo)
+            )
+        }
 
     private fun getContentValuesFromDownloadInfo(downloadInfo: DownloadInfo): ContentValues {
         val contentValues = ContentValues()
@@ -128,38 +129,42 @@ class DownloadsLocalDataSource(private val appContext: Context) {
         }
     }
 
-    suspend fun getDownloads(offset: Int, limit: Int) = suspendCoroutine<List<DownloadInfo>> { continuation ->
-        val uri = DownloadContract.Download.CONTENT_URI.toString() + "?offset=" + offset + "&limit=" + limit
-        queryHandler.startQuery(
-            TOKEN,
-            object : AsyncQueryListener {
-                override fun onQueryComplete(downloadInfoList: List<DownloadInfo>) {
-                    continuation.resume(downloadInfoList)
-                }
-            },
-            Uri.parse(uri),
-            null,
-            null,
-            null,
-            DownloadContract.Download._ID + " DESC"
-        )
-    }
+    suspend fun getDownloads(offset: Int, limit: Int) =
+        suspendCoroutine<List<DownloadInfo>> { continuation ->
+            val uri =
+                DownloadContract.Download.CONTENT_URI.toString() + "?offset=" + offset + "&limit=" + limit
+            queryHandler.startQuery(
+                TOKEN,
+                object : AsyncQueryListener {
+                    override fun onQueryComplete(downloadInfoList: List<DownloadInfo>) {
+                        continuation.resume(downloadInfoList)
+                    }
+                },
+                Uri.parse(uri),
+                null,
+                null,
+                null,
+                DownloadContract.Download._ID + " DESC"
+            )
+        }
 
-    suspend fun getDownloadingAndUnreadIds() = suspendCoroutine<List<DownloadInfo>> { continuation ->
-        val uri = DownloadContract.Download.CONTENT_URI.toString()
-        queryHandler.startQuery(
-            TOKEN,
-            object : AsyncQueryListener {
-                override fun onQueryComplete(downloadInfoList: List<DownloadInfo>) {
-                    continuation.resume(downloadInfoList)
-                }
-            },
-            Uri.parse(uri),
-            null,
-            DownloadContract.Download.STATUS + "!=? or " + DownloadContract.Download.IS_READ + "=?", arrayOf(STATUS_SUCCESSFUL, "0"),
-            null
-        )
-    }
+    suspend fun getDownloadingAndUnreadIds() =
+        suspendCoroutine<List<DownloadInfo>> { continuation ->
+            val uri = DownloadContract.Download.CONTENT_URI.toString()
+            queryHandler.startQuery(
+                TOKEN,
+                object : AsyncQueryListener {
+                    override fun onQueryComplete(downloadInfoList: List<DownloadInfo>) {
+                        continuation.resume(downloadInfoList)
+                    }
+                },
+                Uri.parse(uri),
+                null,
+                DownloadContract.Download.STATUS + "!=? or " + DownloadContract.Download.IS_READ + "=?",
+                arrayOf(STATUS_SUCCESSFUL, "0"),
+                null
+            )
+        }
 
     suspend fun markAllItemsAreRead() = suspendCoroutine<Int> { continuation ->
         val contentValues = ContentValues()
@@ -171,33 +176,40 @@ class DownloadsLocalDataSource(private val appContext: Context) {
                     continuation.resume(result)
                 }
             },
-            DownloadContract.Download.CONTENT_URI, contentValues, DownloadContract.Download.STATUS + "=? and " + DownloadContract.Download.IS_READ + " = ?", arrayOf(STATUS_SUCCESSFUL, "0")
+            DownloadContract.Download.CONTENT_URI,
+            contentValues,
+            DownloadContract.Download.STATUS + "=? and " + DownloadContract.Download.IS_READ + " = ?",
+            arrayOf(STATUS_SUCCESSFUL, "0")
         )
     }
 
-    suspend fun updateDownloadByRowId(downloadInfo: DownloadInfo) = suspendCoroutine<Int> { continuation ->
-        queryHandler.startUpdate(
-            TOKEN,
-            object : AsyncUpdateListener {
-                override fun onUpdateComplete(result: Int) {
-                    continuation.resume(result)
-                }
-            },
-            DownloadContract.Download.CONTENT_URI,
-            getContentValuesFromDownloadInfo(downloadInfo),
-            DownloadContract.Download._ID + " = ?",
-            arrayOf(downloadInfo.rowId.toString())
-        )
-    }
+    suspend fun updateDownloadByRowId(downloadInfo: DownloadInfo) =
+        suspendCoroutine<Int> { continuation ->
+            queryHandler.startUpdate(
+                TOKEN,
+                object : AsyncUpdateListener {
+                    override fun onUpdateComplete(result: Int) {
+                        continuation.resume(result)
+                    }
+                },
+                DownloadContract.Download.CONTENT_URI,
+                getContentValuesFromDownloadInfo(downloadInfo),
+                DownloadContract.Download._ID + " = ?",
+                arrayOf(downloadInfo.rowId.toString())
+            )
+        }
 
     suspend fun remove(rowId: Long) = suspendCoroutine<Int> { continuation ->
         queryHandler.startDelete(
             TOKEN,
-            AsyncDeleteWrapper(rowId, object : AsyncDeleteListener {
-                override fun onDeleteComplete(result: Int, id: Long) {
-                    continuation.resume(result)
+            AsyncDeleteWrapper(
+                rowId,
+                object : AsyncDeleteListener {
+                    override fun onDeleteComplete(result: Int, id: Long) {
+                        continuation.resume(result)
+                    }
                 }
-            }),
+            ),
             DownloadContract.Download.CONTENT_URI,
             DownloadContract.Download._ID + " = ?",
             arrayOf(rowId.toString())
@@ -214,7 +226,8 @@ class DownloadsLocalDataSource(private val appContext: Context) {
         RelocateService.broadcastRelocateFinished(appContext, rowId)
     }
 
-    private class DownloadInfoQueryHandler(context: Context) : AsyncQueryHandler(context.contentResolver) {
+    private class DownloadInfoQueryHandler(context: Context) :
+        AsyncQueryHandler(context.contentResolver) {
         override fun onInsertComplete(token: Int, cookie: Any?, uri: Uri?) {
             when (token) {
                 TOKEN -> if (cookie != null) {
@@ -246,10 +259,19 @@ class DownloadsLocalDataSource(private val appContext: Context) {
             cursor?.use { safeCursor ->
                 when (token) {
                     TOKEN -> while (cursor.moveToNext()) {
-                        val downloadId = safeCursor.getLong(safeCursor.getColumnIndex(DownloadContract.Download.DOWNLOAD_ID))
-                        val rowId = safeCursor.getLong(safeCursor.getColumnIndex(DownloadContract.Download._ID))
-                        val fileUri = safeCursor.getString(safeCursor.getColumnIndex(DownloadContract.Download.FILE_PATH))
-                        downloadInfoList.add(DownloadInfo.createEmptyDownloadInfo(downloadId, rowId, fileUri))
+                        val downloadId =
+                            safeCursor.getLong(safeCursor.getColumnIndex(DownloadContract.Download.DOWNLOAD_ID))
+                        val rowId =
+                            safeCursor.getLong(safeCursor.getColumnIndex(DownloadContract.Download._ID))
+                        val fileUri =
+                            safeCursor.getString(safeCursor.getColumnIndex(DownloadContract.Download.FILE_PATH))
+                        downloadInfoList.add(
+                            DownloadInfo.createEmptyDownloadInfo(
+                                downloadId,
+                                rowId,
+                                fileUri
+                            )
+                        )
                     }
                 }
             }

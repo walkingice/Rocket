@@ -6,7 +6,6 @@
 package org.mozilla.focus.provider
 
 import android.net.Uri
-
 import org.mozilla.focus.BuildConfig
 
 object SettingContract {

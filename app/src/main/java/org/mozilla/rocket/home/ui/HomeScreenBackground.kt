@@ -86,18 +86,18 @@ class HomeScreenBackground : ThemedImageView, ThemeManager.Themeable {
     }
 
     private fun getPatternDrawable(colorStart: Int, colorCenter: Int, colorEnd: Int): Drawable =
-            getScreenedDrawable(
-                PATTERN_IMAGE_RESOURCE_ID,
-                intArrayOf(colorStart, colorCenter, colorEnd),
-                COLORS_GRADIENT_POSITIONS
-            )
+        getScreenedDrawable(
+            PATTERN_IMAGE_RESOURCE_ID,
+            intArrayOf(colorStart, colorCenter, colorEnd),
+            COLORS_GRADIENT_POSITIONS
+        )
 
     private fun getScreenedDrawable(resId: Int, colors: IntArray, positions: FloatArray): Drawable =
-            applyColorScreen(
-                bitmap = requireNotNull(AppCompatResources.getDrawable(context, resId)).toBitmap(),
-                colors = colors,
-                positions = positions
-            ).toDrawable(resources)
+        applyColorScreen(
+            bitmap = requireNotNull(AppCompatResources.getDrawable(context, resId)).toBitmap(),
+            colors = colors,
+            positions = positions
+        ).toDrawable(resources)
 
     private fun applyColorScreen(bitmap: Bitmap, colors: IntArray, positions: FloatArray): Bitmap {
         val width = bitmap.width

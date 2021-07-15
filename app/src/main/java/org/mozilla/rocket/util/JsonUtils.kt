@@ -27,12 +27,12 @@ fun <T> JSONObject.optJsonArray(name: String, parser: (JSONObject) -> T): List<T
 @Throws(JSONException::class)
 private fun <T> JSONArray.serialize(parser: (JSONObject) -> T): List<T> {
     return (0 until this.length())
-            .map { index -> this.getJSONObject(index) }
-            .map { jsonObject -> parser(jsonObject) }
+        .map { index -> this.getJSONObject(index) }
+        .map { jsonObject -> parser(jsonObject) }
 }
 
 private fun <T> JSONArray.optSerialize(parser: (JSONObject) -> T): List<T> {
     return (0 until this.length())
-            .mapNotNull { index -> this.optJSONObject(index) }
-            .map { jsonObject -> parser(jsonObject) }
+        .mapNotNull { index -> this.optJSONObject(index) }
+        .map { jsonObject -> parser(jsonObject) }
 }

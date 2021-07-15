@@ -113,7 +113,7 @@ object HomeModule {
     @Singleton
     @Provides
     fun providePinSiteManager(appContext: Context): PinSiteManager =
-            PinSiteManager(SharedPreferencePinSiteDelegate(appContext))
+        PinSiteManager(SharedPreferencePinSiteDelegate(appContext))
 
     @JvmStatic
     @Singleton
@@ -140,7 +140,7 @@ object HomeModule {
     fun provideDismissLogoManNotificationUseCase(
         logoManNotificationRepo: LogoManNotificationRepo
     ): DismissLogoManNotificationUseCase =
-            DismissLogoManNotificationUseCase(logoManNotificationRepo)
+        DismissLogoManNotificationUseCase(logoManNotificationRepo)
 
     @JvmStatic
     @Singleton
@@ -149,7 +149,7 @@ object HomeModule {
         shoppingSearchRepository: ShoppingSearchRepository,
         contentPrefRepo: ContentPrefRepo
     ): IsHomeScreenShoppingButtonEnabledUseCase =
-            IsHomeScreenShoppingButtonEnabledUseCase(shoppingSearchRepository, contentPrefRepo)
+        IsHomeScreenShoppingButtonEnabledUseCase(shoppingSearchRepository, contentPrefRepo)
 
     @JvmStatic
     @Singleton
@@ -159,24 +159,24 @@ object HomeModule {
         contentPrefRepo: ContentPrefRepo,
         newFeatureNotice: NewFeatureNotice
     ): ShouldShowShoppingSearchOnboardingUseCase =
-            ShouldShowShoppingSearchOnboardingUseCase(shoppingSearchRepository, contentPrefRepo, newFeatureNotice)
+        ShouldShowShoppingSearchOnboardingUseCase(shoppingSearchRepository, contentPrefRepo, newFeatureNotice)
 
     @JvmStatic
     @Singleton
     @Provides
     fun provideSetShoppingSearchOnboardingIsShownUseCase(newFeatureNotice: NewFeatureNotice): SetShoppingSearchOnboardingIsShownUseCase =
-            SetShoppingSearchOnboardingIsShownUseCase(newFeatureNotice)
+        SetShoppingSearchOnboardingIsShownUseCase(newFeatureNotice)
 
     @JvmStatic
     @Provides
     fun provideTabTrayViewModel(): TabTrayViewModel =
-            TabTrayViewModel()
+        TabTrayViewModel()
 
     @JvmStatic
     @Singleton
     @Provides
     fun provideGetRecommendedSitesUseCase(topSitesRepo: TopSitesRepo): GetRecommendedSitesUseCase =
-            GetRecommendedSitesUseCase(topSitesRepo)
+        GetRecommendedSitesUseCase(topSitesRepo)
 
     @JvmStatic
     @Provides
@@ -184,7 +184,7 @@ object HomeModule {
         getRecommendedSitesUseCase: GetRecommendedSitesUseCase,
         pinTopSiteUseCase: PinTopSiteUseCase
     ): AddNewTopSitesViewModel =
-            AddNewTopSitesViewModel(getRecommendedSitesUseCase, pinTopSiteUseCase)
+        AddNewTopSitesViewModel(getRecommendedSitesUseCase, pinTopSiteUseCase)
 
     @JvmStatic
     @Provides
@@ -193,29 +193,29 @@ object HomeModule {
     @JvmStatic
     @Provides
     fun provideSetContentPrefUseCase(contentPrefRepo: ContentPrefRepo): SetContentPrefUseCase =
-            SetContentPrefUseCase(contentPrefRepo)
+        SetContentPrefUseCase(contentPrefRepo)
 
     @JvmStatic
     @Singleton
     @Provides
     fun provideShouldShowThemeOnboardingUseCase(newFeatureNotice: NewFeatureNotice): ShouldShowThemeOnboardingUseCase =
-            ShouldShowThemeOnboardingUseCase(newFeatureNotice)
+        ShouldShowThemeOnboardingUseCase(newFeatureNotice)
 
     @JvmStatic
     @Singleton
     @Provides
     fun provideSetThemeOnboardingIsShownUseCase(newFeatureNotice: NewFeatureNotice): SetThemeOnboardingIsShownUseCase =
-            SetThemeOnboardingIsShownUseCase(newFeatureNotice)
+        SetThemeOnboardingIsShownUseCase(newFeatureNotice)
 
     @JvmStatic
     @Singleton
     @Provides
     fun provideShouldShowSetDefaultBrowserOnboardingUseCase(newFeatureNotice: NewFeatureNotice): ShouldShowSetDefaultBrowserOnboardingUseCase =
-            ShouldShowSetDefaultBrowserOnboardingUseCase(newFeatureNotice)
+        ShouldShowSetDefaultBrowserOnboardingUseCase(newFeatureNotice)
 
     @JvmStatic
     @Singleton
     @Provides
     fun provideSetSetDefaultBrowserOnboardingIsShownUseCase(newFeatureNotice: NewFeatureNotice): SetSetDefaultBrowserOnboardingIsShownUseCase =
-            SetSetDefaultBrowserOnboardingIsShownUseCase(newFeatureNotice)
+        SetSetDefaultBrowserOnboardingIsShownUseCase(newFeatureNotice)
 }

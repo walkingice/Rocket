@@ -133,12 +133,12 @@ class RocketMessagingService : FirebaseMessagingServiceWrapper() {
         fun scheduleNotification(applicationContext: Context, messageId: String, imageUrl: String?, title: String?, body: String?, openUrl: String?, pushCommand: String?, deepLink: String?, displayTimestamp: Long) {
 
             val inputDataBuilder = Data.Builder()
-                    .putString(STR_MESSAGE_ID, messageId)
-                    .putString(STR_DATA_MSG_TITLE, title)
-                    .putString(STR_DATA_MSG_BODY, body)
-                    .putString(STR_PUSH_OPEN_URL, openUrl)
-                    .putString(STR_PUSH_COMMAND, pushCommand)
-                    .putString(STR_PUSH_DEEP_LINK, deepLink)
+                .putString(STR_MESSAGE_ID, messageId)
+                .putString(STR_DATA_MSG_TITLE, title)
+                .putString(STR_DATA_MSG_BODY, body)
+                .putString(STR_PUSH_OPEN_URL, openUrl)
+                .putString(STR_PUSH_COMMAND, pushCommand)
+                .putString(STR_PUSH_DEEP_LINK, deepLink)
 
             // only allow valid urls
             if (imageUrl != null && URLUtil.isValidUrl(imageUrl)) {
@@ -154,11 +154,11 @@ class RocketMessagingService : FirebaseMessagingServiceWrapper() {
 
             Log.d(TAG, "Schedule display notification [$title] from server [$delay] ms later.")
             val request =
-                    OneTimeWorkRequest.Builder(NotificationScheduleWorker::class.java)
-                            .setInputData(inputDataBuilder.build())
-                            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-                            .addTag(messageId)
-                            .build()
+                OneTimeWorkRequest.Builder(NotificationScheduleWorker::class.java)
+                    .setInputData(inputDataBuilder.build())
+                    .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                    .addTag(messageId)
+                    .build()
 
             WorkManager.getInstance(applicationContext).enqueue(request)
         }
@@ -166,11 +166,11 @@ class RocketMessagingService : FirebaseMessagingServiceWrapper() {
         fun handlePushMessage(applicationContext: Context, messageId: String?, openUrl: String?, pushCommand: String?, deepLink: String?, title: String?, body: String?, imageUrl: String?) {
 
             val pendingIntent = getClickPendingIntent(
-                    applicationContext,
-                    messageId,
-                    openUrl,
-                    pushCommand,
-                    deepLink
+                applicationContext,
+                messageId,
+                openUrl,
+                pushCommand,
+                deepLink
             )
             val builder = NotificationUtil.importantBuilder(applicationContext).setContentIntent(pendingIntent)
             title?.let { builder.setContentTitle(it) }
@@ -187,17 +187,17 @@ class RocketMessagingService : FirebaseMessagingServiceWrapper() {
             if (!imageUrl.isNullOrEmpty()) {
                 ThreadUtils.postToMainThread {
                     Glide.with(applicationContext)
-                            .asBitmap()
-                            .load(imageUrl)
-                            .into(object : SimpleTarget<Bitmap?>() {
-                                override fun onResourceReady(resource: Bitmap?, transition: Transition<in Bitmap?>?) {
-                                    builder.setLargeIcon(resource)
-                                    builder.setStyle(NotificationCompat.BigPictureStyle().bigPicture(resource))
+                        .asBitmap()
+                        .load(imageUrl)
+                        .into(object : SimpleTarget<Bitmap?>() {
+                            override fun onResourceReady(resource: Bitmap?, transition: Transition<in Bitmap?>?) {
+                                builder.setLargeIcon(resource)
+                                builder.setStyle(NotificationCompat.BigPictureStyle().bigPicture(resource))
 
-                                    NotificationUtil.sendNotification(applicationContext, NotificationId.FIREBASE_AD_HOC, builder)
-                                    TelemetryWrapper.showNotification(link, messageId)
-                                }
-                            })
+                                NotificationUtil.sendNotification(applicationContext, NotificationId.FIREBASE_AD_HOC, builder)
+                                TelemetryWrapper.showNotification(link, messageId)
+                            }
+                        })
                 }
             } else {
                 NotificationUtil.sendNotification(applicationContext, NotificationId.FIREBASE_AD_HOC, builder)
@@ -218,11 +218,11 @@ class RocketMessagingService : FirebaseMessagingServiceWrapper() {
 
         private fun getClickPendingIntent(appContext: Context, messageId: String?, openUrl: String?, command: String?, deepLink: String?): PendingIntent { // RocketLauncherActivity will handle this intent
             val clickIntent = IntentUtils.genFirebaseNotificationClickForBroadcastReceiver(
-                    appContext,
-                    messageId,
-                    openUrl,
-                    command,
-                    deepLink
+                appContext,
+                messageId,
+                openUrl,
+                command,
+                deepLink
             )
             return PendingIntent.getBroadcast(appContext, RocketMessagingService.REQUEST_CODE_CLICK_NOTIFICATION, clickIntent, PendingIntent.FLAG_ONE_SHOT)
         }

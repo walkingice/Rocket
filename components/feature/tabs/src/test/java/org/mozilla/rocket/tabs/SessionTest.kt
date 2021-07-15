@@ -10,21 +10,27 @@ class SessionTest {
 
     @Test
     fun testIsValid() {
-        Session(UUID.randomUUID().toString(),
-                "parent_id",
-                "https://mozilla.org").let { model ->
+        Session(
+            UUID.randomUUID().toString(),
+            "parent_id",
+            "https://mozilla.org"
+        ).let { model ->
             assertEquals(true, model.isValid())
         }
 
-        Session(UUID.randomUUID().toString(),
-                "",
-                "https://mozilla.org").let { model ->
+        Session(
+            UUID.randomUUID().toString(),
+            "",
+            "https://mozilla.org"
+        ).let { model ->
             assertEquals(true, model.isValid())
         }
 
-        Session(UUID.randomUUID().toString(),
-                null,
-                "https://mozilla.org").let { model ->
+        Session(
+            UUID.randomUUID().toString(),
+            null,
+            "https://mozilla.org"
+        ).let { model ->
             assertEquals(true, model.isValid())
         }
 

@@ -19,10 +19,10 @@ open class DelegateAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-            delegatesManager.onCreateViewHolder(parent, viewType)
+        delegatesManager.onCreateViewHolder(parent, viewType)
 
     override fun getItemViewType(position: Int): Int =
-            delegatesManager.getItemViewType(data[position])
+        delegatesManager.getItemViewType(data[position])
 
     override fun getItemCount(): Int = data.size
 
@@ -39,11 +39,15 @@ open class DelegateAdapter(
 
 interface AdapterDelegate {
     fun inflateView(parent: ViewGroup, layoutId: Int): View =
-            LayoutInflater.from(parent.context).inflate(layoutId, parent, false)
+        LayoutInflater.from(parent.context).inflate(layoutId, parent, false)
 
     fun onCreateViewHolder(view: View): DelegateAdapter.ViewHolder
 
-    fun onBindViewHolder(uiModel: DelegateAdapter.UiModel, position: Int, holder: DelegateAdapter.ViewHolder) {
+    fun onBindViewHolder(
+        uiModel: DelegateAdapter.UiModel,
+        position: Int,
+        holder: DelegateAdapter.ViewHolder
+    ) {
         holder.bind(uiModel)
     }
 }

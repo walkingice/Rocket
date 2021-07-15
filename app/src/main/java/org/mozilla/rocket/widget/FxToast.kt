@@ -27,11 +27,12 @@ object FxToast {
     }
 
     private fun inflateCustomView(appContext: Context, msg: String): View =
-            getLayoutInflater(appContext).inflate(R.layout.fx_toast, null).apply {
-                text.text = msg
-            }
+        getLayoutInflater(appContext).inflate(R.layout.fx_toast, null).apply {
+            text.text = msg
+        }
 
-    private fun createToast(appContext: Context, duration: Int, customView: View) = Toast(appContext)
+    private fun createToast(appContext: Context, duration: Int, customView: View) =
+        Toast(appContext)
             .apply {
                 setGravity(Gravity.FILL_HORIZONTAL or Gravity.TOP, 0, 0)
                 view = customView
@@ -40,7 +41,8 @@ object FxToast {
 
     private fun getLayoutInflater(appContext: Context): LayoutInflater {
         if (inflater == null) {
-            inflater = appContext.getSystemService(Service.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            inflater =
+                appContext.getSystemService(Service.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         }
 
         return requireNotNull(inflater)

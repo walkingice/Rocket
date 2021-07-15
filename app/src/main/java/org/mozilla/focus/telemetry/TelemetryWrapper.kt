@@ -193,6 +193,7 @@ object TelemetryWrapper {
         const val VERSION = "version"
         const val TYPE = "type"
         const val CATEGORY = "category"
+
         // Remove the last character cause Telemetry library will do that for you.( > 15chars)
         const val CATEGORY_VERSION = "category_versio"
         const val ENGINE = "engine"
@@ -294,14 +295,20 @@ object TelemetryWrapper {
     fun isTelemetryEnabled(context: Context?): Boolean {
         if (context == null) return false
         // The first access to shared preferences will require a disk read.
-        return StrictModeViolation.tempGrant({ obj: Builder -> obj.permitDiskReads() }, {
-            val resources = context.resources
-            val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-            val isEnabledByDefault = AppConstants.isBuiltWithFirebase()
-            // Telemetry is not enable by default in debug build. But the user / developer can choose to turn it on
-            // in AndroidTest, this is enabled by default
-            preferences.getBoolean(resources.getString(R.string.pref_key_telemetry), isEnabledByDefault)
-        })
+        return StrictModeViolation.tempGrant(
+            { obj: Builder -> obj.permitDiskReads() },
+            {
+                val resources = context.resources
+                val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+                val isEnabledByDefault = AppConstants.isBuiltWithFirebase()
+                // Telemetry is not enable by default in debug build. But the user / developer can choose to turn it on
+                // in AndroidTest, this is enabled by default
+                preferences.getBoolean(
+                    resources.getString(R.string.pref_key_telemetry),
+                    isEnabledByDefault
+                )
+            }
+        )
     }
 
     @JvmStatic
@@ -311,12 +318,14 @@ object TelemetryWrapper {
 
         val key = resources.getString(R.string.pref_key_telemetry)
         preferences.edit()
-                .putBoolean(key, enabled)
-                .apply()
+            .putBoolean(key, enabled)
+            .apply()
     }
 
     fun init(context: Context) {
-        StrictModeViolation.tempGrant({ obj: Builder -> obj.permitDiskReads().permitDiskWrites() }) {
+        StrictModeViolation.tempGrant({ obj: Builder ->
+            obj.permitDiskReads().permitDiskWrites()
+        }) {
             appContext = context.applicationContext
             // When initializing the telemetry library it will make sure that all directories exist and
             // are readable/writable.
@@ -326,175 +335,197 @@ object TelemetryWrapper {
     }
 
     @TelemetryDoc(
-            name = "App is launched by Launcher",
-            category = Category.ACTION,
-            method = Method.LAUNCH,
-            `object` = Object.APP,
-            value = Value.LAUNCHER,
-            extras = [])
+        name = "App is launched by Launcher",
+        category = Category.ACTION,
+        method = Method.LAUNCH,
+        `object` = Object.APP,
+        value = Value.LAUNCHER,
+        extras = []
+    )
     @JvmStatic
     fun launchByAppLauncherEvent() {
         EventBuilder(Category.ACTION, Method.LAUNCH, Object.APP, Value.LAUNCHER).queue()
     }
 
     @TelemetryDoc(
-            name = "App is launched by Shortcut",
-            category = Category.ACTION,
-            method = Method.LAUNCH,
-            `object` = Object.APP,
-            value = Value.SHORTCUT,
-            extras = [])
+        name = "App is launched by Shortcut",
+        category = Category.ACTION,
+        method = Method.LAUNCH,
+        `object` = Object.APP,
+        value = Value.SHORTCUT,
+        extras = []
+    )
     @JvmStatic
     fun launchByHomeScreenShortcutEvent() {
         EventBuilder(Category.ACTION, Method.LAUNCH, Object.APP, Value.SHORTCUT).queue()
     }
 
     @TelemetryDoc(
-            name = "App is launched from Private Shortcut",
-            category = Category.ACTION,
-            method = Method.LAUNCH,
-            `object` = Object.APP,
-            value = Value.PRIVATE_MODE,
-            extras = [TelemetryExtra(name = Extra.FROM, value = "[${Extra_Value.LAUNCHER}|${Extra_Value.EXTERNAL_APP}]")])
+        name = "App is launched from Private Shortcut",
+        category = Category.ACTION,
+        method = Method.LAUNCH,
+        `object` = Object.APP,
+        value = Value.PRIVATE_MODE,
+        extras = [
+            TelemetryExtra(
+                name = Extra.FROM,
+                value = "[${Extra_Value.LAUNCHER}|${Extra_Value.EXTERNAL_APP}]"
+            )
+        ]
+    )
     @JvmStatic
     fun launchByPrivateModeShortcut(from: String) {
         EventBuilder(Category.ACTION, Method.LAUNCH, Object.APP, Value.PRIVATE_MODE)
-                .extra(Extra.FROM, from)
-                .queue()
+            .extra(Extra.FROM, from)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show private shortcut prompt",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.PRIVATE_SHORTCUT,
-            value = "",
-            extras = [TelemetryExtra(name = Extra.MODE, value = Extra_Value.PRIVATE_MODE)])
+        name = "Show private shortcut prompt",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.PRIVATE_SHORTCUT,
+        value = "",
+        extras = [TelemetryExtra(name = Extra.MODE, value = Extra_Value.PRIVATE_MODE)]
+    )
     @JvmStatic
     fun showPrivateShortcutPrompt() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.PRIVATE_SHORTCUT)
-                .extra(Extra.MODE, Extra_Value.PRIVATE_MODE)
-                .queue()
+            .extra(Extra.MODE, Extra_Value.PRIVATE_MODE)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click private shortcut prompt",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.PRIVATE_SHORTCUT,
-            value = "${Value.POSITIVE},${Value.NEGATIVE},${Value.DISMISS}",
-            extras = [TelemetryExtra(name = Extra.MODE, value = Extra_Value.PRIVATE_MODE)])
+        name = "Click private shortcut prompt",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.PRIVATE_SHORTCUT,
+        value = "${Value.POSITIVE},${Value.NEGATIVE},${Value.DISMISS}",
+        extras = [TelemetryExtra(name = Extra.MODE, value = Extra_Value.PRIVATE_MODE)]
+    )
     @JvmStatic
     fun clickPrivateShortcutPrompt(value: String) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.PRIVATE_SHORTCUT, value)
-                .extra(Extra.MODE, Extra_Value.PRIVATE_MODE)
-                .queue()
+            .extra(Extra.MODE, Extra_Value.PRIVATE_MODE)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Users clicked on a Setting",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.SETTING,
-            value = Value.SETTINGS_PRIVATE_SHORTCUT,
-            extras = [])
+        name = "Users clicked on a Setting",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.SETTING,
+        value = Value.SETTINGS_PRIVATE_SHORTCUT,
+        extras = []
+    )
     @JvmStatic
     fun clickPrivateShortcutItemInSettings() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.SETTING, Value.SETTINGS_PRIVATE_SHORTCUT)
-                .queue()
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Exit private mode",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.PRIVATE_MODE,
-            value = Value.EXIT,
-            extras = [
-                TelemetryExtra(name = Extra.FROM, value = "[${Extra_Value.SYSTEM_BACK}]"),
-                TelemetryExtra(name = Extra.MODE, value = Extra_Value.PRIVATE_MODE)
-            ])
+        name = "Exit private mode",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.PRIVATE_MODE,
+        value = Value.EXIT,
+        extras = [
+            TelemetryExtra(name = Extra.FROM, value = "[${Extra_Value.SYSTEM_BACK}]"),
+            TelemetryExtra(name = Extra.MODE, value = Extra_Value.PRIVATE_MODE)
+        ]
+    )
     @JvmStatic
     fun exitPrivateMode(from: String) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.PRIVATE_MODE, Value.EXIT)
-                .extra(Extra.FROM, from)
-                .extra(Extra.MODE, Extra_Value.PRIVATE_MODE)
-                .queue()
+            .extra(Extra.FROM, from)
+            .extra(Extra.MODE, Extra_Value.PRIVATE_MODE)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Private shortcut created",
-            category = Category.ACTION,
-            method = Method.PIN_SHORTCUT,
-            `object` = Object.PRIVATE_SHORTCUT,
-            value = "",
-            extras = [TelemetryExtra(name = Extra.MODE, value = Extra_Value.PRIVATE_MODE)])
+        name = "Private shortcut created",
+        category = Category.ACTION,
+        method = Method.PIN_SHORTCUT,
+        `object` = Object.PRIVATE_SHORTCUT,
+        value = "",
+        extras = [TelemetryExtra(name = Extra.MODE, value = Extra_Value.PRIVATE_MODE)]
+    )
     @JvmStatic
     fun createPrivateShortcut() {
         EventBuilder(Category.ACTION, Method.PIN_SHORTCUT, Object.PRIVATE_SHORTCUT)
-                .extra(Extra.MODE, Extra_Value.PRIVATE_MODE)
-                .queue()
+            .extra(Extra.MODE, Extra_Value.PRIVATE_MODE)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Kill app",
-            category = Category.ACTION,
-            method = Method.KILL,
-            `object` = Object.APP,
-            value = "",
-            extras = [TelemetryExtra(name = Extra.MODE, value = Extra_Value.PRIVATE_MODE)])
+        name = "Kill app",
+        category = Category.ACTION,
+        method = Method.KILL,
+        `object` = Object.APP,
+        value = "",
+        extras = [TelemetryExtra(name = Extra.MODE, value = Extra_Value.PRIVATE_MODE)]
+    )
     @JvmStatic
     fun appKilled(mode: String) {
         EventBuilder(Category.ACTION, Method.KILL, Object.APP)
-                .extra(Extra.MODE, mode)
-                .queue()
+            .extra(Extra.MODE, mode)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "App is launched by external app",
-            category = Category.ACTION,
-            method = Method.LAUNCH,
-            `object` = Object.APP,
-            value = Value.EXTERNAL_APP,
-            extras = [TelemetryExtra(name = Extra.TYPE, value = Extra_Value.TEXT_SELECTION + "," + Extra_Value.WEB_SEARCH)])
+        name = "App is launched by external app",
+        category = Category.ACTION,
+        method = Method.LAUNCH,
+        `object` = Object.APP,
+        value = Value.EXTERNAL_APP,
+        extras = [
+            TelemetryExtra(
+                name = Extra.TYPE,
+                value = Extra_Value.TEXT_SELECTION + "," + Extra_Value.WEB_SEARCH
+            )
+        ]
+    )
     @JvmStatic
     fun launchByExternalAppEvent(value: String?) {
         if (value == null) {
             EventBuilder(Category.ACTION, Method.LAUNCH, Object.APP, Value.EXTERNAL_APP).queue()
         } else {
             EventBuilder(Category.ACTION, Method.LAUNCH, Object.APP, Value.EXTERNAL_APP)
-                    .extra(Extra.TYPE, value)
-                    .queue()
+                .extra(Extra.TYPE, value)
+                .queue()
         }
     }
 
     @TelemetryDoc(
-            name = "Users changed a Setting",
-            category = Category.ACTION,
-            method = Method.CHANGE,
-            `object` = Object.SETTING,
-            value = "settings pref key",
-            extras = [TelemetryExtra(name = Extra.TO, value = "New Value for the pref")],
-            skipAmplitude = true)
+        name = "Users changed a Setting",
+        category = Category.ACTION,
+        method = Method.CHANGE,
+        `object` = Object.SETTING,
+        value = "settings pref key",
+        extras = [TelemetryExtra(name = Extra.TO, value = "New Value for the pref")],
+        skipAmplitude = true
+    )
     @JvmStatic
     fun settingsEvent(key: String, value: String) {
         // We only log whitelist-ed setting
         val validPrefKey = FirebaseEvent.getValidPrefKey(key)
         if (validPrefKey != null) {
             EventBuilder(Category.ACTION, Method.CHANGE, Object.SETTING, validPrefKey)
-                    .extra(Extra.TO, value)
-                    .queue()
+                .extra(Extra.TO, value)
+                .queue()
         }
     }
 
     @TelemetryDoc(
-            name = "Users clicked on a Setting",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.SETTING,
-            value = "settings pref key",
-            extras = [],
-            skipAmplitude = true)
+        name = "Users clicked on a Setting",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.SETTING,
+        value = "settings pref key",
+        extras = [],
+        skipAmplitude = true
+    )
     @JvmStatic
     fun settingsClickEvent(key: String) {
         val validPrefKey = FirebaseEvent.getValidPrefKey(key)
@@ -504,186 +535,203 @@ object TelemetryWrapper {
     }
 
     @TelemetryDoc(
-            name = "Users clicked on the Learn More link in Settings",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.SETTING,
-            value = Value.LEARN_MORE,
-            extras = [TelemetryExtra(name = Extra.SOURCE, value = "TurboMode")])
+        name = "Users clicked on the Learn More link in Settings",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.SETTING,
+        value = Value.LEARN_MORE,
+        extras = [TelemetryExtra(name = Extra.SOURCE, value = "TurboMode")]
+    )
     @JvmStatic
     fun settingsLearnMoreClickEvent(source: String) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.SETTING, Value.LEARN_MORE)
-                .extra(Extra.SOURCE, source)
-                .queue()
+            .extra(Extra.SOURCE, source)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Users change Locale in Settings",
-            category = Category.ACTION,
-            method = Method.CHANGE,
-            `object` = Object.SETTING,
-            value = "pref_locale",
-            extras = [TelemetryExtra(name = Extra.TO, value = "Locale "),
-                TelemetryExtra(name = Extra.DEFAULT, value = "true,false")])
+        name = "Users change Locale in Settings",
+        category = Category.ACTION,
+        method = Method.CHANGE,
+        `object` = Object.SETTING,
+        value = "pref_locale",
+        extras = [
+            TelemetryExtra(name = Extra.TO, value = "Locale "),
+            TelemetryExtra(name = Extra.DEFAULT, value = "true,false")
+        ]
+    )
     @JvmStatic
     fun settingsLocaleChangeEvent(key: String, value: String, isDefault: Boolean) {
         EventBuilder(Category.ACTION, Method.CHANGE, Object.SETTING, key)
-                .extra(Extra.TO, value)
-                .extra(Extra.DEFAULT, java.lang.Boolean.toString(isDefault))
-                .queue()
+            .extra(Extra.TO, value)
+            .extra(Extra.DEFAULT, java.lang.Boolean.toString(isDefault))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Session starts",
-            category = Category.ACTION,
-            method = Method.FOREGROUND,
-            `object` = Object.APP,
-            value = "",
-            extras = [])
+        name = "Session starts",
+        category = Category.ACTION,
+        method = Method.FOREGROUND,
+        `object` = Object.APP,
+        value = "",
+        extras = []
+    )
     @JvmStatic
     fun startSession() {
         EventBuilder(Category.ACTION, Method.FOREGROUND, Object.APP).queue()
     }
 
     @TelemetryDoc(
-            name = "Session ends",
-            category = Category.ACTION,
-            method = Method.BACKGROUND,
-            `object` = Object.APP,
-            value = "",
-            extras = [])
+        name = "Session ends",
+        category = Category.ACTION,
+        method = Method.BACKGROUND,
+        `object` = Object.APP,
+        value = "",
+        extras = []
+    )
     @JvmStatic
     fun stopSession() {
         EventBuilder(Category.ACTION, Method.BACKGROUND, Object.APP).queue()
     }
 
     @TelemetryDoc(
-            name = "Long Press ContextMenu",
-            category = Category.ACTION,
-            method = Method.LONG_PRESS,
-            `object` = Object.BROWSER,
-            value = "",
-            extras = [])
+        name = "Long Press ContextMenu",
+        category = Category.ACTION,
+        method = Method.LONG_PRESS,
+        `object` = Object.BROWSER,
+        value = "",
+        extras = []
+    )
     @JvmStatic
     fun openWebContextMenuEvent() {
         EventBuilder(Category.ACTION, Method.LONG_PRESS, Object.BROWSER).queue()
     }
 
     @TelemetryDoc(
-            name = "Cancel ContextMenu",
-            category = Category.ACTION,
-            method = Method.CANCEL,
-            `object` = Object.BROWSER_CONTEXTMENU,
-            value = "",
-            extras = [])
+        name = "Cancel ContextMenu",
+        category = Category.ACTION,
+        method = Method.CANCEL,
+        `object` = Object.BROWSER_CONTEXTMENU,
+        value = "",
+        extras = []
+    )
     @JvmStatic
     fun cancelWebContextMenuEvent() {
         EventBuilder(Category.ACTION, Method.CANCEL, Object.BROWSER_CONTEXTMENU).queue()
     }
 
     @TelemetryDoc(
-            name = "Share link via ContextMenu",
-            category = Category.ACTION,
-            method = Method.SHARE,
-            `object` = Object.BROWSER_CONTEXTMENU,
-            value = Value.LINK,
-            extras = [])
+        name = "Share link via ContextMenu",
+        category = Category.ACTION,
+        method = Method.SHARE,
+        `object` = Object.BROWSER_CONTEXTMENU,
+        value = Value.LINK,
+        extras = []
+    )
     @JvmStatic
     fun shareLinkEvent() {
         EventBuilder(Category.ACTION, Method.SHARE, Object.BROWSER_CONTEXTMENU, Value.LINK).queue()
     }
 
     @TelemetryDoc(
-            name = "Share image via ContextMenu",
-            category = Category.ACTION,
-            method = Method.SHARE,
-            `object` = Object.BROWSER_CONTEXTMENU,
-            value = Value.IMAGE,
-            extras = [])
+        name = "Share image via ContextMenu",
+        category = Category.ACTION,
+        method = Method.SHARE,
+        `object` = Object.BROWSER_CONTEXTMENU,
+        value = Value.IMAGE,
+        extras = []
+    )
     @JvmStatic
     fun shareImageEvent() {
         EventBuilder(Category.ACTION, Method.SHARE, Object.BROWSER_CONTEXTMENU, Value.IMAGE).queue()
     }
 
     @TelemetryDoc(
-            name = "Save image via ContextMenu",
-            category = Category.ACTION,
-            method = Method.SAVE,
-            `object` = Object.BROWSER_CONTEXTMENU,
-            value = Value.IMAGE,
-            extras = [])
+        name = "Save image via ContextMenu",
+        category = Category.ACTION,
+        method = Method.SAVE,
+        `object` = Object.BROWSER_CONTEXTMENU,
+        value = Value.IMAGE,
+        extras = []
+    )
     @JvmStatic
     fun saveImageEvent() {
         EventBuilder(Category.ACTION, Method.SAVE, Object.BROWSER_CONTEXTMENU, Value.IMAGE).queue()
     }
 
     @TelemetryDoc(
-            name = "Copy link via ContextMenu",
-            category = Category.ACTION,
-            method = Method.COPY,
-            `object` = Object.BROWSER_CONTEXTMENU,
-            value = Value.LINK,
-            extras = [])
+        name = "Copy link via ContextMenu",
+        category = Category.ACTION,
+        method = Method.COPY,
+        `object` = Object.BROWSER_CONTEXTMENU,
+        value = Value.LINK,
+        extras = []
+    )
     @JvmStatic
     fun copyLinkEvent() {
         EventBuilder(Category.ACTION, Method.COPY, Object.BROWSER_CONTEXTMENU, Value.LINK).queue()
     }
 
     @TelemetryDoc(
-            name = "Copy image via ContextMenu",
-            category = Category.ACTION,
-            method = Method.COPY,
-            `object` = Object.BROWSER_CONTEXTMENU,
-            value = Value.IMAGE,
-            extras = [])
+        name = "Copy image via ContextMenu",
+        category = Category.ACTION,
+        method = Method.COPY,
+        `object` = Object.BROWSER_CONTEXTMENU,
+        value = Value.IMAGE,
+        extras = []
+    )
     @JvmStatic
     fun copyImageEvent() {
         EventBuilder(Category.ACTION, Method.COPY, Object.BROWSER_CONTEXTMENU, Value.IMAGE).queue()
     }
 
     @TelemetryDoc(
-            name = "Add link via ContextMenu",
-            category = Category.ACTION,
-            method = Method.ADD,
-            `object` = Object.BROWSER_CONTEXTMENU,
-            value = Value.LINK,
-            extras = [])
+        name = "Add link via ContextMenu",
+        category = Category.ACTION,
+        method = Method.ADD,
+        `object` = Object.BROWSER_CONTEXTMENU,
+        value = Value.LINK,
+        extras = []
+    )
     @JvmStatic
     fun addNewTabFromContextMenu() {
         EventBuilder(Category.ACTION, Method.ADD, Object.BROWSER_CONTEXTMENU, Value.LINK).queue()
     }
 
     @TelemetryDoc(
-            name = "Permission-Geolocation",
-            category = Category.ACTION,
-            method = Method.PERMISSION,
-            `object` = Object.BROWSER,
-            value = Value.GEOLOCATION,
-            extras = [])
+        name = "Permission-Geolocation",
+        category = Category.ACTION,
+        method = Method.PERMISSION,
+        `object` = Object.BROWSER,
+        value = Value.GEOLOCATION,
+        extras = []
+    )
     @JvmStatic
     fun browseGeoLocationPermissionEvent() {
         EventBuilder(Category.ACTION, Method.PERMISSION, Object.BROWSER, Value.GEOLOCATION).queue()
     }
 
     @TelemetryDoc(
-            name = "Permission-File",
-            category = Category.ACTION,
-            method = Method.PERMISSION,
-            `object` = Object.BROWSER,
-            value = Value.FILE,
-            extras = [])
+        name = "Permission-File",
+        category = Category.ACTION,
+        method = Method.PERMISSION,
+        `object` = Object.BROWSER,
+        value = Value.FILE,
+        extras = []
+    )
     @JvmStatic
     fun browseFilePermissionEvent() {
         EventBuilder(Category.ACTION, Method.PERMISSION, Object.BROWSER, Value.FILE).queue()
     }
 
     @TelemetryDoc(
-            name = "Permission-Media",
-            category = Category.ACTION,
-            method = Method.PERMISSION,
-            `object` = Object.BROWSER,
-            value = "${Value.AUDIO},${Value.VIDEO},${Value.EME},${Value.MIDI}",
-            extras = [])
+        name = "Permission-Media",
+        category = Category.ACTION,
+        method = Method.PERMISSION,
+        `object` = Object.BROWSER,
+        value = "${Value.AUDIO},${Value.VIDEO},${Value.EME},${Value.MIDI}",
+        extras = []
+    )
     @JvmStatic
     fun browsePermissionEvent(requests: Array<String>) {
         for (request in requests) {
@@ -700,586 +748,638 @@ object TelemetryWrapper {
     }
 
     @TelemetryDoc(
-            name = "Enter full screen",
-            category = Category.ACTION,
-            method = Method.FULLSCREEN,
-            `object` = Object.BROWSER,
-            value = Value.ENTER,
-            extras = [])
+        name = "Enter full screen",
+        category = Category.ACTION,
+        method = Method.FULLSCREEN,
+        `object` = Object.BROWSER,
+        value = Value.ENTER,
+        extras = []
+    )
     @JvmStatic
     fun browseEnterFullScreenEvent() {
         EventBuilder(Category.ACTION, Method.FULLSCREEN, Object.BROWSER, Value.ENTER).queue()
     }
 
     @TelemetryDoc(
-            name = "Exit full screen",
-            category = Category.ACTION,
-            method = Method.FULLSCREEN,
-            `object` = Object.BROWSER,
-            value = Value.EXIT,
-            extras = [])
+        name = "Exit full screen",
+        category = Category.ACTION,
+        method = Method.FULLSCREEN,
+        `object` = Object.BROWSER,
+        value = Value.EXIT,
+        extras = []
+    )
     @JvmStatic
     fun browseExitFullScreenEvent() {
         EventBuilder(Category.ACTION, Method.FULLSCREEN, Object.BROWSER, Value.EXIT).queue()
     }
 
     @TelemetryDoc(
-            name = "Show Menu from Home",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.MENU,
-            value = Value.HOME,
-            extras = [])
+        name = "Show Menu from Home",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.MENU,
+        value = Value.HOME,
+        extras = []
+    )
     @JvmStatic
     fun showMenuHome() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.MENU, Value.HOME).queue()
     }
 
     @TelemetryDoc(
-            name = "Show TabTray from Home",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.TABTRAY,
-            value = Value.HOME,
-            extras = [])
+        name = "Show TabTray from Home",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.TABTRAY,
+        value = Value.HOME,
+        extras = []
+    )
     @JvmStatic
     fun showTabTrayHome() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.TABTRAY, Value.HOME).queue()
     }
 
     @TelemetryDoc(
-            name = "Show TabTray from Toolbar",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.TABTRAY,
-            value = Value.TOOLBAR,
-            extras = [
-                TelemetryExtra(name = Extra.VERSION, value = "2"),
-                TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-4]"),
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Show TabTray from Toolbar",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.TABTRAY,
+        value = Value.TOOLBAR,
+        extras = [
+            TelemetryExtra(name = Extra.VERSION, value = "2"),
+            TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-4]"),
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun showTabTrayToolbar(mode: String, position: Int, isInLandscape: Boolean = false) {
         EventBuilder(Category.ACTION, Method.SHOW, Object.TABTRAY, Value.TOOLBAR)
-                .extra(Extra.VERSION, "2")
-                .extra(Extra.MODE, mode)
-                .extra(Extra.POSITION, Integer.toString(position))
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(Extra.VERSION, "2")
+            .extra(Extra.MODE, mode)
+            .extra(Extra.POSITION, Integer.toString(position))
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Menu from Toolbar",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.MENU,
-            value = Value.TOOLBAR,
-            extras = [
-                TelemetryExtra(name = Extra.VERSION, value = "2"),
-                TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-4]")
-            ])
+        name = "Show Menu from Toolbar",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.MENU,
+        value = Value.TOOLBAR,
+        extras = [
+            TelemetryExtra(name = Extra.VERSION, value = "2"),
+            TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-4]")
+        ]
+    )
     @JvmStatic
     fun showMenuToolbar(mode: String, position: Int) {
         EventBuilder(Category.ACTION, Method.SHOW, Object.MENU, Value.TOOLBAR)
-                .extra(Extra.VERSION, "2")
-                .extra(Extra.MODE, mode)
-                .extra(Extra.POSITION, Integer.toString(position))
-                .queue()
+            .extra(Extra.VERSION, "2")
+            .extra(Extra.MODE, mode)
+            .extra(Extra.POSITION, Integer.toString(position))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - Downloads",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MENU,
-            value = Value.DOWNLOAD,
-            extras = [])
+        name = "Click Menu - Downloads",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MENU,
+        value = Value.DOWNLOAD,
+        extras = []
+    )
     @JvmStatic
     fun clickMenuDownload() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.MENU, Value.DOWNLOAD).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - History",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MENU,
-            value = Value.HISTORY,
-            extras = [])
+        name = "Click Menu - History",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MENU,
+        value = Value.HISTORY,
+        extras = []
+    )
     @JvmStatic
     fun clickMenuHistory() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.MENU, Value.HISTORY).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - MyShots",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MENU,
-            value = Value.CAPTURE,
-            extras = [])
+        name = "Click Menu - MyShots",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MENU,
+        value = Value.CAPTURE,
+        extras = []
+    )
     @JvmStatic
     fun clickMenuCapture() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.MENU, Value.CAPTURE).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Panel - Bookmarks",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.PANEL,
-            value = Value.BOOKMARK,
-            extras = [])
+        name = "Click Panel - Bookmarks",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.PANEL,
+        value = Value.BOOKMARK,
+        extras = []
+    )
     @JvmStatic
     fun showPanelBookmark() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.PANEL, Value.BOOKMARK).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Panel - Downloads",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.PANEL,
-            value = Value.DOWNLOAD,
-            extras = [])
+        name = "Click Panel - Downloads",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.PANEL,
+        value = Value.DOWNLOAD,
+        extras = []
+    )
     @JvmStatic
     fun showPanelDownload() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.PANEL, Value.DOWNLOAD).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Panel - History",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.PANEL,
-            value = Value.HISTORY,
-            extras = [])
+        name = "Click Panel - History",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.PANEL,
+        value = Value.HISTORY,
+        extras = []
+    )
     @JvmStatic
     fun showPanelHistory() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.PANEL, Value.HISTORY).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Panel - MyShots",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.PANEL,
-            value = Value.CAPTURE,
-            extras = [])
+        name = "Click Panel - MyShots",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.PANEL,
+        value = Value.CAPTURE,
+        extras = []
+    )
     @JvmStatic
     fun showPanelCapture() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.PANEL, Value.CAPTURE).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - TurboMode",
-            category = Category.ACTION,
-            method = Method.CHANGE,
-            `object` = Object.MENU,
-            value = Value.TURBO,
-            extras = [TelemetryExtra(name = Extra.TO, value = "true,false")])
+        name = "Click Menu - TurboMode",
+        category = Category.ACTION,
+        method = Method.CHANGE,
+        `object` = Object.MENU,
+        value = Value.TURBO,
+        extras = [TelemetryExtra(name = Extra.TO, value = "true,false")]
+    )
     @JvmStatic
     fun menuTurboChangeTo(enable: Boolean) {
         EventBuilder(Category.ACTION, Method.CHANGE, Object.MENU, Value.TURBO)
-                .extra(Extra.TO, java.lang.Boolean.toString(enable))
-                .queue()
+            .extra(Extra.TO, java.lang.Boolean.toString(enable))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - Night Mode",
-            category = Category.ACTION,
-            method = Method.CHANGE,
-            `object` = Object.MENU,
-            value = Value.NIGHT_MODE,
-            extras = [TelemetryExtra(name = Extra.TO, value = "true,false")])
+        name = "Click Menu - Night Mode",
+        category = Category.ACTION,
+        method = Method.CHANGE,
+        `object` = Object.MENU,
+        value = Value.NIGHT_MODE,
+        extras = [TelemetryExtra(name = Extra.TO, value = "true,false")]
+    )
     @JvmStatic
     fun menuNightModeChangeTo(enable: Boolean) {
         EventBuilder(Category.ACTION, Method.CHANGE, Object.MENU, Value.NIGHT_MODE)
-                .extra(Extra.TO, java.lang.Boolean.toString(enable))
-                .queue()
+            .extra(Extra.TO, java.lang.Boolean.toString(enable))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - Block Images",
-            category = Category.ACTION,
-            method = Method.CHANGE,
-            `object` = Object.MENU,
-            value = Value.BLOCK_IMAGE,
-            extras = [TelemetryExtra(name = Extra.TO, value = "true,false")])
+        name = "Click Menu - Block Images",
+        category = Category.ACTION,
+        method = Method.CHANGE,
+        `object` = Object.MENU,
+        value = Value.BLOCK_IMAGE,
+        extras = [TelemetryExtra(name = Extra.TO, value = "true,false")]
+    )
     @JvmStatic
     fun menuBlockImageChangeTo(enable: Boolean) {
         EventBuilder(Category.ACTION, Method.CHANGE, Object.MENU, Value.BLOCK_IMAGE)
-                .extra(Extra.TO, java.lang.Boolean.toString(enable))
-                .queue()
+            .extra(Extra.TO, java.lang.Boolean.toString(enable))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - Clear cache",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MENU,
-            value = Value.CLEAR_CACHE,
-            extras = [])
+        name = "Click Menu - Clear cache",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MENU,
+        value = Value.CLEAR_CACHE,
+        extras = []
+    )
     @JvmStatic
     fun clickMenuClearCache() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.MENU, Value.CLEAR_CACHE).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - Settings",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MENU,
-            value = Value.SETTINGS,
-            extras = [])
+        name = "Click Menu - Settings",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MENU,
+        value = Value.SETTINGS,
+        extras = []
+    )
     @JvmStatic
     fun clickMenuSettings() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.MENU, SETTINGS).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - Exit",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MENU,
-            value = Value.EXIT,
-            extras = [])
+        name = "Click Menu - Exit",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MENU,
+        value = Value.EXIT,
+        extras = []
+    )
     @JvmStatic
     fun clickMenuExit() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.MENU, Value.EXIT).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - Bookmarks",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MENU,
-            value = Value.BOOKMARK,
-            extras = [])
+        name = "Click Menu - Bookmarks",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MENU,
+        value = Value.BOOKMARK,
+        extras = []
+    )
     @JvmStatic
     fun clickMenuBookmark() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.MENU, Value.BOOKMARK).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - Theme",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MENU,
-            value = Value.THEME,
-            extras = [])
+        name = "Click Menu - Theme",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MENU,
+        value = Value.THEME,
+        extras = []
+    )
     @JvmStatic
     fun clickMenuTheme() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.MENU, Value.THEME).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - Add Topsite",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MENU,
-            value = Value.ADD_TOPSITE,
-            extras = [])
+        name = "Click Menu - Add Topsite",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MENU,
+        value = Value.ADD_TOPSITE,
+        extras = []
+    )
     @JvmStatic
     fun clickMenuAddTopsite() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.MENU, Value.ADD_TOPSITE).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Toolbar - Forward",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.TOOLBAR,
-            value = Value.FORWARD,
-            extras = [
-                TelemetryExtra(name = Extra.VERSION, value = "2"),
-                TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-4]")
-            ])
+        name = "Click Toolbar - Forward",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.TOOLBAR,
+        value = Value.FORWARD,
+        extras = [
+            TelemetryExtra(name = Extra.VERSION, value = "2"),
+            TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-4]")
+        ]
+    )
     @JvmStatic
     fun clickToolbarForward(mode: String, position: Int) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.TOOLBAR, Value.FORWARD)
-                .extra(Extra.VERSION, "2")
-                .extra(Extra.MODE, mode)
-                .extra(Extra.POSITION, Integer.toString(position))
-                .queue()
+            .extra(Extra.VERSION, "2")
+            .extra(Extra.MODE, mode)
+            .extra(Extra.POSITION, Integer.toString(position))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Toolbar - Reload",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.TOOLBAR,
-            value = Value.RELOAD,
-            extras = [
-                TelemetryExtra(name = Extra.VERSION, value = "2"),
-                TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-4]"),
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Click Toolbar - Reload",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.TOOLBAR,
+        value = Value.RELOAD,
+        extras = [
+            TelemetryExtra(name = Extra.VERSION, value = "2"),
+            TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-4]"),
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun clickToolbarReload(mode: String, position: Int, isInLandscape: Boolean = false) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.TOOLBAR, Value.RELOAD)
-                .extra(Extra.VERSION, "2")
-                .extra(Extra.MODE, mode)
-                .extra(Extra.POSITION, Integer.toString(position))
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(Extra.VERSION, "2")
+            .extra(Extra.MODE, mode)
+            .extra(Extra.POSITION, Integer.toString(position))
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Toolbar - Share Link",
-            category = Category.ACTION,
-            method = Method.SHARE,
-            `object` = Object.TOOLBAR,
-            value = Value.LINK,
-            extras = [
-                TelemetryExtra(name = Extra.VERSION, value = "2"),
-                TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-4]"),
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Click Toolbar - Share Link",
+        category = Category.ACTION,
+        method = Method.SHARE,
+        `object` = Object.TOOLBAR,
+        value = Value.LINK,
+        extras = [
+            TelemetryExtra(name = Extra.VERSION, value = "2"),
+            TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-4]"),
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun clickToolbarShare(mode: String, position: Int, isInLandscape: Boolean = false) {
         EventBuilder(Category.ACTION, Method.SHARE, Object.TOOLBAR, Value.LINK)
-                .extra(Extra.VERSION, "2")
-                .extra(Extra.MODE, mode)
-                .extra(Extra.POSITION, Integer.toString(position))
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(Extra.VERSION, "2")
+            .extra(Extra.MODE, mode)
+            .extra(Extra.POSITION, Integer.toString(position))
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Toolbar - Add bookmark",
-            category = Category.ACTION,
-            method = Method.SHARE,
-            `object` = Object.TOOLBAR,
-            value = Value.BOOKMARK,
-            extras = [
-                TelemetryExtra(name = Extra.VERSION, value = "2"),
-                TelemetryExtra(name = Extra.TO, value = "true,false"),
-                TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-4]")
-            ])
+        name = "Click Toolbar - Add bookmark",
+        category = Category.ACTION,
+        method = Method.SHARE,
+        `object` = Object.TOOLBAR,
+        value = Value.BOOKMARK,
+        extras = [
+            TelemetryExtra(name = Extra.VERSION, value = "2"),
+            TelemetryExtra(name = Extra.TO, value = "true,false"),
+            TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-4]")
+        ]
+    )
     @JvmStatic
     fun clickToolbarBookmark(isAdd: Boolean, mode: String, position: Int) {
         EventBuilder(Category.ACTION, Method.SHARE, Object.TOOLBAR, Value.BOOKMARK)
-                .extra(Extra.VERSION, "2")
-                .extra(Extra.TO, java.lang.Boolean.toString(isAdd))
-                .extra(Extra.MODE, mode)
-                .extra(Extra.POSITION, Integer.toString(position))
-                .queue()
+            .extra(Extra.VERSION, "2")
+            .extra(Extra.TO, java.lang.Boolean.toString(isAdd))
+            .extra(Extra.MODE, mode)
+            .extra(Extra.POSITION, Integer.toString(position))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Toolbar - Pin shortcut",
-            category = Category.ACTION,
-            method = Method.PIN_SHORTCUT,
-            `object` = Object.TOOLBAR,
-            value = Value.LINK,
-            extras = [
-                TelemetryExtra(name = Extra.VERSION, value = "2"),
-                TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-4]")
-            ])
+        name = "Click Toolbar - Pin shortcut",
+        category = Category.ACTION,
+        method = Method.PIN_SHORTCUT,
+        `object` = Object.TOOLBAR,
+        value = Value.LINK,
+        extras = [
+            TelemetryExtra(name = Extra.VERSION, value = "2"),
+            TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-4]")
+        ]
+    )
     @JvmStatic
     fun clickAddToHome(mode: String, position: Int) {
         EventBuilder(Category.ACTION, Method.PIN_SHORTCUT, Object.TOOLBAR, Value.LINK)
-                .extra(Extra.VERSION, "2")
-                .extra(Extra.MODE, mode)
-                .extra(Extra.POSITION, Integer.toString(position))
-                .queue()
+            .extra(Extra.VERSION, "2")
+            .extra(Extra.MODE, mode)
+            .extra(Extra.POSITION, Integer.toString(position))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Menu - Pin shortcut",
-            category = Category.ACTION,
-            method = Method.PIN_SHORTCUT,
-            `object` = Object.MENU,
-            value = Value.LINK,
-            extras = [])
+        name = "Click Menu - Pin shortcut",
+        category = Category.ACTION,
+        method = Method.PIN_SHORTCUT,
+        `object` = Object.MENU,
+        value = Value.LINK,
+        extras = []
+    )
     @JvmStatic
     fun clickMenuPinShortcut() {
         EventBuilder(Category.ACTION, Method.PIN_SHORTCUT, Object.MENU, Value.LINK)
-                .queue()
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Toolbar - Take Screenshot",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.TOOLBAR,
-            value = Value.CAPTURE,
-            extras = [TelemetryExtra(name = Extra.VERSION, value = "4"),
-                TelemetryExtra(name = Extra.CATEGORY, value = "category name"),
-                TelemetryExtra(name = Extra.CATEGORY_VERSION, value = "category version"),
-                TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
-                TelemetryExtra(name = Extra.POSITION, value = "0-4")
-            ])
+        name = "Click Toolbar - Take Screenshot",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.TOOLBAR,
+        value = Value.CAPTURE,
+        extras = [
+            TelemetryExtra(name = Extra.VERSION, value = "4"),
+            TelemetryExtra(name = Extra.CATEGORY, value = "category name"),
+            TelemetryExtra(name = Extra.CATEGORY_VERSION, value = "category version"),
+            TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
+            TelemetryExtra(name = Extra.POSITION, value = "0-4")
+        ]
+    )
     @JvmStatic
     fun clickToolbarCapture(category: String, categoryVersion: Int, mode: String, position: Int) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.TOOLBAR, Value.CAPTURE)
-                .extra(Extra.VERSION, "4")
-                .extra(Extra.CATEGORY, category)
-                .extra(Extra.CATEGORY_VERSION, Integer.toString(categoryVersion))
-                .extra(Extra.MODE, mode)
-                .extra(Extra.POSITION, Integer.toString(position))
-                .queue()
+            .extra(Extra.VERSION, "4")
+            .extra(Extra.CATEGORY, category)
+            .extra(Extra.CATEGORY_VERSION, Integer.toString(categoryVersion))
+            .extra(Extra.MODE, mode)
+            .extra(Extra.POSITION, Integer.toString(position))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Top Site",
-            category = Category.ACTION,
-            method = Method.OPEN,
-            `object` = Object.HOME,
-            value = Value.LINK,
-            extras = [TelemetryExtra(name = Extra.ON, value = "Top Site Position"),
-                TelemetryExtra(name = Extra.SOURCE, value = "Preset Top Site like **"),
-                TelemetryExtra(name = Extra.VERSION, value = OPEN_HOME_LINK_VERSION),
-                TelemetryExtra(name = Extra.DEFAULT, value = "true,false"),
-                TelemetryExtra(name = Extra.PINNED, value = "true,false")
-            ])
+        name = "Click Top Site",
+        category = Category.ACTION,
+        method = Method.OPEN,
+        `object` = Object.HOME,
+        value = Value.LINK,
+        extras = [
+            TelemetryExtra(name = Extra.ON, value = "Top Site Position"),
+            TelemetryExtra(name = Extra.SOURCE, value = "Preset Top Site like **"),
+            TelemetryExtra(name = Extra.VERSION, value = OPEN_HOME_LINK_VERSION),
+            TelemetryExtra(name = Extra.DEFAULT, value = "true,false"),
+            TelemetryExtra(name = Extra.PINNED, value = "true,false")
+        ]
+    )
     @JvmStatic
     fun clickTopSiteOn(index: Int, source: String, isDefault: Boolean, isPinned: Boolean) {
         EventBuilder(Category.ACTION, Method.OPEN, Object.HOME, Value.LINK)
-                .extra(Extra.ON, index.toString())
-                .extra(Extra.SOURCE, source)
-                .extra(Extra.VERSION, OPEN_HOME_LINK_VERSION)
-                .extra(Extra.DEFAULT, isDefault.toString())
-                .extra(Extra.PINNED, isPinned.toString())
-                .queue()
+            .extra(Extra.ON, index.toString())
+            .extra(Extra.SOURCE, source)
+            .extra(Extra.VERSION, OPEN_HOME_LINK_VERSION)
+            .extra(Extra.DEFAULT, isDefault.toString())
+            .extra(Extra.PINNED, isPinned.toString())
+            .queue()
 
         EventBuilder(Category.ACTION, Method.ADD, Object.TAB, Value.TOPSITE)
-                .queue()
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Remove Top Site",
-            category = Category.ACTION,
-            method = Method.REMOVE,
-            `object` = Object.HOME,
-            value = Value.LINK,
-            extras = [
-                TelemetryExtra(name = Extra.DEFAULT, value = "true,false"),
-                TelemetryExtra(name = Extra.ON, value = "Default Top Site Position"),
-                TelemetryExtra(name = Extra.SOURCE, value = "Default Topsite Name"),
-                TelemetryExtra(name = Extra.PINNED, value = "true,false")
-            ])
+        name = "Remove Top Site",
+        category = Category.ACTION,
+        method = Method.REMOVE,
+        `object` = Object.HOME,
+        value = Value.LINK,
+        extras = [
+            TelemetryExtra(name = Extra.DEFAULT, value = "true,false"),
+            TelemetryExtra(name = Extra.ON, value = "Default Top Site Position"),
+            TelemetryExtra(name = Extra.SOURCE, value = "Default Topsite Name"),
+            TelemetryExtra(name = Extra.PINNED, value = "true,false")
+        ]
+    )
     @JvmStatic
     fun removeTopSite(isDefault: Boolean, position: Int, source: String, isPinned: Boolean) {
         EventBuilder(Category.ACTION, Method.REMOVE, Object.HOME, Value.LINK)
-                .extra(Extra.DEFAULT, isDefault.toString())
-                .extra(Extra.ON, position.toString())
-                .extra(Extra.SOURCE, source)
-                .extra(Extra.PINNED, isPinned.toString())
-                .queue()
+            .extra(Extra.DEFAULT, isDefault.toString())
+            .extra(Extra.ON, position.toString())
+            .extra(Extra.SOURCE, source)
+            .extra(Extra.PINNED, isPinned.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Add Topsite",
-            category = Category.ACTION,
-            method = Method.ADD,
-            `object` = Object.HOME,
-            value = Value.LINK,
-            extras = [
-                TelemetryExtra(name = Extra.FROM, value = "${Extra_Value.CONTEXT_MENU},${Extra_Value.EMPTY_HINT}")
-            ])
+        name = "Add Topsite",
+        category = Category.ACTION,
+        method = Method.ADD,
+        `object` = Object.HOME,
+        value = Value.LINK,
+        extras = [
+            TelemetryExtra(
+                name = Extra.FROM,
+                value = "${Extra_Value.CONTEXT_MENU},${Extra_Value.EMPTY_HINT}"
+            )
+        ]
+    )
     @JvmStatic
     fun addTopSite(from: String) {
         EventBuilder(Category.ACTION, Method.ADD, Object.HOME, Value.LINK)
-                .extra(Extra.FROM, from)
-                .queue()
+            .extra(Extra.FROM, from)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Add Topsite Snackbar",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.SNACKBAR,
-            value = Value.ADD_TOPSITE,
-            extras = [])
+        name = "Click Add Topsite Snackbar",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.SNACKBAR,
+        value = Value.ADD_TOPSITE,
+        extras = []
+    )
     @JvmStatic
     fun clickAddTopSiteFromSnackBar() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.SNACKBAR, Value.ADD_TOPSITE)
-                .queue()
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Select to Add Topsite",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.PANEL,
-            value = Value.ADD_TOPSITE,
-            extras = [
-                TelemetryExtra(name = Extra.DEFAULT, value = "true,false"),
-                TelemetryExtra(name = Extra.ON, value = "Default Top Site Position"),
-                TelemetryExtra(name = Extra.SOURCE, value = "Default Topsite Name")
-            ])
+        name = "Select to Add Topsite",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.PANEL,
+        value = Value.ADD_TOPSITE,
+        extras = [
+            TelemetryExtra(name = Extra.DEFAULT, value = "true,false"),
+            TelemetryExtra(name = Extra.ON, value = "Default Top Site Position"),
+            TelemetryExtra(name = Extra.SOURCE, value = "Default Topsite Name")
+        ]
+    )
     @JvmStatic
     fun selectToAddTopSite(isDefault: Boolean, position: Int, source: String) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.PANEL, Value.ADD_TOPSITE)
-                .extra(Extra.DEFAULT, java.lang.Boolean.toString(isDefault))
-                .extra(Extra.ON, position.toString())
-                .extra(Extra.SOURCE, source)
-                .queue()
+            .extra(Extra.DEFAULT, java.lang.Boolean.toString(isDefault))
+            .extra(Extra.ON, position.toString())
+            .extra(Extra.SOURCE, source)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Theme Contextual Hint",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.CONTEXTUAL_HINT,
-            value = Value.THEME,
-            extras = [])
+        name = "Show Theme Contextual Hint",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.CONTEXTUAL_HINT,
+        value = Value.THEME,
+        extras = []
+    )
     @JvmStatic
     fun showThemeContextualHint() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.CONTEXTUAL_HINT, Value.THEME).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Theme Contextual Hint",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.CONTEXTUAL_HINT,
-            value = Value.THEME,
-            extras = [
-                TelemetryExtra(name = Extra.THEME, value = "aqua,cyan,raspberry,iris,night")
-            ])
+        name = "Click Theme Contextual Hint",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.CONTEXTUAL_HINT,
+        value = Value.THEME,
+        extras = [
+            TelemetryExtra(name = Extra.THEME, value = "aqua,cyan,raspberry,iris,night")
+        ]
+    )
     @JvmStatic
     fun clickThemeContextualHint(name: String) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.CONTEXTUAL_HINT, Value.THEME)
-                .extra(Extra.THEME, name)
-                .queue()
+            .extra(Extra.THEME, name)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Go-Set-Default Message",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.MESSAGE,
-            value = Value.GO_SET_DEFAULT,
-            extras = [])
+        name = "Show Go-Set-Default Message",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.MESSAGE,
+        value = Value.GO_SET_DEFAULT,
+        extras = []
+    )
     @JvmStatic
     fun showGoSetDefaultMessage() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.MESSAGE, Value.GO_SET_DEFAULT).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Go-Set-Default Message",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MESSAGE,
-            value = Value.GO_SET_DEFAULT,
-            extras = [
-                TelemetryExtra(name = Extra.ACTION, value = "later,ok")
-            ])
+        name = "Click Go-Set-Default Message",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MESSAGE,
+        value = Value.GO_SET_DEFAULT,
+        extras = [
+            TelemetryExtra(name = Extra.ACTION, value = "later,ok")
+        ]
+    )
     @JvmStatic
     fun clickGoSetDefaultMessage(action: String) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.MESSAGE, Value.GO_SET_DEFAULT)
-                .extra(Extra.ACTION, action)
-                .queue()
+            .extra(Extra.ACTION, action)
+            .queue()
     }
 
     @TelemetryDoc(
@@ -1288,7 +1388,8 @@ object TelemetryWrapper {
         method = Method.ADD,
         `object` = Object.TAB,
         value = Value.HOME,
-        extras = [])
+        extras = []
+    )
     @JvmStatic
     fun addNewTabFromHome() {
         EventBuilder(Category.ACTION, Method.ADD, Object.TAB, Value.HOME).queue()
@@ -1311,326 +1412,393 @@ object TelemetryWrapper {
     }
 
     @TelemetryDoc(
-            name = "Enter an url in SearchBar",
-            category = Category.ACTION,
-            method = Method.OPEN,
-            `object` = Object.SEARCH_BAR,
-            value = Value.LINK,
-            extras = [
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape"),
-                TelemetryExtra(
-                    name = Extra.TYPE,
-                    value = "history,bookmark,clipboard,suggestion,tabtray,manualcomplete,autocomplete"
-                )
-            ])
+        name = "Enter an url in SearchBar",
+        category = Category.ACTION,
+        method = Method.OPEN,
+        `object` = Object.SEARCH_BAR,
+        value = Value.LINK,
+        extras = [
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape"),
+            TelemetryExtra(
+                name = Extra.TYPE,
+                value = "history,bookmark,clipboard,suggestion,tabtray,manualcomplete,autocomplete"
+            )
+        ]
+    )
     private fun browseEvent(isInLandscape: Boolean, type: String) {
         EventBuilder(Category.ACTION, Method.OPEN, Object.SEARCH_BAR, Value.LINK)
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .extra(Extra.TYPE, type)
-                .queue()
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .extra(Extra.TYPE, type)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Use SearchSuggestion SearchBar",
-            category = Category.ACTION,
-            method = Method.TYPE_SELECT_QUERY,
-            `object` = Object.SEARCH_BAR,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Use SearchSuggestion SearchBar",
+        category = Category.ACTION,
+        method = Method.TYPE_SELECT_QUERY,
+        `object` = Object.SEARCH_BAR,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun searchSelectEvent(isInLandscape: Boolean) {
         EventBuilder(Category.ACTION, Method.TYPE_SELECT_QUERY, Object.SEARCH_BAR)
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Search with text in SearchBar",
-            category = Category.ACTION,
-            method = Method.TYPE_QUERY,
-            `object` = Object.SEARCH_BAR,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Search with text in SearchBar",
+        category = Category.ACTION,
+        method = Method.TYPE_QUERY,
+        `object` = Object.SEARCH_BAR,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     private fun searchEnterEvent(isInLandscape: Boolean) {
         EventBuilder(Category.ACTION, Method.TYPE_QUERY, Object.SEARCH_BAR)
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Toggle Private Mode",
-            category = Category.ACTION,
-            method = Method.CHANGE,
-            `object` = Object.PRIVATE_MODE,
-            value = Value.ENTER + "," + Value.EXIT,
-            extras = [])
+        name = "Toggle Private Mode",
+        category = Category.ACTION,
+        method = Method.CHANGE,
+        `object` = Object.PRIVATE_MODE,
+        value = Value.ENTER + "," + Value.EXIT,
+        extras = []
+    )
     @JvmStatic
     fun togglePrivateMode(enter: Boolean) {
-        EventBuilder(Category.ACTION, Method.CHANGE, Object.PRIVATE_MODE, if (enter) Value.ENTER else Value.EXIT).queue()
+        EventBuilder(
+            Category.ACTION,
+            Method.CHANGE,
+            Object.PRIVATE_MODE,
+            if (enter) Value.ENTER else Value.EXIT
+        ).queue()
     }
 
     @TelemetryDoc(
-            name = "Long click on Search Suggestion",
-            category = Category.ACTION,
-            method = Method.LONG_PRESS,
-            `object` = Object.SEARCH_SUGGESTION,
-            value = "",
-            extras = [])
+        name = "Long click on Search Suggestion",
+        category = Category.ACTION,
+        method = Method.LONG_PRESS,
+        `object` = Object.SEARCH_SUGGESTION,
+        value = "",
+        extras = []
+    )
     @JvmStatic
     fun searchSuggestionLongClick() {
         EventBuilder(Category.ACTION, Method.LONG_PRESS, Object.SEARCH_SUGGESTION).queue()
     }
 
     @TelemetryDoc(
-            name = "Clear SearchBar",
-            category = Category.ACTION,
-            method = Method.CLEAR,
-            `object` = Object.SEARCH_BAR,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.VERSION, value = SEARCHCLEAR_TELEMETRY_VERSION),
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Clear SearchBar",
+        category = Category.ACTION,
+        method = Method.CLEAR,
+        `object` = Object.SEARCH_BAR,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.VERSION, value = SEARCHCLEAR_TELEMETRY_VERSION),
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun searchClear(isInLandscape: Boolean) {
         EventBuilder(Category.ACTION, Method.CLEAR, Object.SEARCH_BAR)
-                .extra(Extra.VERSION, SEARCHCLEAR_TELEMETRY_VERSION)
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(Extra.VERSION, SEARCHCLEAR_TELEMETRY_VERSION)
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Dismiss SearchBar",
-            category = Category.ACTION,
-            method = Method.CANCEL,
-            `object` = Object.SEARCH_BAR,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.VERSION, value = SEARCHDISMISS_TELEMETRY_VERSION),
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Dismiss SearchBar",
+        category = Category.ACTION,
+        method = Method.CANCEL,
+        `object` = Object.SEARCH_BAR,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.VERSION, value = SEARCHDISMISS_TELEMETRY_VERSION),
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun searchDismiss(isInLandscape: Boolean) {
         EventBuilder(Category.ACTION, Method.CANCEL, Object.SEARCH_BAR)
-                .extra(Extra.VERSION, SEARCHDISMISS_TELEMETRY_VERSION)
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(Extra.VERSION, SEARCHDISMISS_TELEMETRY_VERSION)
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show SearchBar from Home",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.SEARCH_BAR,
-            value = Value.SEARCH_BOX,
-            extras = [])
+        name = "Show SearchBar from Home",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.SEARCH_BAR,
+        value = Value.SEARCH_BOX,
+        extras = []
+    )
     @JvmStatic
     fun showSearchBarHome() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.SEARCH_BAR, Value.SEARCH_BOX).queue()
     }
 
     @TelemetryDoc(
-            name = "Show SearchBar by clicking MINI_URLBAR",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.SEARCH_BAR,
-            value = Value.MINI_URLBAR,
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = "${Extra_Value.SHOPPING}"),
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Show SearchBar by clicking MINI_URLBAR",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.SEARCH_BAR,
+        value = Value.MINI_URLBAR,
+        extras = [
+            TelemetryExtra(name = Extra.VERTICAL, value = "${Extra_Value.SHOPPING}"),
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun clickUrlbar(vertical: String, isInLandscape: Boolean) {
         EventBuilder(Category.ACTION, Method.SHOW, Object.SEARCH_BAR, Value.MINI_URLBAR)
-                .apply {
-                    if (vertical.isNotEmpty()) {
-                        extra(Extra.VERTICAL, vertical)
-                    }
+            .apply {
+                if (vertical.isNotEmpty()) {
+                    extra(Extra.VERTICAL, vertical)
                 }
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            }
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show SearchBar by clicking SEARCH_BUTTON",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.SEARCH_BAR,
-            value = Value.SEARCH_BUTTON,
-            extras = [
-                TelemetryExtra(name = Extra.VERSION, value = "2"),
-                TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-4]"),
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Show SearchBar by clicking SEARCH_BUTTON",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.SEARCH_BAR,
+        value = Value.SEARCH_BUTTON,
+        extras = [
+            TelemetryExtra(name = Extra.VERSION, value = "2"),
+            TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-4]"),
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun clickToolbarSearch(mode: String, position: Int, isInLandscape: Boolean = false) {
         EventBuilder(Category.ACTION, Method.SHOW, Object.SEARCH_BAR, Value.SEARCH_BUTTON)
-                .extra(Extra.VERSION, "2")
-                .extra(Extra.MODE, mode)
-                .extra(Extra.POSITION, Integer.toString(position))
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(Extra.VERSION, "2")
+            .extra(Extra.MODE, mode)
+            .extra(Extra.POSITION, Integer.toString(position))
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Add Tab from Toolbar",
-            category = Category.ACTION,
-            method = Method.ADD,
-            `object` = Object.TAB,
-            value = Value.TOOLBAR,
-            extras = [
-                TelemetryExtra(name = Extra.VERSION, value = "2"),
-                TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-4]"),
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Add Tab from Toolbar",
+        category = Category.ACTION,
+        method = Method.ADD,
+        `object` = Object.TAB,
+        value = Value.TOOLBAR,
+        extras = [
+            TelemetryExtra(name = Extra.VERSION, value = "2"),
+            TelemetryExtra(name = Extra.MODE, value = "[webview|menu]"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-4]"),
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun clickAddTabToolbar(mode: String, position: Int, isInLandscape: Boolean = false) {
         EventBuilder(Category.ACTION, Method.ADD, Object.TAB, Value.TOOLBAR)
-                .extra(Extra.VERSION, "2")
-                .extra(Extra.MODE, mode)
-                .extra(Extra.POSITION, Integer.toString(position))
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(Extra.VERSION, "2")
+            .extra(Extra.MODE, mode)
+            .extra(Extra.POSITION, Integer.toString(position))
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Add Tab from TabTray",
-            category = Category.ACTION,
-            method = Method.ADD,
-            `object` = Object.TAB,
-            value = Value.TABTRAY,
-            extras = [
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Add Tab from TabTray",
+        category = Category.ACTION,
+        method = Method.ADD,
+        `object` = Object.TAB,
+        value = Value.TABTRAY,
+        extras = [
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun clickAddTabTray(isInLandscape: Boolean) {
         EventBuilder(Category.ACTION, Method.ADD, Object.TAB, Value.TABTRAY)
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Enter Private Mode from TabTray",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.PRIVATE_MODE,
-            value = Value.TABTRAY,
-            extras = [
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Enter Private Mode from TabTray",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.PRIVATE_MODE,
+        value = Value.TABTRAY,
+        extras = [
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun privateModeTray(isInLandscape: Boolean) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.PRIVATE_MODE, Value.TABTRAY)
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Switch Tab From TabTray",
-            category = Category.ACTION,
-            method = Method.CHANGE,
-            `object` = Object.TAB,
-            value = Value.TABTRAY,
-            extras = [
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Switch Tab From TabTray",
+        category = Category.ACTION,
+        method = Method.CHANGE,
+        `object` = Object.TAB,
+        value = Value.TABTRAY,
+        extras = [
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun clickTabFromTabTray(isInLandscape: Boolean) {
         EventBuilder(Category.ACTION, Method.CHANGE, Object.TAB, Value.TABTRAY)
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Remove Tab From TabTray",
-            category = Category.ACTION,
-            method = Method.REMOVE,
-            `object` = Object.TAB,
-            value = Value.TABTRAY,
-            extras = [
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Remove Tab From TabTray",
+        category = Category.ACTION,
+        method = Method.REMOVE,
+        `object` = Object.TAB,
+        value = Value.TABTRAY,
+        extras = [
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun closeTabFromTabTray(isInLandscape: Boolean) {
         EventBuilder(Category.ACTION, Method.REMOVE, Object.TAB, Value.TABTRAY)
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Swipe Tab From TabTray",
-            category = Category.ACTION,
-            method = Method.SWIPE,
-            `object` = Object.TAB,
-            value = Value.TABTRAY,
-            extras = [
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Swipe Tab From TabTray",
+        category = Category.ACTION,
+        method = Method.SWIPE,
+        `object` = Object.TAB,
+        value = Value.TABTRAY,
+        extras = [
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun swipeTabFromTabTray(isInLandscape: Boolean) {
         EventBuilder(Category.ACTION, Method.SWIPE, Object.TAB, Value.TABTRAY)
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Close all From TabTray",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.CLOSE_ALL,
-            value = Value.TABTRAY,
-            extras = [
-                TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
-            ])
+        name = "Close all From TabTray",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.CLOSE_ALL,
+        value = Value.TABTRAY,
+        extras = [
+            TelemetryExtra(name = Extra.ORIENTATION, value = "portrait,landscape")
+        ]
+    )
     @JvmStatic
     fun closeAllTabFromTabTray(isInLandscape: Boolean) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.CLOSE_ALL, Value.TABTRAY)
-                .extra(Extra.ORIENTATION, if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT)
-                .queue()
+            .extra(
+                Extra.ORIENTATION,
+                if (isInLandscape) Extra_Value.LANDSCAPE else Extra_Value.PORTRAIT
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Remove Download File",
-            category = Category.ACTION,
-            method = Method.REMOVE,
-            `object` = Object.PANEL,
-            value = Value.FILE,
-            extras = [])
+        name = "Remove Download File",
+        category = Category.ACTION,
+        method = Method.REMOVE,
+        `object` = Object.PANEL,
+        value = Value.FILE,
+        extras = []
+    )
     @JvmStatic
     fun downloadRemoveFile() {
         EventBuilder(Category.ACTION, Method.REMOVE, Object.PANEL, Value.FILE).queue()
     }
 
     @TelemetryDoc(
-            name = "Delete Download File",
-            category = Category.ACTION,
-            method = Method.DELETE,
-            `object` = Object.PANEL,
-            value = Value.FILE,
-            extras = [])
+        name = "Delete Download File",
+        category = Category.ACTION,
+        method = Method.DELETE,
+        `object` = Object.PANEL,
+        value = Value.FILE,
+        extras = []
+    )
     @JvmStatic
     fun downloadDeleteFile() {
         EventBuilder(Category.ACTION, Method.DELETE, Object.PANEL, Value.FILE).queue()
     }
 
     @TelemetryDoc(
-            name = "Open Download File via snackbar",
-            category = Category.ACTION,
-            method = Method.OPEN,
-            `object` = Object.PANEL,
-            value = Value.FILE,
-            extras = [(TelemetryExtra(name = Extra.SNACKBAR, value = "true,false"))])
+        name = "Open Download File via snackbar",
+        category = Category.ACTION,
+        method = Method.OPEN,
+        `object` = Object.PANEL,
+        value = Value.FILE,
+        extras = [(TelemetryExtra(name = Extra.SNACKBAR, value = "true,false"))]
+    )
     @JvmStatic
     fun downloadOpenFile(fromSnackBar: Boolean) {
         EventBuilder(Category.ACTION, Method.OPEN, Object.PANEL, Value.FILE)
-                .extra(Extra.SNACKBAR, java.lang.Boolean.toString(fromSnackBar))
-                .queue()
+            .extra(Extra.SNACKBAR, java.lang.Boolean.toString(fromSnackBar))
+            .queue()
     }
 
     @TelemetryDoc(
@@ -1639,231 +1807,258 @@ object TelemetryWrapper {
         method = Method.SHOW,
         `object` = Object.MENU,
         value = Value.DOWNLOAD,
-        extras = [])
+        extras = []
+    )
     @JvmStatic
     fun showFileContextMenu() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.MENU, Value.DOWNLOAD).queue()
     }
 
     @TelemetryDoc(
-            name = "History Open Link",
-            category = Category.ACTION,
-            method = Method.OPEN,
-            `object` = Object.PANEL,
-            value = Value.LINK,
-            extras = [])
+        name = "History Open Link",
+        category = Category.ACTION,
+        method = Method.OPEN,
+        `object` = Object.PANEL,
+        value = Value.LINK,
+        extras = []
+    )
     @JvmStatic
     fun historyOpenLink() {
         EventBuilder(Category.ACTION, Method.OPEN, Object.PANEL, Value.LINK).queue()
     }
 
     @TelemetryDoc(
-            name = "History Remove Link",
-            category = Category.ACTION,
-            method = Method.REMOVE,
-            `object` = Object.PANEL,
-            value = Value.LINK,
-            extras = [])
+        name = "History Remove Link",
+        category = Category.ACTION,
+        method = Method.REMOVE,
+        `object` = Object.PANEL,
+        value = Value.LINK,
+        extras = []
+    )
     @JvmStatic
     fun historyRemoveLink() {
         EventBuilder(Category.ACTION, Method.REMOVE, Object.PANEL, Value.LINK).queue()
     }
 
     @TelemetryDoc(
-            name = "Bookmark Remove Item",
-            category = Category.ACTION,
-            method = Method.REMOVE,
-            `object` = Object.PANEL,
-            value = Value.BOOKMARK,
-            extras = [])
+        name = "Bookmark Remove Item",
+        category = Category.ACTION,
+        method = Method.REMOVE,
+        `object` = Object.PANEL,
+        value = Value.BOOKMARK,
+        extras = []
+    )
     @JvmStatic
     fun bookmarkRemoveItem() {
         EventBuilder(Category.ACTION, Method.REMOVE, Object.PANEL, Value.BOOKMARK).queue()
     }
 
     @TelemetryDoc(
-            name = "Bookmark Edit Item",
-            category = Category.ACTION,
-            method = Method.EDIT,
-            `object` = Object.PANEL,
-            value = Value.BOOKMARK,
-            extras = [])
+        name = "Bookmark Edit Item",
+        category = Category.ACTION,
+        method = Method.EDIT,
+        `object` = Object.PANEL,
+        value = Value.BOOKMARK,
+        extras = []
+    )
     @JvmStatic
     fun bookmarkEditItem() {
         EventBuilder(Category.ACTION, Method.EDIT, Object.PANEL, Value.BOOKMARK).queue()
     }
 
     @TelemetryDoc(
-            name = "Bookmark Open Item",
-            category = Category.ACTION,
-            method = Method.OPEN,
-            `object` = Object.PANEL,
-            value = Value.BOOKMARK,
-            extras = [])
+        name = "Bookmark Open Item",
+        category = Category.ACTION,
+        method = Method.OPEN,
+        `object` = Object.PANEL,
+        value = Value.BOOKMARK,
+        extras = []
+    )
     @JvmStatic
     fun bookmarkOpenItem() {
         EventBuilder(Category.ACTION, Method.OPEN, Object.PANEL, Value.BOOKMARK).queue()
     }
 
     @TelemetryDoc(
-            name = "Show History ContextMenu",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.MENU,
-            value = Value.HISTORY,
-            extras = [])
+        name = "Show History ContextMenu",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.MENU,
+        value = Value.HISTORY,
+        extras = []
+    )
     @JvmStatic
     fun showHistoryContextMenu() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.MENU, Value.HISTORY).queue()
     }
 
     @TelemetryDoc(
-            name = "Show Bookmark ContextMenu",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.MENU,
-            value = Value.BOOKMARK,
-            extras = [])
+        name = "Show Bookmark ContextMenu",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.MENU,
+        value = Value.BOOKMARK,
+        extras = []
+    )
     @JvmStatic
     fun showBookmarkContextMenu() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.MENU, Value.BOOKMARK).queue()
     }
 
     @TelemetryDoc(
-            name = "Clear History",
-            category = Category.ACTION,
-            method = Method.CLEAR,
-            `object` = Object.PANEL,
-            value = Value.HISTORY,
-            extras = [])
+        name = "Clear History",
+        category = Category.ACTION,
+        method = Method.CLEAR,
+        `object` = Object.PANEL,
+        value = Value.HISTORY,
+        extras = []
+    )
     @JvmStatic
     fun clearHistory() {
         EventBuilder(Category.ACTION, Method.CLEAR, Object.PANEL, Value.HISTORY).queue()
     }
 
     @TelemetryDoc(
-            name = "Open Capture Item",
-            category = Category.ACTION,
-            method = Method.OPEN,
-            `object` = Object.PANEL,
-            value = Value.CAPTURE,
-            extras = [])
+        name = "Open Capture Item",
+        category = Category.ACTION,
+        method = Method.OPEN,
+        `object` = Object.PANEL,
+        value = Value.CAPTURE,
+        extras = []
+    )
     @JvmStatic
     fun openCapture() {
         EventBuilder(Category.ACTION, Method.OPEN, Object.PANEL, Value.CAPTURE).queue()
     }
 
     @TelemetryDoc(
-            name = "Open Capture Link",
-            category = Category.ACTION,
-            method = Method.OPEN,
-            `object` = Object.CAPTURE,
-            value = Value.LINK,
-            extras = [TelemetryExtra(name = Extra.CATEGORY, value = "category"),
-                TelemetryExtra(name = Extra.CATEGORY_VERSION, value = "category version")
-            ])
+        name = "Open Capture Link",
+        category = Category.ACTION,
+        method = Method.OPEN,
+        `object` = Object.CAPTURE,
+        value = Value.LINK,
+        extras = [
+            TelemetryExtra(name = Extra.CATEGORY, value = "category"),
+            TelemetryExtra(name = Extra.CATEGORY_VERSION, value = "category version")
+        ]
+    )
     @JvmStatic
     fun openCaptureLink(category: String, categoryVersion: Int) {
         EventBuilder(Category.ACTION, Method.OPEN, Object.CAPTURE, Value.LINK)
-                .extra(Extra.CATEGORY, category)
-                .extra(Extra.CATEGORY_VERSION, Integer.toString(categoryVersion))
-                .queue()
+            .extra(Extra.CATEGORY, category)
+            .extra(Extra.CATEGORY_VERSION, Integer.toString(categoryVersion))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Edit Capture Image",
-            category = Category.ACTION,
-            method = Method.EDIT,
-            `object` = Object.CAPTURE,
-            value = Value.IMAGE,
-            extras = [TelemetryExtra(name = Extra.SUCCESS, value = "true,false"),
-                TelemetryExtra(name = Extra.CATEGORY, value = "category"),
-                TelemetryExtra(name = Extra.CATEGORY_VERSION, value = "category version")
-            ])
+        name = "Edit Capture Image",
+        category = Category.ACTION,
+        method = Method.EDIT,
+        `object` = Object.CAPTURE,
+        value = Value.IMAGE,
+        extras = [
+            TelemetryExtra(name = Extra.SUCCESS, value = "true,false"),
+            TelemetryExtra(name = Extra.CATEGORY, value = "category"),
+            TelemetryExtra(name = Extra.CATEGORY_VERSION, value = "category version")
+        ]
+    )
     @JvmStatic
     fun editCaptureImage(editAppResolved: Boolean, category: String, categoryVersion: Int) {
         EventBuilder(Category.ACTION, Method.EDIT, Object.CAPTURE, Value.IMAGE)
-                .extra(Extra.SUCCESS, java.lang.Boolean.toString(editAppResolved))
-                .extra(Extra.CATEGORY, category)
-                .extra(Extra.CATEGORY_VERSION, Integer.toString(categoryVersion))
-                .queue()
+            .extra(Extra.SUCCESS, java.lang.Boolean.toString(editAppResolved))
+            .extra(Extra.CATEGORY, category)
+            .extra(Extra.CATEGORY_VERSION, Integer.toString(categoryVersion))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Share Capture Image",
-            category = Category.ACTION,
-            method = Method.SHARE,
-            `object` = Object.CAPTURE,
-            value = Value.IMAGE,
-            extras = [TelemetryExtra(name = Extra.SNACKBAR, value = "true,false"),
-                TelemetryExtra(name = Extra.CATEGORY, value = "category"),
-                TelemetryExtra(name = Extra.CATEGORY_VERSION, value = "category version")
-            ])
+        name = "Share Capture Image",
+        category = Category.ACTION,
+        method = Method.SHARE,
+        `object` = Object.CAPTURE,
+        value = Value.IMAGE,
+        extras = [
+            TelemetryExtra(name = Extra.SNACKBAR, value = "true,false"),
+            TelemetryExtra(name = Extra.CATEGORY, value = "category"),
+            TelemetryExtra(name = Extra.CATEGORY_VERSION, value = "category version")
+        ]
+    )
     @JvmStatic
     fun shareCaptureImage(fromSnackBar: Boolean, category: String, categoryVersion: Int) {
         EventBuilder(Category.ACTION, Method.SHARE, Object.CAPTURE, Value.IMAGE)
-                .extra(Extra.SNACKBAR, java.lang.Boolean.toString(fromSnackBar))
-                .extra(Extra.CATEGORY, category)
-                .extra(Extra.CATEGORY_VERSION, Integer.toString(categoryVersion))
-                .queue()
+            .extra(Extra.SNACKBAR, java.lang.Boolean.toString(fromSnackBar))
+            .extra(Extra.CATEGORY, category)
+            .extra(Extra.CATEGORY_VERSION, Integer.toString(categoryVersion))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Capture Info",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.CAPTURE,
-            value = Value.INFO,
-            extras = [TelemetryExtra(name = Extra.CATEGORY, value = "category"),
-                TelemetryExtra(name = Extra.CATEGORY_VERSION, value = "category version")
-            ])
+        name = "Show Capture Info",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.CAPTURE,
+        value = Value.INFO,
+        extras = [
+            TelemetryExtra(name = Extra.CATEGORY, value = "category"),
+            TelemetryExtra(name = Extra.CATEGORY_VERSION, value = "category version")
+        ]
+    )
     @JvmStatic
     fun showCaptureInfo(category: String, categoryVersion: Int) {
         EventBuilder(Category.ACTION, Method.SHOW, Object.CAPTURE, Value.INFO)
-                .extra(Extra.CATEGORY, category)
-                .extra(Extra.CATEGORY_VERSION, Integer.toString(categoryVersion))
-                .queue()
+            .extra(Extra.CATEGORY, category)
+            .extra(Extra.CATEGORY_VERSION, Integer.toString(categoryVersion))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Delete Capture Image",
-            category = Category.ACTION,
-            method = Method.DELETE,
-            `object` = Object.CAPTURE,
-            value = Value.IMAGE,
-            extras = [TelemetryExtra(name = Extra.CATEGORY, value = "category"),
-                TelemetryExtra(name = Extra.CATEGORY_VERSION, value = "category version")
-            ])
+        name = "Delete Capture Image",
+        category = Category.ACTION,
+        method = Method.DELETE,
+        `object` = Object.CAPTURE,
+        value = Value.IMAGE,
+        extras = [
+            TelemetryExtra(name = Extra.CATEGORY, value = "category"),
+            TelemetryExtra(name = Extra.CATEGORY_VERSION, value = "category version")
+        ]
+    )
     @JvmStatic
     fun deleteCaptureImage(category: String, categoryVersion: Int) {
         EventBuilder(Category.ACTION, Method.DELETE, Object.CAPTURE, Value.IMAGE)
-                .extra(Extra.CATEGORY, category)
-                .extra(Extra.CATEGORY_VERSION, Integer.toString(categoryVersion))
-                .queue()
+            .extra(Extra.CATEGORY, category)
+            .extra(Extra.CATEGORY_VERSION, Integer.toString(categoryVersion))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "click Rate App",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.FEEDBACK,
-            value = "null,dismiss,positive,negative",
-            extras = [TelemetryExtra(name = Extra.SOURCE, value = "contextual_hints,settings,notification")
-            ])
+        name = "click Rate App",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.FEEDBACK,
+        value = "null,dismiss,positive,negative",
+        extras = [
+            TelemetryExtra(
+                name = Extra.SOURCE,
+                value = "contextual_hints,settings,notification"
+            )
+        ]
+    )
     @JvmStatic
     fun clickRateApp(value: String?, source: String) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.FEEDBACK, value)
-                .extra(Extra.SOURCE, source).extra(Extra.VERSION, RATE_APP_NOTIFICATION_TELEMETRY_VERSION.toString())
-                .queue()
+            .extra(Extra.SOURCE, source)
+            .extra(Extra.VERSION, RATE_APP_NOTIFICATION_TELEMETRY_VERSION.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Rate App",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.FEEDBACK,
-            value = "",
-            extras = [TelemetryExtra(name = Extra.SOURCE, value = "notification")])
+        name = "Show Rate App",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.FEEDBACK,
+        value = "",
+        extras = [TelemetryExtra(name = Extra.SOURCE, value = "notification")]
+    )
     @JvmStatic
     fun showRateApp(isNotification: Boolean) {
         val builder = EventBuilder(Category.ACTION, Method.SHOW, Object.FEEDBACK)
@@ -1874,158 +2069,183 @@ object TelemetryWrapper {
     }
 
     @TelemetryDoc(
-            name = "Default Browser Notification shown",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.DEFAULT_BROWSER,
-            value = "",
-            extras = [TelemetryExtra(name = Extra.SOURCE, value = "notification")])
+        name = "Default Browser Notification shown",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.DEFAULT_BROWSER,
+        value = "",
+        extras = [TelemetryExtra(name = Extra.SOURCE, value = "notification")]
+    )
     @JvmStatic
     fun showDefaultSettingNotification() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.DEFAULT_BROWSER)
-                .extra(Extra.SOURCE, TelemetryWrapper.Extra_Value.NOTIFICATION)
-                .queue()
+            .extra(Extra.SOURCE, TelemetryWrapper.Extra_Value.NOTIFICATION)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Receive Firstrun Push config",
-            category = Category.ACTION,
-            method = Method.GET,
-            `object` = Object.FIRSTRUN_PUSH,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.DELAY, value = "minutes"),
-                TelemetryExtra(name = Extra.MESSAGE_ID, value = "message_id"),
-                TelemetryExtra(name = Extra.LINK, value = "url|deeplink|null"),
-                TelemetryExtra(name = Extra.BACKGROUND, value = "true|false")
-            ])
+        name = "Receive Firstrun Push config",
+        category = Category.ACTION,
+        method = Method.GET,
+        `object` = Object.FIRSTRUN_PUSH,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.DELAY, value = "minutes"),
+            TelemetryExtra(name = Extra.MESSAGE_ID, value = "message_id"),
+            TelemetryExtra(name = Extra.LINK, value = "url|deeplink|null"),
+            TelemetryExtra(name = Extra.BACKGROUND, value = "true|false")
+        ]
+    )
     @JvmStatic
-    fun receiveFirstrunConfig(minutes: Long, messageId: String, link: String?, background: Boolean) {
+    fun receiveFirstrunConfig(
+        minutes: Long,
+        messageId: String,
+        link: String?,
+        background: Boolean
+    ) {
         val builder = EventBuilder(Category.ACTION, Method.GET, Object.FIRSTRUN_PUSH)
-                .extra(Extra.DELAY, minutes.toString())
-                .extra(Extra.MESSAGE_ID, messageId)
-                .extra(Extra.LINK, link ?: "")
-                .extra(Extra.BACKGROUND, background.toString())
+            .extra(Extra.DELAY, minutes.toString())
+            .extra(Extra.MESSAGE_ID, messageId)
+            .extra(Extra.LINK, link ?: "")
+            .extra(Extra.BACKGROUND, background.toString())
         builder.queue()
     }
 
     @TelemetryDoc(
-            name = "Firstrun Push notification shown",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.FIRSTRUN_PUSH,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.DELAY, value = "minutes"),
-                TelemetryExtra(name = Extra.MESSAGE_ID, value = "message_id"),
-                TelemetryExtra(name = Extra.LINK, value = "url|deeplink|null"),
-                TelemetryExtra(name = Extra.BACKGROUND, value = "true|false")
-            ])
+        name = "Firstrun Push notification shown",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.FIRSTRUN_PUSH,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.DELAY, value = "minutes"),
+            TelemetryExtra(name = Extra.MESSAGE_ID, value = "message_id"),
+            TelemetryExtra(name = Extra.LINK, value = "url|deeplink|null"),
+            TelemetryExtra(name = Extra.BACKGROUND, value = "true|false")
+        ]
+    )
     @JvmStatic
-    fun showFirstrunNotification(minutes: Long, messageId: String, link: String?, background: Boolean) {
+    fun showFirstrunNotification(
+        minutes: Long,
+        messageId: String,
+        link: String?,
+        background: Boolean
+    ) {
         val builder = EventBuilder(Category.ACTION, Method.SHOW, Object.FIRSTRUN_PUSH)
-                .extra(Extra.DELAY, minutes.toString())
-                .extra(Extra.MESSAGE_ID, messageId)
-                .extra(Extra.LINK, link ?: "")
-                .extra(Extra.BACKGROUND, background.toString())
+            .extra(Extra.DELAY, minutes.toString())
+            .extra(Extra.MESSAGE_ID, messageId)
+            .extra(Extra.LINK, link ?: "")
+            .extra(Extra.BACKGROUND, background.toString())
         builder.queue()
     }
 
     @TelemetryDoc(
-            name = "Default Browser Notification Clicked",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.DEFAULT_BROWSER,
-            value = "",
-            extras = [TelemetryExtra(name = Extra.SOURCE, value = TelemetryWrapper.Extra_Value.NOTIFICATION),
-                TelemetryExtra(name = Extra.VERSION, value = "version")])
+        name = "Default Browser Notification Clicked",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.DEFAULT_BROWSER,
+        value = "",
+        extras = [
+            TelemetryExtra(
+                name = Extra.SOURCE,
+                value = TelemetryWrapper.Extra_Value.NOTIFICATION
+            ),
+            TelemetryExtra(name = Extra.VERSION, value = "version")
+        ]
+    )
     @JvmStatic
     fun clickDefaultSettingNotification() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.DEFAULT_BROWSER)
-                .extra(Extra.SOURCE, TelemetryWrapper.Extra_Value.NOTIFICATION)
-                .extra(Extra.VERSION, Integer.toString(DEFAULT_BROWSER_NOTIFICATION_TELEMETRY_VERSION))
-                .queue()
+            .extra(Extra.SOURCE, TelemetryWrapper.Extra_Value.NOTIFICATION)
+            .extra(Extra.VERSION, Integer.toString(DEFAULT_BROWSER_NOTIFICATION_TELEMETRY_VERSION))
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Promote Share Dialog Clicked",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.PROMOTE_SHARE,
-            value = "dismiss,share",
-            extras = [TelemetryExtra(name = Extra.SOURCE, value = "contextual_hints,settings")])
+        name = "Promote Share Dialog Clicked",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.PROMOTE_SHARE,
+        value = "dismiss,share",
+        extras = [TelemetryExtra(name = Extra.SOURCE, value = "contextual_hints,settings")]
+    )
     @JvmStatic
     fun promoteShareClickEvent(value: String, source: String) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.PROMOTE_SHARE, value)
-                .extra(Extra.SOURCE, source)
-                .queue()
+            .extra(Extra.SOURCE, source)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Promote Share Dialog shown",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.PROMOTE_SHARE,
-            value = "",
-            extras = [])
+        name = "Promote Share Dialog shown",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.PROMOTE_SHARE,
+        value = "",
+        extras = []
+    )
     @JvmStatic
     fun showPromoteShareDialog() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.PROMOTE_SHARE).queue()
     }
 
     @TelemetryDoc(
-            name = "Change Theme To",
-            category = Category.ACTION,
-            method = Method.CHANGE,
-            `object` = Object.THEMETOY,
-            value = "",
-            extras = [TelemetryExtra(name = Extra.TO, value = "theme name")])
+        name = "Change Theme To",
+        category = Category.ACTION,
+        method = Method.CHANGE,
+        `object` = Object.THEMETOY,
+        value = "",
+        extras = [TelemetryExtra(name = Extra.TO, value = "theme name")]
+    )
     @JvmStatic
     fun changeThemeTo(themeName: String) {
         EventBuilder(Category.ACTION, Method.CHANGE, Object.THEMETOY)
-                .extra(Extra.TO, themeName)
-                .queue()
+            .extra(Extra.TO, themeName)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Reset Theme To",
-            category = Category.ACTION,
-            method = Method.RESET,
-            `object` = Object.THEMETOY,
-            value = "",
-            extras = [TelemetryExtra(name = Extra.TO, value = "default")])
+        name = "Reset Theme To",
+        category = Category.ACTION,
+        method = Method.RESET,
+        `object` = Object.THEMETOY,
+        value = "",
+        extras = [TelemetryExtra(name = Extra.TO, value = "default")]
+    )
     @JvmStatic
     fun resetThemeToDefault() {
         EventBuilder(Category.ACTION, Method.RESET, Object.THEMETOY)
-                .extra(Extra.TO, Extra_Value.DEFAULT)
-                .queue()
+            .extra(Extra.TO, Extra_Value.DEFAULT)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Erase Private Mode Notification",
-            category = Category.ACTION,
-            method = Method.CLEAR,
-            `object` = Object.PRIVATE_MODE,
-            value = "",
-            extras = [TelemetryExtra(name = Extra.TO, value = "notification")])
+        name = "Erase Private Mode Notification",
+        category = Category.ACTION,
+        method = Method.CLEAR,
+        `object` = Object.PRIVATE_MODE,
+        value = "",
+        extras = [TelemetryExtra(name = Extra.TO, value = "notification")]
+    )
     @JvmStatic
     fun erasePrivateModeNotification() {
         EventBuilder(Category.ACTION, Method.CLEAR, Object.PRIVATE_MODE)
-                .extra(Extra.SOURCE, TelemetryWrapper.Extra_Value.NOTIFICATION)
-                .queue()
+            .extra(Extra.SOURCE, TelemetryWrapper.Extra_Value.NOTIFICATION)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Home Impression",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.HOME,
-            value = "",
-            extras = [])
+        name = "Home Impression",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.HOME,
+        value = "",
+        extras = []
+    )
     @JvmStatic
     fun showHome() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.HOME)
-                .queue()
+            .queue()
     }
 
     @JvmStatic
@@ -2043,653 +2263,777 @@ object TelemetryWrapper {
     @JvmStatic
     fun nightModeBrightnessChangeTo(value: Int, fromSetting: Boolean) {
         EventBuilder(Category.ACTION, Method.CHANGE, Object.SETTING, Value.NIGHT_MODE_BRIGHTNESS)
-                .extra(Extra.SOURCE, if (fromSetting) Object.SETTING else Object.MENU)
-                .extra(Extra.TO, value.toString())
-                .queue()
+            .extra(Extra.SOURCE, if (fromSetting) Object.SETTING else Object.MENU)
+            .extra(Extra.TO, value.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Long Press Toolbar Download Indicator",
-            category = Category.EVENT_DOWNLOADS,
-            method = Method.LONG_PRESS,
-            `object` = Object.TOOLBAR,
-            value = Value.DOWNLOAD,
-            extras = [])
+        name = "Long Press Toolbar Download Indicator",
+        category = Category.EVENT_DOWNLOADS,
+        method = Method.LONG_PRESS,
+        `object` = Object.TOOLBAR,
+        value = Value.DOWNLOAD,
+        extras = []
+    )
     @JvmStatic
     fun longPressDownloadIndicator() {
         EventBuilder(Category.EVENT_DOWNLOADS, Method.LONG_PRESS, Object.TOOLBAR, Value.DOWNLOAD)
-                .queue()
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click FindInPage Next",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.FIND_IN_PAGE,
-            value = Value.NEXT,
-            extras = [TelemetryExtra(name = Extra.VERSION, value = "2")])
+        name = "Click FindInPage Next",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.FIND_IN_PAGE,
+        value = Value.NEXT,
+        extras = [TelemetryExtra(name = Extra.VERSION, value = "2")]
+    )
     internal fun clickFindInPageNext() =
-            EventBuilder(Category.ACTION, Method.CLICK, Object.FIND_IN_PAGE, Value.NEXT)
-                    .extra(Extra.VERSION, Integer.toString(FIND_IN_PAGE_VERSION))
+        EventBuilder(Category.ACTION, Method.CLICK, Object.FIND_IN_PAGE, Value.NEXT)
+            .extra(Extra.VERSION, Integer.toString(FIND_IN_PAGE_VERSION))
 
     @TelemetryDoc(
-            name = "Click FindInPage Previous",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.FIND_IN_PAGE,
-            value = Value.PREVIOUS,
-            extras = [TelemetryExtra(name = Extra.VERSION, value = "2")])
+        name = "Click FindInPage Previous",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.FIND_IN_PAGE,
+        value = Value.PREVIOUS,
+        extras = [TelemetryExtra(name = Extra.VERSION, value = "2")]
+    )
     internal fun clickFindInPagePrevious() =
-            EventBuilder(Category.ACTION, Method.CLICK, Object.FIND_IN_PAGE, Value.PREVIOUS)
-                    .extra(Extra.VERSION, Integer.toString(FIND_IN_PAGE_VERSION))
+        EventBuilder(Category.ACTION, Method.CLICK, Object.FIND_IN_PAGE, Value.PREVIOUS)
+            .extra(Extra.VERSION, Integer.toString(FIND_IN_PAGE_VERSION))
 
     @TelemetryDoc(
-            name = "Click Menu FindInPage",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MENU,
-            value = Value.FIND_IN_PAGE,
-            extras = [TelemetryExtra(name = Extra.VERSION, value = "2")])
+        name = "Click Menu FindInPage",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MENU,
+        value = Value.FIND_IN_PAGE,
+        extras = [TelemetryExtra(name = Extra.VERSION, value = "2")]
+    )
     internal fun clickMenuFindInPage() =
-            EventBuilder(Category.ACTION, Method.CLICK, Object.MENU, Value.FIND_IN_PAGE)
-                    .extra(Extra.VERSION, Integer.toString(FIND_IN_PAGE_VERSION))
+        EventBuilder(Category.ACTION, Method.CLICK, Object.MENU, Value.FIND_IN_PAGE)
+            .extra(Extra.VERSION, Integer.toString(FIND_IN_PAGE_VERSION))
 
     @TelemetryDoc(
-            name = "Click Quick Search",
-            category = Category.SEARCH,
-            method = Method.CLICK,
-            `object` = Object.QUICK_SEARCH,
-            value = "",
-            extras = [TelemetryExtra(name = Extra.ENGINE, value = "Facebook,Youtube,Instagram")])
+        name = "Click Quick Search",
+        category = Category.SEARCH,
+        method = Method.CLICK,
+        `object` = Object.QUICK_SEARCH,
+        value = "",
+        extras = [TelemetryExtra(name = Extra.ENGINE, value = "Facebook,Youtube,Instagram")]
+    )
     @JvmStatic
     fun clickQuickSearchEngine(engineName: String) {
         EventBuilder(Category.SEARCH, Method.CLICK, Object.QUICK_SEARCH, null)
-                .extra(Extra.ENGINE, engineName).queue()
+            .extra(Extra.ENGINE, engineName).queue()
     }
 
     @TelemetryDoc(
-            name = "Enter Landscape Mode",
-            category = Category.ENTER_LANDSCAPE_MODE,
-            method = Method.CHANGE,
-            `object` = Object.LANDSCAPE_MODE,
-            value = Value.ENTER,
-            extras = [])
+        name = "Enter Landscape Mode",
+        category = Category.ENTER_LANDSCAPE_MODE,
+        method = Method.CHANGE,
+        `object` = Object.LANDSCAPE_MODE,
+        value = Value.ENTER,
+        extras = []
+    )
     @JvmStatic
     fun enterLandscapeMode() {
-        EventBuilder(Category.ENTER_LANDSCAPE_MODE, Method.CHANGE, Object.LANDSCAPE_MODE, Value.ENTER).queue()
+        EventBuilder(
+            Category.ENTER_LANDSCAPE_MODE,
+            Method.CHANGE,
+            Object.LANDSCAPE_MODE,
+            Value.ENTER
+        ).queue()
     }
 
     @TelemetryDoc(
-            name = "Exit Landscape Mode",
-            category = Category.ENTER_LANDSCAPE_MODE,
-            method = Method.CHANGE,
-            `object` = Object.LANDSCAPE_MODE,
-            value = Value.EXIT,
-            extras = [TelemetryExtra(name = Extra.DURATION, value = "duration in ms")])
+        name = "Exit Landscape Mode",
+        category = Category.ENTER_LANDSCAPE_MODE,
+        method = Method.CHANGE,
+        `object` = Object.LANDSCAPE_MODE,
+        value = Value.EXIT,
+        extras = [TelemetryExtra(name = Extra.DURATION, value = "duration in ms")]
+    )
     @JvmStatic
     fun exitLandscapeMode(duration: Long) {
-        EventBuilder(Category.ENTER_LANDSCAPE_MODE, Method.CHANGE, Object.LANDSCAPE_MODE, Value.EXIT)
-                .extra(Extra.DURATION, duration.toString()).queue()
+        EventBuilder(
+            Category.ENTER_LANDSCAPE_MODE,
+            Method.CHANGE,
+            Object.LANDSCAPE_MODE,
+            Value.EXIT
+        )
+            .extra(Extra.DURATION, duration.toString()).queue()
     }
 
     @TelemetryDoc(
-            name = "Show in-app update intro dialog",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.UPDATE_MESSAGE,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.FROM_BUILD, value = "old version"),
-                TelemetryExtra(name = Extra.TO_BUILD, value = "new version")
-            ])
+        name = "Show in-app update intro dialog",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.UPDATE_MESSAGE,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.FROM_BUILD, value = "old version"),
+            TelemetryExtra(name = Extra.TO_BUILD, value = "new version")
+        ]
+    )
     fun showInAppUpdateIntroDialog(toVersion: Int) {
         EventBuilder(Category.ACTION, Method.SHOW, Object.UPDATE_MESSAGE)
-                .extra(Extra.FROM_BUILD, BuildConfig.VERSION_CODE.toString())
-                .extra(Extra.TO_BUILD, toVersion.toString())
-                .queue()
+            .extra(Extra.FROM_BUILD, BuildConfig.VERSION_CODE.toString())
+            .extra(Extra.TO_BUILD, toVersion.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show google play's in-app update dialog",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.UPDATE,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.FROM_BUILD, value = "old version"),
-                TelemetryExtra(name = Extra.TO_BUILD, value = "new version")
-            ])
+        name = "Show google play's in-app update dialog",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.UPDATE,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.FROM_BUILD, value = "old version"),
+            TelemetryExtra(name = Extra.TO_BUILD, value = "new version")
+        ]
+    )
     fun showInAppUpdateGooglePlayDialog(toVersion: Int) {
         EventBuilder(Category.ACTION, Method.SHOW, Object.UPDATE)
-                .extra(Extra.FROM_BUILD, BuildConfig.VERSION_CODE.toString())
-                .extra(Extra.TO_BUILD, toVersion.toString())
-                .queue()
+            .extra(Extra.FROM_BUILD, BuildConfig.VERSION_CODE.toString())
+            .extra(Extra.TO_BUILD, toVersion.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click in-app update intro dialog",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.UPDATE_MESSAGE,
-            value = "${Value.POSITIVE},${Value.NEGATIVE}",
-            extras = [
-                TelemetryExtra(name = Extra.FROM_BUILD, value = "old version"),
-                TelemetryExtra(name = Extra.TO_BUILD, value = "new version"),
-                TelemetryExtra(name = Extra.ACTION, value = "${Extra_Value.DISMISS},${Extra_Value.FORCE_CLOSE}")
-            ])
+        name = "Click in-app update intro dialog",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.UPDATE_MESSAGE,
+        value = "${Value.POSITIVE},${Value.NEGATIVE}",
+        extras = [
+            TelemetryExtra(name = Extra.FROM_BUILD, value = "old version"),
+            TelemetryExtra(name = Extra.TO_BUILD, value = "new version"),
+            TelemetryExtra(
+                name = Extra.ACTION,
+                value = "${Extra_Value.DISMISS},${Extra_Value.FORCE_CLOSE}"
+            )
+        ]
+    )
     fun clickInAppUpdateIntroDialog(value: String, isForceClose: Boolean, toVersion: Int) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.UPDATE_MESSAGE, value)
-                .extra(Extra.FROM_BUILD, BuildConfig.VERSION_CODE.toString())
-                .extra(Extra.TO_BUILD, toVersion.toString())
-                .extra(Extra.ACTION, if (isForceClose) {
+            .extra(Extra.FROM_BUILD, BuildConfig.VERSION_CODE.toString())
+            .extra(Extra.TO_BUILD, toVersion.toString())
+            .extra(
+                Extra.ACTION,
+                if (isForceClose) {
                     Extra_Value.FORCE_CLOSE
                 } else {
                     Extra_Value.DISMISS
-                })
-                .queue()
+                }
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click google play's in-app update dialog",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.UPDATE,
-            value = "${Value.POSITIVE},${Value.NEGATIVE}",
-            extras = [
-                TelemetryExtra(name = Extra.FROM_BUILD, value = "old version"),
-                TelemetryExtra(name = Extra.TO_BUILD, value = "new version"),
-                TelemetryExtra(name = Extra.ACTION, value = "${Extra_Value.DISMISS},${Extra_Value.FORCE_CLOSE}")
-            ])
+        name = "Click google play's in-app update dialog",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.UPDATE,
+        value = "${Value.POSITIVE},${Value.NEGATIVE}",
+        extras = [
+            TelemetryExtra(name = Extra.FROM_BUILD, value = "old version"),
+            TelemetryExtra(name = Extra.TO_BUILD, value = "new version"),
+            TelemetryExtra(
+                name = Extra.ACTION,
+                value = "${Extra_Value.DISMISS},${Extra_Value.FORCE_CLOSE}"
+            )
+        ]
+    )
     fun clickInAppUpdateGooglePlayDialog(value: String, isForceClose: Boolean, toVersion: Int) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.UPDATE, value)
-                .extra(Extra.FROM_BUILD, BuildConfig.VERSION_CODE.toString())
-                .extra(Extra.TO_BUILD, toVersion.toString())
-                .extra(Extra.ACTION, if (isForceClose) {
+            .extra(Extra.FROM_BUILD, BuildConfig.VERSION_CODE.toString())
+            .extra(Extra.TO_BUILD, toVersion.toString())
+            .extra(
+                Extra.ACTION,
+                if (isForceClose) {
                     Extra_Value.FORCE_CLOSE
                 } else {
                     Extra_Value.DISMISS
-                })
-                .queue()
+                }
+            )
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show in-app update install prompt",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.UPDATE,
-            value = Value.DOWNLOADED,
-            extras = [
-                TelemetryExtra(name = Extra.FROM_BUILD, value = "old version"),
-                TelemetryExtra(name = Extra.TO_BUILD, value = "new version"),
-                TelemetryExtra(name = Extra.TYPE, value = "${Extra_Value.NEW},${Extra_Value.REMINDER}")
-            ])
+        name = "Show in-app update install prompt",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.UPDATE,
+        value = Value.DOWNLOADED,
+        extras = [
+            TelemetryExtra(name = Extra.FROM_BUILD, value = "old version"),
+            TelemetryExtra(name = Extra.TO_BUILD, value = "new version"),
+            TelemetryExtra(name = Extra.TYPE, value = "${Extra_Value.NEW},${Extra_Value.REMINDER}")
+        ]
+    )
     fun showInAppUpdateInstallPrompt(type: String, toVersion: Int) {
         EventBuilder(Category.ACTION, Method.SHOW, Object.UPDATE, Value.DOWNLOADED)
-                .extra(Extra.FROM_BUILD, BuildConfig.VERSION_CODE.toString())
-                .extra(Extra.TO_BUILD, toVersion.toString())
-                .extra(Extra.TYPE, type)
-                .queue()
+            .extra(Extra.FROM_BUILD, BuildConfig.VERSION_CODE.toString())
+            .extra(Extra.TO_BUILD, toVersion.toString())
+            .extra(Extra.TYPE, type)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click in-app update install prompt",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.UPDATE,
-            value = Value.APPLY,
-            extras = [
-                TelemetryExtra(name = Extra.FROM_BUILD, value = "old version"),
-                TelemetryExtra(name = Extra.TO_BUILD, value = "new version"),
-                TelemetryExtra(
-                        name = Extra.SOURCE,
-                        value = "${Extra_Value.NOTIFICATION},${Extra_Value.SNACKBAR}"
-                ),
-                TelemetryExtra(name = Extra.TYPE, value = "${Extra_Value.NEW},${Extra_Value.REMINDER}")
-            ])
+        name = "Click in-app update install prompt",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.UPDATE,
+        value = Value.APPLY,
+        extras = [
+            TelemetryExtra(name = Extra.FROM_BUILD, value = "old version"),
+            TelemetryExtra(name = Extra.TO_BUILD, value = "new version"),
+            TelemetryExtra(
+                name = Extra.SOURCE,
+                value = "${Extra_Value.NOTIFICATION},${Extra_Value.SNACKBAR}"
+            ),
+            TelemetryExtra(name = Extra.TYPE, value = "${Extra_Value.NEW},${Extra_Value.REMINDER}")
+        ]
+    )
     fun clickInAppUpdateInstallPrompt(source: String, type: String, toVersion: Int) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.UPDATE, Value.APPLY)
-                .extra(Extra.FROM_BUILD, BuildConfig.VERSION_CODE.toString())
-                .extra(Extra.TO_BUILD, toVersion.toString())
-                .extra(Extra.SOURCE, source)
-                .extra(Extra.TYPE, type)
-                .queue()
+            .extra(Extra.FROM_BUILD, BuildConfig.VERSION_CODE.toString())
+            .extra(Extra.TO_BUILD, toVersion.toString())
+            .extra(Extra.SOURCE, source)
+            .extra(Extra.TYPE, type)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Firstrun Onboarding",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.ONBOARDING,
-            value = Value.FIRSTRUN,
-            extras = [])
+        name = "Show Firstrun Onboarding",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.ONBOARDING,
+        value = Value.FIRSTRUN,
+        extras = []
+    )
     fun showFirstRunOnBoarding() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.ONBOARDING, Value.FIRSTRUN).queue()
     }
 
     @TelemetryDoc(
-            name = "Click Firstrun Onboarding",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.ONBOARDING,
-            value = Value.FIRSTRUN,
-            extras = [
-                TelemetryExtra(name = Extra.ON, value = "time spent on page"),
-                TelemetryExtra(name = Extra.PAGE, value = "[0-9]"),
-                TelemetryExtra(name = Extra.FINISH, value = "true,false"),
-                TelemetryExtra(name = Extra.INTEREST, value = "default|deals||news|entertainment")
-            ])
-    fun clickFirstRunOnBoarding(timeSpent: Long, pageIndex: Int, finish: Boolean, interest: String) {
+        name = "Click Firstrun Onboarding",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.ONBOARDING,
+        value = Value.FIRSTRUN,
+        extras = [
+            TelemetryExtra(name = Extra.ON, value = "time spent on page"),
+            TelemetryExtra(name = Extra.PAGE, value = "[0-9]"),
+            TelemetryExtra(name = Extra.FINISH, value = "true,false"),
+            TelemetryExtra(name = Extra.INTEREST, value = "default|deals||news|entertainment")
+        ]
+    )
+    fun clickFirstRunOnBoarding(
+        timeSpent: Long,
+        pageIndex: Int,
+        finish: Boolean,
+        interest: String
+    ) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.ONBOARDING, Value.FIRSTRUN)
-                .extra(Extra.ON, timeSpent.toString())
-                .extra(Extra.PAGE, pageIndex.toString())
-                .extra(Extra.FINISH, finish.toString())
-                .extra(Extra.INTEREST, interest)
-                .queue()
+            .extra(Extra.ON, timeSpent.toString())
+            .extra(Extra.PAGE, pageIndex.toString())
+            .extra(Extra.FINISH, finish.toString())
+            .extra(Extra.INTEREST, interest)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Logoman",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.LOGOMAN,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.TYPE, value = "${Extra_Value.SHOPPING},null"),
-                TelemetryExtra(name = Extra.LINK, value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"),
-                TelemetryExtra(name = Extra.MESSAGE_ID, value = "message id")
-            ])
+        name = "Show Logoman",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.LOGOMAN,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.TYPE, value = "${Extra_Value.SHOPPING},null"),
+            TelemetryExtra(
+                name = Extra.LINK,
+                value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"
+            ),
+            TelemetryExtra(name = Extra.MESSAGE_ID, value = "message id")
+        ]
+    )
     fun showLogoman(type: String?, link: String?, messageId: String?) {
         EventBuilder(Category.ACTION, Method.SHOW, Object.LOGOMAN)
-                .extra(Extra.TYPE, type ?: "null")
-                .extra(Extra.LINK, link ?: "null")
-                .extra(Extra.MESSAGE_ID, messageId ?: "null")
-                .queue()
+            .extra(Extra.TYPE, type ?: "null")
+            .extra(Extra.LINK, link ?: "null")
+            .extra(Extra.MESSAGE_ID, messageId ?: "null")
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Logoman",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.LOGOMAN,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.TYPE, value = "${Extra_Value.SHOPPING},null"),
-                TelemetryExtra(name = Extra.LINK, value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"),
-                TelemetryExtra(name = Extra.MESSAGE_ID, value = "message id")
-            ])
+        name = "Click Logoman",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.LOGOMAN,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.TYPE, value = "${Extra_Value.SHOPPING},null"),
+            TelemetryExtra(
+                name = Extra.LINK,
+                value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"
+            ),
+            TelemetryExtra(name = Extra.MESSAGE_ID, value = "message id")
+        ]
+    )
     fun clickLogoman(type: String?, link: String?, messageId: String?) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.LOGOMAN)
-                .extra(Extra.TYPE, type ?: "null")
-                .extra(Extra.LINK, link ?: "null")
-                .extra(Extra.MESSAGE_ID, messageId ?: "null")
-                .queue()
+            .extra(Extra.TYPE, type ?: "null")
+            .extra(Extra.LINK, link ?: "null")
+            .extra(Extra.MESSAGE_ID, messageId ?: "null")
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Swipe Logoman",
-            category = Category.ACTION,
-            method = Method.SWIPE,
-            `object` = Object.LOGOMAN,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.TYPE, value = "${Extra_Value.SHOPPING},null"),
-                TelemetryExtra(name = Extra.LINK, value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"),
-                TelemetryExtra(name = Extra.MESSAGE_ID, value = "message id")
-            ])
+        name = "Swipe Logoman",
+        category = Category.ACTION,
+        method = Method.SWIPE,
+        `object` = Object.LOGOMAN,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.TYPE, value = "${Extra_Value.SHOPPING},null"),
+            TelemetryExtra(
+                name = Extra.LINK,
+                value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"
+            ),
+            TelemetryExtra(name = Extra.MESSAGE_ID, value = "message id")
+        ]
+    )
     fun swipeLogoman(type: String?, link: String?, messageId: String?) {
         EventBuilder(Category.ACTION, Method.SWIPE, Object.LOGOMAN)
-                .extra(Extra.TYPE, type ?: "null")
-                .extra(Extra.LINK, link ?: "null")
-                .extra(Extra.MESSAGE_ID, messageId ?: "null")
-                .queue()
+            .extra(Extra.TYPE, type ?: "null")
+            .extra(Extra.LINK, link ?: "null")
+            .extra(Extra.MESSAGE_ID, messageId ?: "null")
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Get Notification",
-            category = Category.ACTION,
-            method = Method.GET,
-            `object` = Object.NOTIFICATION,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.LINK, value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"),
-                TelemetryExtra(name = Extra.MESSAGE_ID, value = "messageId")
-            ])
+        name = "Get Notification",
+        category = Category.ACTION,
+        method = Method.GET,
+        `object` = Object.NOTIFICATION,
+        value = "",
+        extras = [
+            TelemetryExtra(
+                name = Extra.LINK,
+                value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"
+            ),
+            TelemetryExtra(name = Extra.MESSAGE_ID, value = "messageId")
+        ]
+    )
     @JvmStatic
     fun getNotification(link: String?, messageId: String?) {
         EventBuilder(Category.ACTION, Method.GET, Object.NOTIFICATION)
-                .extra(Extra.LINK, link ?: "null")
-                .extra(Extra.MESSAGE_ID, messageId ?: "null")
-                .queue()
+            .extra(Extra.LINK, link ?: "null")
+            .extra(Extra.MESSAGE_ID, messageId ?: "null")
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Notification",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.NOTIFICATION,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.LINK, value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"),
-                TelemetryExtra(name = Extra.MESSAGE_ID, value = "messageId")
-            ])
+        name = "Show Notification",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.NOTIFICATION,
+        value = "",
+        extras = [
+            TelemetryExtra(
+                name = Extra.LINK,
+                value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"
+            ),
+            TelemetryExtra(name = Extra.MESSAGE_ID, value = "messageId")
+        ]
+    )
     @JvmStatic
     fun showNotification(link: String?, messageId: String?) {
         EventBuilder(Category.ACTION, Method.SHOW, Object.NOTIFICATION)
-                .extra(Extra.LINK, link ?: "null")
-                .extra(Extra.MESSAGE_ID, messageId ?: "null")
-                .queue()
+            .extra(Extra.LINK, link ?: "null")
+            .extra(Extra.MESSAGE_ID, messageId ?: "null")
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Dismiss Notification",
-            category = Category.ACTION,
-            method = Method.SWIPE,
-            `object` = Object.NOTIFICATION,
-            value = Value.DISMISS,
-            extras = [
-                TelemetryExtra(name = Extra.LINK, value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"),
-                TelemetryExtra(name = Extra.MESSAGE_ID, value = "messageId")
-            ])
+        name = "Dismiss Notification",
+        category = Category.ACTION,
+        method = Method.SWIPE,
+        `object` = Object.NOTIFICATION,
+        value = Value.DISMISS,
+        extras = [
+            TelemetryExtra(
+                name = Extra.LINK,
+                value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"
+            ),
+            TelemetryExtra(name = Extra.MESSAGE_ID, value = "messageId")
+        ]
+    )
     @JvmStatic
     fun dismissNotification(link: String?, messageId: String?) {
         EventBuilder(Category.ACTION, Method.SWIPE, Object.NOTIFICATION, Value.DISMISS)
-                .extra(Extra.LINK, link ?: "null")
-                .extra(Extra.MESSAGE_ID, messageId ?: "null")
-                .queue()
+            .extra(Extra.LINK, link ?: "null")
+            .extra(Extra.MESSAGE_ID, messageId ?: "null")
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Dismiss D1 Notification",
-            category = Category.ACTION,
-            method = Method.SWIPE,
-            `object` = Object.FIRSTRUN_PUSH,
-            value = Value.DISMISS,
-            extras = [
-                TelemetryExtra(name = Extra.LINK, value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"),
-                TelemetryExtra(name = Extra.MESSAGE_ID, value = "message_id"),
-                TelemetryExtra(name = Extra.BACKGROUND, value = "true|false")
-            ])
+        name = "Dismiss D1 Notification",
+        category = Category.ACTION,
+        method = Method.SWIPE,
+        `object` = Object.FIRSTRUN_PUSH,
+        value = Value.DISMISS,
+        extras = [
+            TelemetryExtra(
+                name = Extra.LINK,
+                value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"
+            ),
+            TelemetryExtra(name = Extra.MESSAGE_ID, value = "message_id"),
+            TelemetryExtra(name = Extra.BACKGROUND, value = "true|false")
+        ]
+    )
     @JvmStatic
     fun dismissFirstrunNotification(link: String?, messageId: String, background: Boolean) {
         EventBuilder(Category.ACTION, Method.SWIPE, Object.FIRSTRUN_PUSH, Value.DISMISS)
-                .extra(Extra.LINK, link ?: "null")
-                .extra(Extra.MESSAGE_ID, messageId)
-                .extra(Extra.BACKGROUND, background.toString())
-                .queue()
+            .extra(Extra.LINK, link ?: "null")
+            .extra(Extra.MESSAGE_ID, messageId)
+            .extra(Extra.BACKGROUND, background.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Open Notification",
-            category = Category.ACTION,
-            method = Method.OPEN,
-            `object` = Object.NOTIFICATION,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.LINK, value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"),
-                TelemetryExtra(name = Extra.MESSAGE_ID, value = "messageId"),
-                TelemetryExtra(name = Extra.BACKGROUND, value = "true|false")
-            ])
+        name = "Open Notification",
+        category = Category.ACTION,
+        method = Method.OPEN,
+        `object` = Object.NOTIFICATION,
+        value = "",
+        extras = [
+            TelemetryExtra(
+                name = Extra.LINK,
+                value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"
+            ),
+            TelemetryExtra(name = Extra.MESSAGE_ID, value = "messageId"),
+            TelemetryExtra(name = Extra.BACKGROUND, value = "true|false")
+        ]
+    )
     @JvmStatic
     fun openNotification(link: String?, messageId: String?, background: Boolean) {
         EventBuilder(Category.ACTION, Method.OPEN, Object.NOTIFICATION)
-                .extra(Extra.LINK, link ?: "null")
-                .extra(Extra.MESSAGE_ID, messageId ?: "null")
-                .extra(Extra.BACKGROUND, background.toString())
-                .queue()
+            .extra(Extra.LINK, link ?: "null")
+            .extra(Extra.MESSAGE_ID, messageId ?: "null")
+            .extra(Extra.BACKGROUND, background.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Open D1 Notification",
-            category = Category.ACTION,
-            method = Method.OPEN,
-            `object` = Object.FIRSTRUN_PUSH,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.LINK, value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"),
-                TelemetryExtra(name = Extra.MESSAGE_ID, value = "message_id"),
-                TelemetryExtra(name = Extra.BACKGROUND, value = "true|false")
-            ])
+        name = "Open D1 Notification",
+        category = Category.ACTION,
+        method = Method.OPEN,
+        `object` = Object.FIRSTRUN_PUSH,
+        value = "",
+        extras = [
+            TelemetryExtra(
+                name = Extra.LINK,
+                value = "${Extra_Value.URL},${Extra_Value.DEEPLINK},null"
+            ),
+            TelemetryExtra(name = Extra.MESSAGE_ID, value = "message_id"),
+            TelemetryExtra(name = Extra.BACKGROUND, value = "true|false")
+        ]
+    )
     @JvmStatic
     fun openD1Notification(link: String?, messageId: String, background: Boolean) {
         EventBuilder(Category.ACTION, Method.OPEN, Object.FIRSTRUN_PUSH)
-                .extra(Extra.LINK, link ?: "null")
-                .extra(Extra.MESSAGE_ID, messageId)
-                .extra(Extra.BACKGROUND, background.toString())
-                .queue()
+            .extra(Extra.LINK, link ?: "null")
+            .extra(Extra.MESSAGE_ID, messageId)
+            .extra(Extra.BACKGROUND, background.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Start Content Tab",
-            category = Category.ACTION,
-            method = Method.START,
-            `object` = Object.CONTENT_TAB,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
-                TelemetryExtra(name = Extra.FEED, value = "feed"),
-                TelemetryExtra(name = Extra.SOURCE, value = "source"),
-                TelemetryExtra(name = Extra.CATEGORY, value = "category"),
-                TelemetryExtra(name = Extra.COMPONENT_ID, value = "component id"),
-                TelemetryExtra(name = Extra.SUB_CATEGORY_ID, value = "subcategory id"),
-                TelemetryExtra(name = Extra.VERSION_ID, value = "version id")
-            ])
+        name = "Start Content Tab",
+        category = Category.ACTION,
+        method = Method.START,
+        `object` = Object.CONTENT_TAB,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
+            TelemetryExtra(name = Extra.FEED, value = "feed"),
+            TelemetryExtra(name = Extra.SOURCE, value = "source"),
+            TelemetryExtra(name = Extra.CATEGORY, value = "category"),
+            TelemetryExtra(name = Extra.COMPONENT_ID, value = "component id"),
+            TelemetryExtra(name = Extra.SUB_CATEGORY_ID, value = "subcategory id"),
+            TelemetryExtra(name = Extra.VERSION_ID, value = "version id")
+        ]
+    )
     fun startContentTab(contentTabTelemetryData: ContentTabTelemetryData) {
         EventBuilder(Category.ACTION, Method.START, Object.CONTENT_TAB)
-                .extra(Extra.VERTICAL, contentTabTelemetryData.vertical)
-                .extra(Extra.FEED, contentTabTelemetryData.feed)
-                .extra(Extra.SOURCE, contentTabTelemetryData.source)
-                .extra(Extra.CATEGORY, contentTabTelemetryData.category)
-                .extra(Extra.COMPONENT_ID, contentTabTelemetryData.componentId)
-                .extra(Extra.SUB_CATEGORY_ID, contentTabTelemetryData.subCategoryId)
-                .extra(Extra.VERSION_ID, contentTabTelemetryData.versionId.toString())
-                .queue()
+            .extra(Extra.VERTICAL, contentTabTelemetryData.vertical)
+            .extra(Extra.FEED, contentTabTelemetryData.feed)
+            .extra(Extra.SOURCE, contentTabTelemetryData.source)
+            .extra(Extra.CATEGORY, contentTabTelemetryData.category)
+            .extra(Extra.COMPONENT_ID, contentTabTelemetryData.componentId)
+            .extra(Extra.SUB_CATEGORY_ID, contentTabTelemetryData.subCategoryId)
+            .extra(Extra.VERSION_ID, contentTabTelemetryData.versionId.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "End Content Tab",
-            category = Category.ACTION,
-            method = Method.END,
-            `object` = Object.CONTENT_TAB,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
-                TelemetryExtra(name = Extra.FEED, value = "feed"),
-                TelemetryExtra(name = Extra.SOURCE, value = "source"),
-                TelemetryExtra(name = Extra.CATEGORY, value = "category"),
-                TelemetryExtra(name = Extra.COMPONENT_ID, value = "component id"),
-                TelemetryExtra(name = Extra.SUB_CATEGORY_ID, value = "subcategory id"),
-                TelemetryExtra(name = Extra.VERSION_ID, value = "version"),
-                TelemetryExtra(name = Extra.SESSION_TIME, value = "time duration from entering component"),
-                TelemetryExtra(name = Extra.URL_COUNTS, value = "url counts duration from entering component"),
-                TelemetryExtra(name = Extra.APP_LINK, value = "${Extra_Value.OPEN}|${Extra_Value.INSTALL}|null"),
-                TelemetryExtra(name = Extra.SHOW_KEYBOARD, value = "true|false")
-            ])
+        name = "End Content Tab",
+        category = Category.ACTION,
+        method = Method.END,
+        `object` = Object.CONTENT_TAB,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
+            TelemetryExtra(name = Extra.FEED, value = "feed"),
+            TelemetryExtra(name = Extra.SOURCE, value = "source"),
+            TelemetryExtra(name = Extra.CATEGORY, value = "category"),
+            TelemetryExtra(name = Extra.COMPONENT_ID, value = "component id"),
+            TelemetryExtra(name = Extra.SUB_CATEGORY_ID, value = "subcategory id"),
+            TelemetryExtra(name = Extra.VERSION_ID, value = "version"),
+            TelemetryExtra(
+                name = Extra.SESSION_TIME,
+                value = "time duration from entering component"
+            ),
+            TelemetryExtra(
+                name = Extra.URL_COUNTS,
+                value = "url counts duration from entering component"
+            ),
+            TelemetryExtra(
+                name = Extra.APP_LINK,
+                value = "${Extra_Value.OPEN}|${Extra_Value.INSTALL}|null"
+            ),
+            TelemetryExtra(name = Extra.SHOW_KEYBOARD, value = "true|false")
+        ]
+    )
     fun endContentTab(contentTabTelemetryData: ContentTabTelemetryData) {
         EventBuilder(Category.ACTION, Method.END, Object.CONTENT_TAB)
-                .extra(Extra.VERTICAL, contentTabTelemetryData.vertical)
-                .extra(Extra.FEED, contentTabTelemetryData.feed)
-                .extra(Extra.SOURCE, contentTabTelemetryData.source)
-                .extra(Extra.CATEGORY, contentTabTelemetryData.category)
-                .extra(Extra.COMPONENT_ID, contentTabTelemetryData.componentId)
-                .extra(Extra.SUB_CATEGORY_ID, contentTabTelemetryData.subCategoryId)
-                .extra(Extra.VERSION_ID, contentTabTelemetryData.versionId.toString())
-                .extra(Extra.SESSION_TIME, contentTabTelemetryData.sessionTime.toString())
-                .extra(Extra.URL_COUNTS, contentTabTelemetryData.urlCounts.toString())
-                .extra(Extra.APP_LINK, contentTabTelemetryData.appLink)
-                .extra(Extra.SHOW_KEYBOARD, contentTabTelemetryData.showKeyboard.toString())
-                .queue()
+            .extra(Extra.VERTICAL, contentTabTelemetryData.vertical)
+            .extra(Extra.FEED, contentTabTelemetryData.feed)
+            .extra(Extra.SOURCE, contentTabTelemetryData.source)
+            .extra(Extra.CATEGORY, contentTabTelemetryData.category)
+            .extra(Extra.COMPONENT_ID, contentTabTelemetryData.componentId)
+            .extra(Extra.SUB_CATEGORY_ID, contentTabTelemetryData.subCategoryId)
+            .extra(Extra.VERSION_ID, contentTabTelemetryData.versionId.toString())
+            .extra(Extra.SESSION_TIME, contentTabTelemetryData.sessionTime.toString())
+            .extra(Extra.URL_COUNTS, contentTabTelemetryData.urlCounts.toString())
+            .extra(Extra.APP_LINK, contentTabTelemetryData.appLink)
+            .extra(Extra.SHOW_KEYBOARD, contentTabTelemetryData.showKeyboard.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Start Vertical Process",
-            category = Category.ACTION,
-            method = Method.START,
-            `object` = Object.PROCESS,
-            value = Value.VERTICAL,
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = "${Extra_Value.SHOPPING},${Extra_Value.ALL}")
-            ])
+        name = "Start Vertical Process",
+        category = Category.ACTION,
+        method = Method.START,
+        `object` = Object.PROCESS,
+        value = Value.VERTICAL,
+        extras = [
+            TelemetryExtra(
+                name = Extra.VERTICAL,
+                value = "${Extra_Value.SHOPPING},${Extra_Value.ALL}"
+            )
+        ]
+    )
     fun startVerticalProcess(vertical: String) {
         EventBuilder(Category.ACTION, Method.START, Object.PROCESS, Value.VERTICAL)
-                .extra(Extra.VERTICAL, vertical)
-                .queue()
+            .extra(Extra.VERTICAL, vertical)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "End Vertical Process",
-            category = Category.ACTION,
-            method = Method.END,
-            `object` = Object.PROCESS,
-            value = Value.VERTICAL,
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = "${Extra_Value.SHOPPING},${Extra_Value.ALL}"),
-                TelemetryExtra(name = Extra.LOADTIME, value = "[0-9]+")
-            ])
+        name = "End Vertical Process",
+        category = Category.ACTION,
+        method = Method.END,
+        `object` = Object.PROCESS,
+        value = Value.VERTICAL,
+        extras = [
+            TelemetryExtra(
+                name = Extra.VERTICAL,
+                value = "${Extra_Value.SHOPPING},${Extra_Value.ALL}"
+            ),
+            TelemetryExtra(name = Extra.LOADTIME, value = "[0-9]+")
+        ]
+    )
     fun endVerticalProcess(vertical: String, loadTime: Long) {
         EventBuilder(Category.ACTION, Method.END, Object.PROCESS, Value.VERTICAL)
-                .extra(Extra.VERTICAL, vertical)
-                .extra(Extra.LOADTIME, loadTime.toString())
-                .queue()
+            .extra(Extra.VERTICAL, vertical)
+            .extra(Extra.LOADTIME, loadTime.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Start Tab Swipe Process",
-            category = Category.ACTION,
-            method = Method.START,
-            `object` = Object.PROCESS,
-            value = Value.TAB_SWIPE,
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = "${Extra_Value.SHOPPING},${Extra_Value.ALL}")
-            ])
+        name = "Start Tab Swipe Process",
+        category = Category.ACTION,
+        method = Method.START,
+        `object` = Object.PROCESS,
+        value = Value.TAB_SWIPE,
+        extras = [
+            TelemetryExtra(
+                name = Extra.VERTICAL,
+                value = "${Extra_Value.SHOPPING},${Extra_Value.ALL}"
+            )
+        ]
+    )
     fun startTabSwipeProcess(vertical: String) {
         EventBuilder(Category.ACTION, Method.START, Object.PROCESS, Value.TAB_SWIPE)
-                .extra(Extra.VERTICAL, vertical)
-                .queue()
+            .extra(Extra.VERTICAL, vertical)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "End Tab Swipe Process",
-            category = Category.ACTION,
-            method = Method.END,
-            `object` = Object.PROCESS,
-            value = Value.TAB_SWIPE,
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = "${Extra_Value.SHOPPING},${Extra_Value.ALL}"),
-                TelemetryExtra(name = Extra.LOADTIME, value = "[0-9]+")
-            ])
+        name = "End Tab Swipe Process",
+        category = Category.ACTION,
+        method = Method.END,
+        `object` = Object.PROCESS,
+        value = Value.TAB_SWIPE,
+        extras = [
+            TelemetryExtra(
+                name = Extra.VERTICAL,
+                value = "${Extra_Value.SHOPPING},${Extra_Value.ALL}"
+            ),
+            TelemetryExtra(name = Extra.LOADTIME, value = "[0-9]+")
+        ]
+    )
     fun endTabSwipeProcess(vertical: String, loadTime: Long) {
         EventBuilder(Category.ACTION, Method.END, Object.PROCESS, Value.TAB_SWIPE)
-                .extra(Extra.VERTICAL, vertical)
-                .extra(Extra.LOADTIME, loadTime.toString())
-                .queue()
+            .extra(Extra.VERTICAL, vertical)
+            .extra(Extra.LOADTIME, loadTime.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Start Tab Swipe",
-            category = Category.ACTION,
-            method = Method.START,
-            `object` = Object.TAB_SWIPE,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
-                TelemetryExtra(name = Extra.FEED, value = "feed"),
-                TelemetryExtra(name = Extra.SOURCE, value = "source")
-            ])
+        name = "Start Tab Swipe",
+        category = Category.ACTION,
+        method = Method.START,
+        `object` = Object.TAB_SWIPE,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
+            TelemetryExtra(name = Extra.FEED, value = "feed"),
+            TelemetryExtra(name = Extra.SOURCE, value = "source")
+        ]
+    )
     fun startTabSwipe(telemetryData: TabSwipeTelemetryData) {
         EventBuilder(Category.ACTION, Method.START, Object.TAB_SWIPE)
-                .extra(Extra.VERTICAL, telemetryData.vertical)
-                .extra(Extra.FEED, telemetryData.feed)
-                .extra(Extra.SOURCE, telemetryData.source)
-                .queue()
+            .extra(Extra.VERTICAL, telemetryData.vertical)
+            .extra(Extra.FEED, telemetryData.feed)
+            .extra(Extra.SOURCE, telemetryData.source)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "End Tab Swipe",
-            category = Category.ACTION,
-            method = Method.END,
-            `object` = Object.TAB_SWIPE,
-            value = "",
-            extras = [
-                TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
-                TelemetryExtra(name = Extra.FEED, value = "feed"),
-                TelemetryExtra(name = Extra.SOURCE, value = "source"),
-                TelemetryExtra(name = Extra.SESSION_TIME, value = "time duration from entering component"),
-                TelemetryExtra(name = Extra.URL_COUNTS, value = "url counts duration from entering component"),
-                TelemetryExtra(name = Extra.APP_LINK, value = "${Extra_Value.OPEN}|${Extra_Value.INSTALL}|null"),
-                TelemetryExtra(name = Extra.SHOW_KEYBOARD, value = "true|false")
-            ])
+        name = "End Tab Swipe",
+        category = Category.ACTION,
+        method = Method.END,
+        `object` = Object.TAB_SWIPE,
+        value = "",
+        extras = [
+            TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
+            TelemetryExtra(name = Extra.FEED, value = "feed"),
+            TelemetryExtra(name = Extra.SOURCE, value = "source"),
+            TelemetryExtra(
+                name = Extra.SESSION_TIME,
+                value = "time duration from entering component"
+            ),
+            TelemetryExtra(
+                name = Extra.URL_COUNTS,
+                value = "url counts duration from entering component"
+            ),
+            TelemetryExtra(
+                name = Extra.APP_LINK,
+                value = "${Extra_Value.OPEN}|${Extra_Value.INSTALL}|null"
+            ),
+            TelemetryExtra(name = Extra.SHOW_KEYBOARD, value = "true|false")
+        ]
+    )
     fun endTabSwipe(telemetryData: TabSwipeTelemetryData) {
         EventBuilder(Category.ACTION, Method.END, Object.TAB_SWIPE)
-                .extra(Extra.VERTICAL, telemetryData.vertical)
-                .extra(Extra.FEED, telemetryData.feed)
-                .extra(Extra.SOURCE, telemetryData.source)
-                .extra(Extra.SESSION_TIME, telemetryData.sessionTime.toString())
-                .extra(Extra.URL_COUNTS, telemetryData.urlCounts.toString())
-                .extra(Extra.APP_LINK, telemetryData.appLink)
-                .extra(Extra.SHOW_KEYBOARD, telemetryData.showKeyboard.toString())
-                .queue()
+            .extra(Extra.VERTICAL, telemetryData.vertical)
+            .extra(Extra.FEED, telemetryData.feed)
+            .extra(Extra.SOURCE, telemetryData.source)
+            .extra(Extra.SESSION_TIME, telemetryData.sessionTime.toString())
+            .extra(Extra.URL_COUNTS, telemetryData.urlCounts.toString())
+            .extra(Extra.APP_LINK, telemetryData.appLink)
+            .extra(Extra.SHOW_KEYBOARD, telemetryData.showKeyboard.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Toolbar - Share",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.TOOLBAR,
-            value = Value.SHARE,
-            extras = [
-                TelemetryExtra(name = Extra.MODE, value = "webview"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-9]"),
-                TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
-                TelemetryExtra(name = Extra.FEED, value = "feed"),
-                TelemetryExtra(name = Extra.SOURCE, value = "source"),
-                TelemetryExtra(name = Extra.CATEGORY, value = "category"),
-                TelemetryExtra(name = Extra.COMPONENT_ID, value = "component id"),
-                TelemetryExtra(name = Extra.SUB_CATEGORY_ID, value = "subcategory id"),
-                TelemetryExtra(name = Extra.VERSION_ID, value = "version id")
-            ])
-    fun clickContentTabToolbarShare(position: Int, contentTabTelemetryData: ContentTabTelemetryData) {
+        name = "Click Toolbar - Share",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.TOOLBAR,
+        value = Value.SHARE,
+        extras = [
+            TelemetryExtra(name = Extra.MODE, value = "webview"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-9]"),
+            TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
+            TelemetryExtra(name = Extra.FEED, value = "feed"),
+            TelemetryExtra(name = Extra.SOURCE, value = "source"),
+            TelemetryExtra(name = Extra.CATEGORY, value = "category"),
+            TelemetryExtra(name = Extra.COMPONENT_ID, value = "component id"),
+            TelemetryExtra(name = Extra.SUB_CATEGORY_ID, value = "subcategory id"),
+            TelemetryExtra(name = Extra.VERSION_ID, value = "version id")
+        ]
+    )
+    fun clickContentTabToolbarShare(
+        position: Int,
+        contentTabTelemetryData: ContentTabTelemetryData
+    ) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.TOOLBAR, Value.SHARE)
-                .extra(Extra.MODE, Extra_Value.WEBVIEW)
-                .extra(Extra.POSITION, position.toString())
-                .extra(Extra.VERTICAL, contentTabTelemetryData.vertical)
-                .extra(Extra.FEED, contentTabTelemetryData.feed)
-                .extra(Extra.SOURCE, contentTabTelemetryData.source)
-                .extra(Extra.CATEGORY, contentTabTelemetryData.category)
-                .extra(Extra.COMPONENT_ID, contentTabTelemetryData.componentId)
-                .extra(Extra.SUB_CATEGORY_ID, contentTabTelemetryData.subCategoryId)
-                .extra(Extra.VERSION_ID, contentTabTelemetryData.versionId.toString())
-                .queue()
+            .extra(Extra.MODE, Extra_Value.WEBVIEW)
+            .extra(Extra.POSITION, position.toString())
+            .extra(Extra.VERTICAL, contentTabTelemetryData.vertical)
+            .extra(Extra.FEED, contentTabTelemetryData.feed)
+            .extra(Extra.SOURCE, contentTabTelemetryData.source)
+            .extra(Extra.CATEGORY, contentTabTelemetryData.category)
+            .extra(Extra.COMPONENT_ID, contentTabTelemetryData.componentId)
+            .extra(Extra.SUB_CATEGORY_ID, contentTabTelemetryData.subCategoryId)
+            .extra(Extra.VERSION_ID, contentTabTelemetryData.versionId.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Toolbar - Reload",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.TOOLBAR,
-            value = Value.RELOAD,
-            extras = [
-                TelemetryExtra(name = Extra.MODE, value = "webview"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-9]"),
-                TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
-                TelemetryExtra(name = Extra.FEED, value = "feed"),
-                TelemetryExtra(name = Extra.SOURCE, value = "source"),
-                TelemetryExtra(name = Extra.CATEGORY, value = "category"),
-                TelemetryExtra(name = Extra.COMPONENT_ID, value = "component id"),
-                TelemetryExtra(name = Extra.SUB_CATEGORY_ID, value = "subcategory id"),
-                TelemetryExtra(name = Extra.VERSION_ID, value = "version id")
-            ])
-    fun clickContentTabToolbarReload(position: Int, contentTabTelemetryData: ContentTabTelemetryData) {
+        name = "Click Toolbar - Reload",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.TOOLBAR,
+        value = Value.RELOAD,
+        extras = [
+            TelemetryExtra(name = Extra.MODE, value = "webview"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-9]"),
+            TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
+            TelemetryExtra(name = Extra.FEED, value = "feed"),
+            TelemetryExtra(name = Extra.SOURCE, value = "source"),
+            TelemetryExtra(name = Extra.CATEGORY, value = "category"),
+            TelemetryExtra(name = Extra.COMPONENT_ID, value = "component id"),
+            TelemetryExtra(name = Extra.SUB_CATEGORY_ID, value = "subcategory id"),
+            TelemetryExtra(name = Extra.VERSION_ID, value = "version id")
+        ]
+    )
+    fun clickContentTabToolbarReload(
+        position: Int,
+        contentTabTelemetryData: ContentTabTelemetryData
+    ) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.TOOLBAR, Value.RELOAD)
-                .extra(Extra.MODE, Extra_Value.WEBVIEW)
-                .extra(Extra.POSITION, position.toString())
-                .extra(Extra.VERTICAL, contentTabTelemetryData.vertical)
-                .extra(Extra.FEED, contentTabTelemetryData.feed)
-                .extra(Extra.SOURCE, contentTabTelemetryData.source)
-                .extra(Extra.CATEGORY, contentTabTelemetryData.category)
-                .extra(Extra.COMPONENT_ID, contentTabTelemetryData.componentId)
-                .extra(Extra.SUB_CATEGORY_ID, contentTabTelemetryData.subCategoryId)
-                .extra(Extra.VERSION_ID, contentTabTelemetryData.versionId.toString())
-                .queue()
+            .extra(Extra.MODE, Extra_Value.WEBVIEW)
+            .extra(Extra.POSITION, position.toString())
+            .extra(Extra.VERTICAL, contentTabTelemetryData.vertical)
+            .extra(Extra.FEED, contentTabTelemetryData.feed)
+            .extra(Extra.SOURCE, contentTabTelemetryData.source)
+            .extra(Extra.CATEGORY, contentTabTelemetryData.category)
+            .extra(Extra.COMPONENT_ID, contentTabTelemetryData.componentId)
+            .extra(Extra.SUB_CATEGORY_ID, contentTabTelemetryData.subCategoryId)
+            .extra(Extra.VERSION_ID, contentTabTelemetryData.versionId.toString())
+            .queue()
     }
 
     fun clickToolbarBack(position: Int) {
@@ -2697,41 +3041,49 @@ object TelemetryWrapper {
     }
 
     @TelemetryDoc(
-            name = "Click Toolbar - Back",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.TOOLBAR,
-            value = Value.BACK,
-            extras = [
-                TelemetryExtra(name = Extra.MODE, value = "webview"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-9]"),
-                TelemetryExtra(name = Extra.VERTICAL, value = "${Extra_Value.SHOPPING},${Extra_Value.ALL}"),
-                TelemetryExtra(name = Extra.FEED, value = "feed"),
-                TelemetryExtra(name = Extra.SOURCE, value = "source"),
-                TelemetryExtra(name = Extra.CATEGORY, value = "category"),
-                TelemetryExtra(name = Extra.COMPONENT_ID, value = "component id"),
-                TelemetryExtra(name = Extra.SUB_CATEGORY_ID, value = "subcategory id"),
-                TelemetryExtra(name = Extra.VERSION_ID, value = "version id")
-            ])
-    fun clickContentTabToolbarBack(position: Int, isFromVertical: Boolean, contentTabTelemetryData: ContentTabTelemetryData?) {
+        name = "Click Toolbar - Back",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.TOOLBAR,
+        value = Value.BACK,
+        extras = [
+            TelemetryExtra(name = Extra.MODE, value = "webview"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-9]"),
+            TelemetryExtra(
+                name = Extra.VERTICAL,
+                value = "${Extra_Value.SHOPPING},${Extra_Value.ALL}"
+            ),
+            TelemetryExtra(name = Extra.FEED, value = "feed"),
+            TelemetryExtra(name = Extra.SOURCE, value = "source"),
+            TelemetryExtra(name = Extra.CATEGORY, value = "category"),
+            TelemetryExtra(name = Extra.COMPONENT_ID, value = "component id"),
+            TelemetryExtra(name = Extra.SUB_CATEGORY_ID, value = "subcategory id"),
+            TelemetryExtra(name = Extra.VERSION_ID, value = "version id")
+        ]
+    )
+    fun clickContentTabToolbarBack(
+        position: Int,
+        isFromVertical: Boolean,
+        contentTabTelemetryData: ContentTabTelemetryData?
+    ) {
         if (isFromVertical) {
             requireNotNull(contentTabTelemetryData)
             EventBuilder(Category.ACTION, Method.CLICK, Object.TOOLBAR, Value.BACK)
-                    .extra(Extra.MODE, Extra_Value.WEBVIEW)
-                    .extra(Extra.POSITION, position.toString())
-                    .extra(Extra.VERTICAL, contentTabTelemetryData.vertical)
-                    .extra(Extra.FEED, contentTabTelemetryData.feed)
-                    .extra(Extra.SOURCE, contentTabTelemetryData.source)
-                    .extra(Extra.CATEGORY, contentTabTelemetryData.category)
-                    .extra(Extra.COMPONENT_ID, contentTabTelemetryData.componentId)
-                    .extra(Extra.SUB_CATEGORY_ID, contentTabTelemetryData.subCategoryId)
-                    .extra(Extra.VERSION_ID, contentTabTelemetryData.versionId.toString())
-                    .queue()
+                .extra(Extra.MODE, Extra_Value.WEBVIEW)
+                .extra(Extra.POSITION, position.toString())
+                .extra(Extra.VERTICAL, contentTabTelemetryData.vertical)
+                .extra(Extra.FEED, contentTabTelemetryData.feed)
+                .extra(Extra.SOURCE, contentTabTelemetryData.source)
+                .extra(Extra.CATEGORY, contentTabTelemetryData.category)
+                .extra(Extra.COMPONENT_ID, contentTabTelemetryData.componentId)
+                .extra(Extra.SUB_CATEGORY_ID, contentTabTelemetryData.subCategoryId)
+                .extra(Extra.VERSION_ID, contentTabTelemetryData.versionId.toString())
+                .queue()
         } else {
             EventBuilder(Category.ACTION, Method.CLICK, Object.TOOLBAR, Value.BACK)
-                    .extra(Extra.POSITION, position.toString())
-                    .extra(Extra.VERTICAL, Extra_Value.ALL)
-                    .queue()
+                .extra(Extra.POSITION, position.toString())
+                .extra(Extra.VERTICAL, Extra_Value.ALL)
+                .queue()
         }
     }
 
@@ -2741,15 +3093,20 @@ object TelemetryWrapper {
         method = Method.CLICK,
         `object` = Object.TOOLBAR,
         value = Value.TAB_SWIPE,
-        extras = [TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
-            TelemetryExtra(name = Extra.FROM, value = "${Extra_Value.HOME},${Extra_Value.TAB_SWIPE}")
-        ])
+        extras = [
+            TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
+            TelemetryExtra(
+                name = Extra.FROM,
+                value = "${Extra_Value.HOME},${Extra_Value.TAB_SWIPE}"
+            )
+        ]
+    )
     @JvmStatic
     fun clickToolbarTabSwipe(vertical: String, from: String) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.TOOLBAR, Value.TAB_SWIPE)
-                .extra(Extra.VERTICAL, vertical)
-                .extra(Extra.FROM, from)
-                .queue()
+            .extra(Extra.VERTICAL, vertical)
+            .extra(Extra.FROM, from)
+            .queue()
     }
 
     @TelemetryDoc(
@@ -2758,15 +3115,17 @@ object TelemetryWrapper {
         method = Method.SHOW,
         `object` = Object.DRAWER,
         value = Value.TAB_SWIPE,
-        extras = [TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
+        extras = [
+            TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
             TelemetryExtra(name = Extra.FEED, value = "feed")
-        ])
+        ]
+    )
     @JvmStatic
     fun showTabSwipeDrawer(vertical: String, feed: String) {
         EventBuilder(Category.ACTION, Method.SHOW, Object.DRAWER, Value.TAB_SWIPE)
-                .extra(Extra.VERTICAL, vertical)
-                .extra(Extra.FEED, feed)
-                .queue()
+            .extra(Extra.VERTICAL, vertical)
+            .extra(Extra.FEED, feed)
+            .queue()
     }
 
     @TelemetryDoc(
@@ -2775,15 +3134,17 @@ object TelemetryWrapper {
         method = Method.CLICK,
         `object` = Object.DRAWER,
         value = Value.TAB_SWIPE,
-        extras = [TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
+        extras = [
+            TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
             TelemetryExtra(name = Extra.FEED, value = "feed")
-        ])
+        ]
+    )
     @JvmStatic
     fun clickTabSwipeDrawer(vertical: String, feed: String) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.DRAWER, Value.TAB_SWIPE)
-                .extra(Extra.VERTICAL, vertical)
-                .extra(Extra.FEED, feed)
-                .queue()
+            .extra(Extra.VERTICAL, vertical)
+            .extra(Extra.FEED, feed)
+            .queue()
     }
 
     @TelemetryDoc(
@@ -2792,12 +3153,13 @@ object TelemetryWrapper {
         method = Method.ADD,
         `object` = Object.TAB,
         value = Value.TAB_SWIPE,
-        extras = [TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING)])
+        extras = [TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING)]
+    )
     @JvmStatic
     fun addTabSwipeTab(vertical: String) {
         EventBuilder(Category.ACTION, Method.ADD, Object.TAB, Value.TAB_SWIPE)
-                .extra(Extra.VERTICAL, vertical)
-                .queue()
+            .extra(Extra.VERTICAL, vertical)
+            .queue()
     }
 
     @TelemetryDoc(
@@ -2806,12 +3168,13 @@ object TelemetryWrapper {
         method = Method.CHANGE,
         `object` = Object.SETTING,
         value = Value.TAB_SWIPE,
-        extras = [TelemetryExtra(name = Extra.FEED, value = "feed")])
+        extras = [TelemetryExtra(name = Extra.FEED, value = "feed")]
+    )
     @JvmStatic
     fun changeTabSwipeSettings(feed: String) {
         EventBuilder(Category.ACTION, Method.CHANGE, Object.SETTING, Value.TAB_SWIPE)
-                .extra(Extra.FEED, feed)
-                .queue()
+            .extra(Extra.FEED, feed)
+            .queue()
     }
 
     @TelemetryDoc(
@@ -2822,7 +3185,8 @@ object TelemetryWrapper {
         value = Value.TAB_SWIPE,
         extras = [
             TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING)
-        ])
+        ]
+    )
     @JvmStatic
     fun showSearchBarFromTabSwipe(vertical: String) {
         EventBuilder(Category.ACTION, Method.SHOW, Object.SEARCH_BAR, Value.TAB_SWIPE)
@@ -2838,7 +3202,8 @@ object TelemetryWrapper {
         value = Value.TAB_SWIPE,
         extras = [
             TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING)
-        ])
+        ]
+    )
     @JvmStatic
     fun showKeyboardFromTabSwipeSearchBar(vertical: String) {
         EventBuilder(Category.ACTION, Method.SHOW_KEYBOARD, Object.SEARCH_BAR, Value.TAB_SWIPE)
@@ -2854,7 +3219,8 @@ object TelemetryWrapper {
         value = Value.TAB_SWIPE,
         extras = [
             TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING)
-        ])
+        ]
+    )
     @JvmStatic
     fun startTypingFromTabSwipeSearchBar(vertical: String) {
         EventBuilder(Category.ACTION, Method.START_TYPING, Object.SEARCH_BAR, Value.TAB_SWIPE)
@@ -2870,7 +3236,8 @@ object TelemetryWrapper {
         value = Value.TAB_SWIPE,
         extras = [
             TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING)
-        ])
+        ]
+    )
     @JvmStatic
     fun searchWithTextInSearchBar(vertical: String) {
         EventBuilder(Category.ACTION, Method.TYPE_QUERY, Object.SEARCH_BAR, Value.TAB_SWIPE)
@@ -2888,9 +3255,14 @@ object TelemetryWrapper {
             TelemetryExtra(name = Extra.VERTICAL, value = Extra_Value.SHOPPING),
             TelemetryExtra(name = Extra.DEFAULT, value = "true,false"),
             TelemetryExtra(name = Extra.KEYWORD, value = "default name xxx,null")
-        ])
+        ]
+    )
     @JvmStatic
-    fun useSearchSuggestionInTabSwipeSearchBar(vertical: String, isDefault: Boolean, keyword: String) {
+    fun useSearchSuggestionInTabSwipeSearchBar(
+        vertical: String,
+        isDefault: Boolean,
+        keyword: String
+    ) {
         EventBuilder(Category.ACTION, Method.TYPE_SELECT_QUERY, Object.SEARCH_BAR, Value.TAB_SWIPE)
             .extra(Extra.VERTICAL, vertical)
             .extra(Extra.DEFAULT, isDefault.toString())
@@ -2899,129 +3271,138 @@ object TelemetryWrapper {
     }
 
     @TelemetryDoc(
-            name = "Pin Topsite",
-            category = Category.ACTION,
-            method = Method.PIN,
-            `object` = Object.HOME,
-            value = Value.LINK,
-            extras = [
-                TelemetryExtra(name = Extra.SOURCE, value = "buka|toko...|null"),
-                TelemetryExtra(name = Extra.POSITION, value = "[0-9]"),
-                TelemetryExtra(name = Extra.DEFAULT, value = "true,false"),
-                TelemetryExtra(name = Extra.PINNED, value = "false")
-            ])
+        name = "Pin Topsite",
+        category = Category.ACTION,
+        method = Method.PIN,
+        `object` = Object.HOME,
+        value = Value.LINK,
+        extras = [
+            TelemetryExtra(name = Extra.SOURCE, value = "buka|toko...|null"),
+            TelemetryExtra(name = Extra.POSITION, value = "[0-9]"),
+            TelemetryExtra(name = Extra.DEFAULT, value = "true,false"),
+            TelemetryExtra(name = Extra.PINNED, value = "false")
+        ]
+    )
     fun pinTopSite(source: String?, position: Int, isDefault: Boolean) {
         EventBuilder(Category.ACTION, Method.PIN, Object.HOME, Value.LINK)
-                .extra(Extra.SOURCE, source ?: "null")
-                .extra(Extra.POSITION, position.toString())
-                .extra(Extra.DEFAULT, isDefault.toString())
-                .extra(Extra.PINNED, false.toString())
-                .queue()
+            .extra(Extra.SOURCE, source ?: "null")
+            .extra(Extra.POSITION, position.toString())
+            .extra(Extra.DEFAULT, isDefault.toString())
+            .extra(Extra.PINNED, false.toString())
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Exit Warning Toast",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.TOAST,
-            value = Value.EXIT_WARNING,
-            extras = [])
+        name = "Show Exit Warning Toast",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.TOAST,
+        value = Value.EXIT_WARNING,
+        extras = []
+    )
     fun showExitToast() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.TOAST, Value.EXIT_WARNING)
-                .queue()
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Set-Default by Settings Message",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.MESSAGE,
-            value = Value.SET_DEFAULT_BY_SETTINGS,
-            extras = [])
+        name = "Show Set-Default by Settings Message",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.MESSAGE,
+        value = Value.SET_DEFAULT_BY_SETTINGS,
+        extras = []
+    )
     fun showSetDefaultBySettingsMessage() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.MESSAGE, Value.SET_DEFAULT_BY_SETTINGS)
-                .queue()
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Set-Default by Link Message",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.MESSAGE,
-            value = Value.SET_DEFAULT_BY_LINK,
-            extras = [])
+        name = "Show Set-Default by Link Message",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.MESSAGE,
+        value = Value.SET_DEFAULT_BY_LINK,
+        extras = []
+    )
     fun showSetDefaultByLinkMessage() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.MESSAGE, Value.SET_DEFAULT_BY_LINK)
-                .queue()
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Set-Default by Settings Message",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MESSAGE,
-            value = Value.SET_DEFAULT_BY_SETTINGS,
-            extras = [
-                TelemetryExtra(name = Extra.ACTION, value = "${Extra_Value.OK},${Extra_Value.CANCEL}")
-            ])
+        name = "Click Set-Default by Settings Message",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MESSAGE,
+        value = Value.SET_DEFAULT_BY_SETTINGS,
+        extras = [
+            TelemetryExtra(name = Extra.ACTION, value = "${Extra_Value.OK},${Extra_Value.CANCEL}")
+        ]
+    )
     fun clickSetDefaultBySettingsMessage(action: String) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.MESSAGE, Value.SET_DEFAULT_BY_SETTINGS)
-                .extra(Extra.ACTION, action)
-                .queue()
+            .extra(Extra.ACTION, action)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Set-Default by Link Message",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.MESSAGE,
-            value = Value.SET_DEFAULT_BY_LINK,
-            extras = [
-                TelemetryExtra(name = Extra.ACTION, value = "${Extra_Value.OK},${Extra_Value.CANCEL}")
-            ])
+        name = "Click Set-Default by Link Message",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.MESSAGE,
+        value = Value.SET_DEFAULT_BY_LINK,
+        extras = [
+            TelemetryExtra(name = Extra.ACTION, value = "${Extra_Value.OK},${Extra_Value.CANCEL}")
+        ]
+    )
     fun clickSetDefaultByLinkMessage(action: String) {
         EventBuilder(Category.ACTION, Method.CLICK, Object.MESSAGE, Value.SET_DEFAULT_BY_LINK)
-                .extra(Extra.ACTION, action)
-                .queue()
+            .extra(Extra.ACTION, action)
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Set-Default Success Toast",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.TOAST,
-            value = Value.SET_DEFAULT_SUCCESS,
-            extras = [])
+        name = "Show Set-Default Success Toast",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.TOAST,
+        value = Value.SET_DEFAULT_SUCCESS,
+        extras = []
+    )
     fun showSetDefaultSuccessToast() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.TOAST, Value.SET_DEFAULT_SUCCESS)
-                .queue()
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Show Set-Default Try-again Snackbar",
-            category = Category.ACTION,
-            method = Method.SHOW,
-            `object` = Object.SNACKBAR,
-            value = Value.SET_DEFAULT_TRY_AGAIN,
-            extras = [])
+        name = "Show Set-Default Try-again Snackbar",
+        category = Category.ACTION,
+        method = Method.SHOW,
+        `object` = Object.SNACKBAR,
+        value = Value.SET_DEFAULT_TRY_AGAIN,
+        extras = []
+    )
     fun showSetDefaultTryAgainSnackbar() {
         EventBuilder(Category.ACTION, Method.SHOW, Object.SNACKBAR, Value.SET_DEFAULT_TRY_AGAIN)
-                .queue()
+            .queue()
     }
 
     @TelemetryDoc(
-            name = "Click Set-Default Try-again Snackbar",
-            category = Category.ACTION,
-            method = Method.CLICK,
-            `object` = Object.SNACKBAR,
-            value = Value.SET_DEFAULT_TRY_AGAIN,
-            extras = [
-                TelemetryExtra(name = Extra.ACTION, value = "${Extra_Value.TRY_AGAIN}")
-            ])
+        name = "Click Set-Default Try-again Snackbar",
+        category = Category.ACTION,
+        method = Method.CLICK,
+        `object` = Object.SNACKBAR,
+        value = Value.SET_DEFAULT_TRY_AGAIN,
+        extras = [
+            TelemetryExtra(name = Extra.ACTION, value = "${Extra_Value.TRY_AGAIN}")
+        ]
+    )
     fun clickSetDefaultTryAgainSnackBar() {
         EventBuilder(Category.ACTION, Method.CLICK, Object.SNACKBAR, Value.SET_DEFAULT_TRY_AGAIN)
-                .extra(Extra.ACTION, Extra_Value.TRY_AGAIN)
-                .queue()
+            .extra(Extra.ACTION, Extra_Value.TRY_AGAIN)
+            .queue()
     }
 
     private fun network(): String {
@@ -3035,11 +3416,13 @@ object TelemetryWrapper {
         method = Method.START,
         `object` = Object.DOWNLOAD,
         value = Value.FILE,
-        extras = [(TelemetryExtra(name = Extra.DOWNLOAD_ID, value = "1,2,3...")),
+        extras = [
+            (TelemetryExtra(name = Extra.DOWNLOAD_ID, value = "1,2,3...")),
             (TelemetryExtra(name = Extra.START_TIME, value = "timestamp")),
             (TelemetryExtra(name = Extra.SUPPORT_RESUME, value = "true,false")),
             (TelemetryExtra(name = Extra.VALID_SSL, value = "true,false")),
-            (TelemetryExtra(name = Extra.NETWORK, value = "mobile/wifi"))]
+            (TelemetryExtra(name = Extra.NETWORK, value = "mobile/wifi"))
+        ]
     )
     @JvmStatic
     fun startDownloadFile(
@@ -3064,13 +3447,15 @@ object TelemetryWrapper {
         method = Method.END,
         `object` = Object.DOWNLOAD,
         value = Value.FILE,
-        extras = [(TelemetryExtra(name = Extra.DOWNLOAD_ID, value = "1,2,3...")),
+        extras = [
+            (TelemetryExtra(name = Extra.DOWNLOAD_ID, value = "1,2,3...")),
             (TelemetryExtra(name = Extra.END_TIME, value = "timestamp")),
             (TelemetryExtra(name = Extra.FILE_SIZE, value = "number")),
             (TelemetryExtra(name = Extra.PROGRESS, value = "number")),
             (TelemetryExtra(name = Extra.STATUS, value = "1.3")),
             (TelemetryExtra(name = Extra.REASON, value = "1005,1006")),
-            (TelemetryExtra(name = Extra.NETWORK, value = "mobile/wifi"))]
+            (TelemetryExtra(name = Extra.NETWORK, value = "mobile/wifi"))
+        ]
     )
     @JvmStatic
     fun endDownloadFile(
@@ -3127,51 +3512,75 @@ object TelemetryWrapper {
                 }
                 val context = appContext
                 val prefKeyWhitelist = HashMap<String, String>()
-                prefKeyWhitelist[context.getString(R.string.pref_key_search_engine)] = "search_engine"
+                prefKeyWhitelist[context.getString(R.string.pref_key_search_engine)] =
+                    "search_engine"
 
-                prefKeyWhitelist[context.getString(R.string.pref_key_privacy_block_ads)] = "privacy_ads"
-                prefKeyWhitelist[context.getString(R.string.pref_key_privacy_block_analytics)] = "privacy_analytics"
-                prefKeyWhitelist[context.getString(R.string.pref_key_privacy_block_social)] = "privacy_social"
-                prefKeyWhitelist[context.getString(R.string.pref_key_privacy_block_other)] = "privacy_other"
+                prefKeyWhitelist[context.getString(R.string.pref_key_privacy_block_ads)] =
+                    "privacy_ads"
+                prefKeyWhitelist[context.getString(R.string.pref_key_privacy_block_analytics)] =
+                    "privacy_analytics"
+                prefKeyWhitelist[context.getString(R.string.pref_key_privacy_block_social)] =
+                    "privacy_social"
+                prefKeyWhitelist[context.getString(R.string.pref_key_privacy_block_other)] =
+                    "privacy_other"
                 prefKeyWhitelist[context.getString(R.string.pref_key_turbo_mode)] = "turbo_mode"
 
-                prefKeyWhitelist[context.getString(R.string.pref_key_performance_block_webfonts)] = "block_webfonts"
-                prefKeyWhitelist[context.getString(R.string.pref_key_performance_block_images)] = "block_images"
+                prefKeyWhitelist[context.getString(R.string.pref_key_performance_block_webfonts)] =
+                    "block_webfonts"
+                prefKeyWhitelist[context.getString(R.string.pref_key_performance_block_images)] =
+                    "block_images"
 
-                prefKeyWhitelist[context.getString(R.string.pref_key_default_browser)] = "default_browser"
+                prefKeyWhitelist[context.getString(R.string.pref_key_default_browser)] =
+                    "default_browser"
 
                 prefKeyWhitelist[context.getString(R.string.pref_key_telemetry)] = "telemetry"
 
-                prefKeyWhitelist[context.getString(R.string.pref_key_give_feedback)] = "give_feedback"
-                prefKeyWhitelist[context.getString(R.string.pref_key_share_with_friends)] = "share_with_friends"
+                prefKeyWhitelist[context.getString(R.string.pref_key_give_feedback)] =
+                    "give_feedback"
+                prefKeyWhitelist[context.getString(R.string.pref_key_share_with_friends)] =
+                    "share_with_friends"
                 prefKeyWhitelist[context.getString(R.string.pref_key_about)] = "key_about"
                 prefKeyWhitelist[context.getString(R.string.pref_key_help)] = "help"
                 prefKeyWhitelist[context.getString(R.string.pref_key_rights)] = "rights"
 
-                prefKeyWhitelist[context.getString(R.string.pref_key_webview_version)] = "webview_version"
+                prefKeyWhitelist[context.getString(R.string.pref_key_webview_version)] =
+                    "webview_version"
                 // data saving
-                prefKeyWhitelist[context.getString(R.string.pref_key_data_saving_block_ads)] = "saving_block_ads"
-                prefKeyWhitelist[context.getString(R.string.pref_key_data_saving_block_webfonts)] = "data_webfont"
-                prefKeyWhitelist[context.getString(R.string.pref_key_data_saving_block_images)] = "data_images"
-                prefKeyWhitelist[context.getString(R.string.pref_key_data_saving_block_tab_restore)] = "tab_restore"
+                prefKeyWhitelist[context.getString(R.string.pref_key_data_saving_block_ads)] =
+                    "saving_block_ads"
+                prefKeyWhitelist[context.getString(R.string.pref_key_data_saving_block_webfonts)] =
+                    "data_webfont"
+                prefKeyWhitelist[context.getString(R.string.pref_key_data_saving_block_images)] =
+                    "data_images"
+                prefKeyWhitelist[context.getString(R.string.pref_key_data_saving_block_tab_restore)] =
+                    "tab_restore"
 
                 // storage and cache
-                prefKeyWhitelist[context.getString(R.string.pref_key_storage_clear_browsing_data)] = "clear_browsing_data)"
-                prefKeyWhitelist[context.getString(R.string.pref_key_removable_storage_available_on_create)] = "remove_storage"
-                prefKeyWhitelist[context.getString(R.string.pref_key_storage_save_downloads_to)] = "save_downloads_to"
-                prefKeyWhitelist[context.getString(R.string.pref_key_showed_storage_message)] = "storage_message)"
+                prefKeyWhitelist[context.getString(R.string.pref_key_storage_clear_browsing_data)] =
+                    "clear_browsing_data)"
+                prefKeyWhitelist[context.getString(R.string.pref_key_removable_storage_available_on_create)] =
+                    "remove_storage"
+                prefKeyWhitelist[context.getString(R.string.pref_key_storage_save_downloads_to)] =
+                    "save_downloads_to"
+                prefKeyWhitelist[context.getString(R.string.pref_key_showed_storage_message)] =
+                    "storage_message)"
 
                 // rate / share app already have telemetry
 
                 // clear browsing data
-                prefKeyWhitelist[context.getString(R.string.pref_value_clear_browsing_history)] = "clear_browsing_his"
-                prefKeyWhitelist[context.getString(R.string.pref_value_clear_form_history)] = "clear_form_his"
-                prefKeyWhitelist[context.getString(R.string.pref_value_clear_cookies)] = "clear_cookies"
+                prefKeyWhitelist[context.getString(R.string.pref_value_clear_browsing_history)] =
+                    "clear_browsing_his"
+                prefKeyWhitelist[context.getString(R.string.pref_value_clear_form_history)] =
+                    "clear_form_his"
+                prefKeyWhitelist[context.getString(R.string.pref_value_clear_cookies)] =
+                    "clear_cookies"
                 prefKeyWhitelist[context.getString(R.string.pref_value_clear_cache)] = "clear_cache"
 
                 // data saving path values
-                prefKeyWhitelist[context.getString(R.string.pref_value_saving_path_sd_card)] = "path_sd_card"
-                prefKeyWhitelist[context.getString(R.string.pref_value_saving_path_internal_storage)] = "path_internal_storage"
+                prefKeyWhitelist[context.getString(R.string.pref_value_saving_path_sd_card)] =
+                    "path_sd_card"
+                prefKeyWhitelist[context.getString(R.string.pref_value_saving_path_internal_storage)] =
+                    "path_internal_storage"
 
                 // default browser already have telemetry
 

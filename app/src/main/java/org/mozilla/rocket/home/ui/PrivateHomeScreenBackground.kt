@@ -14,13 +14,12 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Shader
 import android.graphics.drawable.Drawable
-import androidx.appcompat.widget.AppCompatImageView
 import android.util.AttributeSet
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.drawable.toDrawable
-
 import org.mozilla.focus.R
 
 class PrivateHomeScreenBackground : AppCompatImageView {
@@ -55,18 +54,18 @@ class PrivateHomeScreenBackground : AppCompatImageView {
     }
 
     private fun getPatternDrawable(colorStart: Int, colorCenter: Int, colorEnd: Int): Drawable =
-            getScreenedDrawable(
-                    PATTERN_IMAGE_RESOURCE_ID,
-                    intArrayOf(colorStart, colorCenter, colorEnd),
-                    COLORS_GRADIENT_POSITIONS
-            )
+        getScreenedDrawable(
+            PATTERN_IMAGE_RESOURCE_ID,
+            intArrayOf(colorStart, colorCenter, colorEnd),
+            COLORS_GRADIENT_POSITIONS
+        )
 
     private fun getScreenedDrawable(resId: Int, colors: IntArray, positions: FloatArray): Drawable =
-            applyColorScreen(
-                    bitmap = requireNotNull(AppCompatResources.getDrawable(context, resId)).toBitmap(),
-                    colors = colors,
-                    positions = positions
-            ).toDrawable(resources)
+        applyColorScreen(
+            bitmap = requireNotNull(AppCompatResources.getDrawable(context, resId)).toBitmap(),
+            colors = colors,
+            positions = positions
+        ).toDrawable(resources)
 
     private fun applyColorScreen(bitmap: Bitmap, colors: IntArray, positions: FloatArray): Bitmap {
         val width = bitmap.width

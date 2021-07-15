@@ -23,7 +23,8 @@ class AdapterDelegatesManager {
     }
 
     fun getItemViewType(uiModel: DelegateAdapter.UiModel): Int =
-            modelTypeMap[uiModel::class] ?: error("Cannot find viewType with class: ${uiModel.javaClass}")
+        modelTypeMap[uiModel::class]
+            ?: error("Cannot find viewType with class: ${uiModel.javaClass}")
 
     fun onBindViewHolder(holder: DelegateAdapter.ViewHolder, uiModel: DelegateAdapter.UiModel) {
         holder.bind(uiModel)

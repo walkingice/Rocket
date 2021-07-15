@@ -41,13 +41,13 @@ class TopSitesRepo(
     private var needToCheckDbVersion = true
 
     fun getConfiguredFixedSites(): List<Site>? =
-            FirebaseHelper.getFirebase().getRcString(FirebaseHelper.STR_TOP_SITES_FIXED_ITEM_V2_5)
-                    .takeIf { it.isNotEmpty() }
-                    ?.jsonStringToSites()
+        FirebaseHelper.getFirebase().getRcString(FirebaseHelper.STR_TOP_SITES_FIXED_ITEM_V2_5)
+            .takeIf { it.isNotEmpty() }
+            ?.jsonStringToSites()
 
     fun getDefaultFixedSites(): List<Site>? =
-            AssetsUtils.loadStringFromRawResource(appContext, R.raw.fixedsites)
-                    ?.jsonStringToSites()
+        AssetsUtils.loadStringFromRawResource(appContext, R.raw.fixedsites)
+            ?.jsonStringToSites()
 
     fun getPinnedSites(): List<Site> = pinSiteManager.getPinSites()
 
@@ -68,45 +68,50 @@ class TopSitesRepo(
 
     private suspend fun queryHistorySites(): List<Site> = suspendCoroutine { continuation ->
         BrowsingHistoryManager.getInstance()
-                .queryTopSites(TOP_SITES_QUERY_LIMIT, TOP_SITES_QUERY_MIN_VIEW_COUNT) {
-                    continuation.resume(it.filterIsInstance<Site>())
-                }
+            .queryTopSites(TOP_SITES_QUERY_LIMIT, TOP_SITES_QUERY_MIN_VIEW_COUNT) {
+                continuation.resume(it.filterIsInstance<Site>())
+            }
     }
 
     private suspend fun migrateHistoryDb() = suspendCoroutine<Unit> { continuation ->
-        Thread(MigrateHistoryRunnable(object : Handler(Looper.getMainLooper()) {
-            override fun handleMessage(msg: Message) {
-                if (msg.what == MSG_ID_REFRESH) {
-                    continuation.resume(Unit)
-                }
-            }
-        }, appContext)).start()
+        Thread(
+            MigrateHistoryRunnable(
+                object : Handler(Looper.getMainLooper()) {
+                    override fun handleMessage(msg: Message) {
+                        if (msg.what == MSG_ID_REFRESH) {
+                            continuation.resume(Unit)
+                        }
+                    }
+                },
+                appContext
+            )
+        ).start()
     }
 
     fun getChangedDefaultSites(): List<Site>? = getDefaultTopSitesJsonString()
-                    ?.jsonStringToSites()
-                    ?.apply { forEach { it.isDefault = true } }
+        ?.jsonStringToSites()
+        ?.apply { forEach { it.isDefault = true } }
 
     fun getConfiguredDefaultSiteGroups(): List<SiteGroup>? =
-            FirebaseHelper.getFirebase().getRcString(FirebaseHelper.STR_TOP_SITES_DEFAULT_ITEMS_V2_5)
-                    .takeIf { it.isNotEmpty() }
-                    ?.jsonStringToSiteGroups()
-                    ?.apply {
-                        forEach { group ->
-                            group.sites.forEach { site ->
-                                site.isDefault = true
-                            }
-                        }
+        FirebaseHelper.getFirebase().getRcString(FirebaseHelper.STR_TOP_SITES_DEFAULT_ITEMS_V2_5)
+            .takeIf { it.isNotEmpty() }
+            ?.jsonStringToSiteGroups()
+            ?.apply {
+                forEach { group ->
+                    group.sites.forEach { site ->
+                        site.isDefault = true
                     }
+                }
+            }
 
     fun getDefaultSites(resId: Int): List<Site>? =
-            AssetsUtils.loadStringFromRawResource(appContext, resId)
-                    ?.jsonStringToSites()
-                    ?.apply { forEach { it.isDefault = true } }
+        AssetsUtils.loadStringFromRawResource(appContext, resId)
+            ?.jsonStringToSites()
+            ?.apply { forEach { it.isDefault = true } }
 
     private fun getDefaultTopSitesJsonString(): String? {
         return PreferenceManager.getDefaultSharedPreferences(appContext)
-                .getString(TOP_SITES_PREF, null)
+            .getString(TOP_SITES_PREF, null)
     }
 
     suspend fun getConfiguredRecommendedSites(): RecommendedSitesResult? = withContext(Dispatchers.IO) {
@@ -142,8 +147,8 @@ class TopSitesRepo(
 
     fun removeDefaultSite(site: Site, defaultSitesResId: Int) {
         val defaultSitesString = getDefaultTopSitesJsonString()
-                ?: FirebaseHelper.getFirebase().getRcString(FirebaseHelper.STR_TOP_SITES_DEFAULT_ITEMS_V2_5).takeIf { it.isNotEmpty() }
-                ?: AssetsUtils.loadStringFromRawResource(appContext, defaultSitesResId)
+            ?: FirebaseHelper.getFirebase().getRcString(FirebaseHelper.STR_TOP_SITES_DEFAULT_ITEMS_V2_5).takeIf { it.isNotEmpty() }
+            ?: AssetsUtils.loadStringFromRawResource(appContext, defaultSitesResId)
         val defaultSitesJsonArray = defaultSitesString?.toJsonArray()
         if (defaultSitesJsonArray != null) {
             try {
@@ -196,8 +201,10 @@ class TopSitesRepo(
                 scheduleRefresh(handler)
             } else {
                 // Refresh is still scheduled implicitly in SaveBitmapsTask
-                FavIconUtils.SaveBitmapsTask(faviconFolder, urls, icons, UpdateHistoryWrapper(urls, handler),
-                        Bitmap.CompressFormat.PNG, DimenUtils.PNG_QUALITY_DONT_CARE).execute()
+                FavIconUtils.SaveBitmapsTask(
+                    faviconFolder, urls, icons, UpdateHistoryWrapper(urls, handler),
+                    Bitmap.CompressFormat.PNG, DimenUtils.PNG_QUALITY_DONT_CARE
+                ).execute()
             }
             db.execSQL("DROP TABLE " + HistoryDatabaseHelper.Tables.BROWSING_HISTORY_LEGACY)
             PreferenceManager.getDefaultSharedPreferences(appContext).edit().putBoolean(TOP_SITES_V2_PREF, true).apply()
@@ -256,8 +263,8 @@ private fun String.jsonStringToSiteGroups(): List<SiteGroup>? {
     return try {
         val jsonArray = this.toJsonArray()
         (0 until jsonArray.length())
-                .map { index -> jsonArray.getJSONObject(index) }
-                .mapNotNull { jsonObject -> jsonObject.toSiteGroup() }
+            .map { index -> jsonArray.getJSONObject(index) }
+            .mapNotNull { jsonObject -> jsonObject.toSiteGroup() }
     } catch (e: JSONException) {
         e.printStackTrace()
         null

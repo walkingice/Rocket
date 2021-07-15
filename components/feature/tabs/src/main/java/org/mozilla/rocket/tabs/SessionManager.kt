@@ -118,11 +118,13 @@ class SessionManager @JvmOverloads constructor(
 
         return if (TextUtils.isEmpty(url)) {
             null
-        } else addTabInternal(url,
-                TabUtil.getParentId(arguments),
-                TabUtil.isFromExternal(arguments),
-                TabUtil.toFocus(arguments),
-                arguments)
+        } else addTabInternal(
+            url,
+            TabUtil.getParentId(arguments),
+            TabUtil.isFromExternal(arguments),
+            TabUtil.toFocus(arguments),
+            arguments
+        )
     }
 
     /**
@@ -389,10 +391,12 @@ class SessionManager @JvmOverloads constructor(
                 return false
             }
 
-            val id = addTabInternal(null,
-                    source.id,
-                    false,
-                    isUserGesture, null)
+            val id = addTabInternal(
+                null,
+                source.id,
+                false,
+                isUserGesture, null
+            )
 
             val tab = getTab(id) ?: return false // FIXME: why null?
             if (tab.engineSession == null || tab.engineSession!!.tabView == null) {
@@ -405,7 +409,7 @@ class SessionManager @JvmOverloads constructor(
         override fun onCloseWindow(es: TabViewEngineSession) {
             if (source.engineSession === es) {
                 sessions.firstOrNull { it.engineSession == es }
-                        ?.let { session -> closeTab(session.id) }
+                    ?.let { session -> closeTab(session.id) }
             }
         }
     }
@@ -425,7 +429,8 @@ class SessionManager @JvmOverloads constructor(
             filePathCallback: ValueCallback<Array<Uri>>?,
             fileChooserParams: WebChromeClient.FileChooserParams?
         ): Boolean {
-            val consumers: List<(WebChromeClient.FileChooserParams?) -> Boolean> = wrapConsumers { onShowFileChooser(es, filePathCallback, it) }
+            val consumers: List<(WebChromeClient.FileChooserParams?) -> Boolean> =
+                wrapConsumers { onShowFileChooser(es, filePathCallback, it) }
             return Consumable.from(fileChooserParams).consumeBy(consumers)
         }
 
@@ -449,7 +454,10 @@ class SessionManager @JvmOverloads constructor(
 
         override fun handleMessage(msg: Message) {
             when (msg.what) {
-                MSG_FOCUS_TAB -> focusTab(msg.obj as Session?, msg.data.getSerializable(ENUM_KEY) as Factor)
+                MSG_FOCUS_TAB -> focusTab(
+                    msg.obj as Session?,
+                    msg.data.getSerializable(ENUM_KEY) as Factor
+                )
                 MSG_ADDED_TAB -> addedTab(msg)
                 MSG_REMOVEDED_TAB -> removedTab(msg)
                 else -> {

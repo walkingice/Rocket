@@ -17,7 +17,8 @@ class ShoppingSearchTabsAdapter(
     // Sparse array to keep track of registered fragments in memory
     private val registeredFragments = SparseArray<Fragment>()
 
-    override fun getItem(position: Int): Fragment = ContentTabFragment.newInstance(items[position].searchUrl, items[position].session)
+    override fun getItem(position: Int): Fragment =
+        ContentTabFragment.newInstance(items[position].searchUrl, items[position].session)
 
     override fun getCount(): Int = items.size
 

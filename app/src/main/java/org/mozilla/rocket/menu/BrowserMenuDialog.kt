@@ -52,6 +52,7 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
 
     @Inject
     lateinit var chromeViewModelCreator: Lazy<ChromeViewModel>
+
     @Inject
     lateinit var menuViewModelCreator: Lazy<MenuViewModel>
 
@@ -95,7 +96,13 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
         rootView.content_layout.apply {
             outlineProvider = object : ViewOutlineProvider() {
                 override fun getOutline(view: View, outline: Outline) {
-                    outline.setRoundRect(0, 0, view.width, view.height, resources.getDimension(R.dimen.menu_corner_radius))
+                    outline.setRoundRect(
+                        0,
+                        0,
+                        view.width,
+                        view.height,
+                        resources.getDimension(R.dimen.menu_corner_radius)
+                    )
                 }
             }
             clipToOutline = true
@@ -108,9 +115,9 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
 
     private fun initMenuTabs(contentLayout: View) {
         contentLayout.apply {
-            chromeViewModel.hasUnreadScreenshot.observe(this@BrowserMenuDialog, Observer {
+            chromeViewModel.hasUnreadScreenshot.observe(this@BrowserMenuDialog) {
                 img_screenshots.isActivated = it
-            })
+            }
 
             menu_screenshots.setOnClickListener {
                 postDelayClickEvent {
@@ -144,15 +151,17 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
 
     private fun initMenuItems(contentLayout: View) {
         contentLayout.apply {
-            chromeViewModel.isTurboModeEnabled.observe(this@BrowserMenuDialog, Observer {
+            chromeViewModel.isTurboModeEnabled.observe(this@BrowserMenuDialog) {
                 turbomode_switch.isChecked = it
-            })
-            chromeViewModel.isBlockImageEnabled.observe(this@BrowserMenuDialog, Observer {
+            }
+
+            chromeViewModel.isBlockImageEnabled.observe(this@BrowserMenuDialog) {
                 block_images_switch.isChecked = it
-            })
-            chromeViewModel.isNightMode.observe(this@BrowserMenuDialog, Observer { nightModeSettings ->
+            }
+
+            chromeViewModel.isNightMode.observe(this@BrowserMenuDialog) { nightModeSettings ->
                 night_mode_switch.isChecked = nightModeSettings.isEnabled
-            })
+            }
 
             menu_find_in_page.setOnClickListener {
                 postDelayClickEvent {
@@ -185,7 +194,8 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
                 }
             }
             night_mode_switch.setOnCheckedChangeListener { _, isChecked ->
-                val needToUpdate = isChecked != (chromeViewModel.isNightMode.value?.isEnabled == true)
+                val needToUpdate =
+                    isChecked != (chromeViewModel.isNightMode.value?.isEnabled == true)
                 if (needToUpdate) {
                     chromeViewModel.onNightModeToggled()
                 }
@@ -217,7 +227,8 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
 
     private fun onDeleteClicked() {
         val diff = FileUtils.clearCache(context)
-        val stringId = if (diff < 0) R.string.message_clear_cache_fail else R.string.message_cleared_cached
+        val stringId =
+            if (diff < 0) R.string.message_clear_cache_fail else R.string.message_cleared_cached
         val msg = context.getString(stringId, FormatUtils.getReadableStringFromFileSize(diff))
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
@@ -227,7 +238,11 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
     }
 
     private fun showAdjustBrightness() {
-        ContextCompat.startActivity(context, AdjustBrightnessDialog.Intents.getStartIntentFromMenu(context), null)
+        ContextCompat.startActivity(
+            context,
+            AdjustBrightnessDialog.Intents.getStartIntentFromMenu(context),
+            null
+        )
     }
 
     private fun initBottomBar() {
@@ -238,41 +253,72 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
                 when (type) {
                     BottomBarItemAdapter.TYPE_TAB_COUNTER -> {
                         chromeViewModel.showTabTray.call()
-                        TelemetryWrapper.showTabTrayToolbar(TelemetryWrapper.Extra_Value.MENU, position)
+                        TelemetryWrapper.showTabTrayToolbar(
+                            TelemetryWrapper.Extra_Value.MENU,
+                            position
+                        )
                     }
                     BottomBarItemAdapter.TYPE_MENU -> {
                         chromeViewModel.showBrowserMenu.call()
-                        TelemetryWrapper.showMenuToolbar(TelemetryWrapper.Extra_Value.MENU, position)
+                        TelemetryWrapper.showMenuToolbar(
+                            TelemetryWrapper.Extra_Value.MENU,
+                            position
+                        )
                     }
                     BottomBarItemAdapter.TYPE_HOME -> {
                         chromeViewModel.showNewTab.call()
-                        TelemetryWrapper.clickAddTabToolbar(TelemetryWrapper.Extra_Value.MENU, position)
+                        TelemetryWrapper.clickAddTabToolbar(
+                            TelemetryWrapper.Extra_Value.MENU,
+                            position
+                        )
                     }
                     BottomBarItemAdapter.TYPE_SEARCH -> {
                         chromeViewModel.showUrlInput.call()
-                        TelemetryWrapper.clickToolbarSearch(TelemetryWrapper.Extra_Value.MENU, position)
+                        TelemetryWrapper.clickToolbarSearch(
+                            TelemetryWrapper.Extra_Value.MENU,
+                            position
+                        )
                     }
-                    BottomBarItemAdapter.TYPE_CAPTURE -> chromeViewModel.onDoScreenshot(ChromeViewModel.ScreenCaptureTelemetryData(TelemetryWrapper.Extra_Value.MENU, position))
+                    BottomBarItemAdapter.TYPE_CAPTURE -> chromeViewModel.onDoScreenshot(
+                        ChromeViewModel.ScreenCaptureTelemetryData(
+                            TelemetryWrapper.Extra_Value.MENU,
+                            position
+                        )
+                    )
                     BottomBarItemAdapter.TYPE_PIN_SHORTCUT -> {
                         chromeViewModel.pinShortcut.call()
                         TelemetryWrapper.clickAddToHome(TelemetryWrapper.Extra_Value.MENU, position)
                     }
                     BottomBarItemAdapter.TYPE_BOOKMARK -> {
-                        val isActivated = bottomBarItemAdapter.getItem(BottomBarItemAdapter.TYPE_BOOKMARK)?.view?.isActivated == true
-                        TelemetryWrapper.clickToolbarBookmark(!isActivated, TelemetryWrapper.Extra_Value.MENU, position)
+                        val isActivated =
+                            bottomBarItemAdapter.getItem(BottomBarItemAdapter.TYPE_BOOKMARK)?.view?.isActivated == true
+                        TelemetryWrapper.clickToolbarBookmark(
+                            !isActivated,
+                            TelemetryWrapper.Extra_Value.MENU,
+                            position
+                        )
                         chromeViewModel.toggleBookmark()
                     }
                     BottomBarItemAdapter.TYPE_REFRESH -> {
                         chromeViewModel.refreshOrStop.call()
-                        TelemetryWrapper.clickToolbarReload(TelemetryWrapper.Extra_Value.MENU, position)
+                        TelemetryWrapper.clickToolbarReload(
+                            TelemetryWrapper.Extra_Value.MENU,
+                            position
+                        )
                     }
                     BottomBarItemAdapter.TYPE_SHARE -> {
                         chromeViewModel.share.call()
-                        TelemetryWrapper.clickToolbarShare(TelemetryWrapper.Extra_Value.MENU, position)
+                        TelemetryWrapper.clickToolbarShare(
+                            TelemetryWrapper.Extra_Value.MENU,
+                            position
+                        )
                     }
                     BottomBarItemAdapter.TYPE_NEXT -> {
                         chromeViewModel.goNext.call()
-                        TelemetryWrapper.clickToolbarForward(TelemetryWrapper.Extra_Value.MENU, position)
+                        TelemetryWrapper.clickToolbarForward(
+                            TelemetryWrapper.Extra_Value.MENU,
+                            position
+                        )
                     }
                     BottomBarItemAdapter.TYPE_BACK -> {
                         chromeViewModel.goBack.call()
@@ -289,21 +335,23 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
         }
 
         chromeViewModel.tabCount.switchFrom(menuViewModel.bottomItems)
-                .observe(this, Observer { bottomBarItemAdapter.setTabCount(it ?: 0) })
+            .observe(this, Observer { bottomBarItemAdapter.setTabCount(it ?: 0) })
         chromeViewModel.isRefreshing.switchFrom(menuViewModel.bottomItems)
-                .observe(this, Observer { bottomBarItemAdapter.setRefreshing(it == true) })
+            .observe(this, Observer { bottomBarItemAdapter.setRefreshing(it == true) })
         chromeViewModel.canGoForward.switchFrom(menuViewModel.bottomItems)
-                .observe(this, Observer { bottomBarItemAdapter.setCanGoForward(it == true) })
+            .observe(this, Observer { bottomBarItemAdapter.setCanGoForward(it == true) })
         chromeViewModel.canGoBack.switchFrom(menuViewModel.bottomItems)
-                .observe(this, Observer { bottomBarItemAdapter.setCanGoBack(it == true) })
+            .observe(this, Observer { bottomBarItemAdapter.setCanGoBack(it == true) })
         chromeViewModel.isCurrentUrlBookmarked.switchFrom(menuViewModel.bottomItems)
-                .observe(this, Observer { bottomBarItemAdapter.setBookmark(it == true) })
+            .observe(this, Observer { bottomBarItemAdapter.setBookmark(it == true) })
     }
 
     private fun hidePinShortcutButtonIfNotSupported() {
-        val requestPinShortcutSupported = ShortcutManagerCompat.isRequestPinShortcutSupported(context)
+        val requestPinShortcutSupported =
+            ShortcutManagerCompat.isRequestPinShortcutSupported(context)
         if (!requestPinShortcutSupported) {
-            val pinShortcutItem = bottomBarItemAdapter.getItem(BottomBarItemAdapter.TYPE_PIN_SHORTCUT)
+            val pinShortcutItem =
+                bottomBarItemAdapter.getItem(BottomBarItemAdapter.TYPE_PIN_SHORTCUT)
             pinShortcutItem?.view?.apply {
                 visibility = View.GONE
             }
@@ -314,8 +362,6 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
      * Post delay click event to wait the clicking feedback shows
      */
     private fun postDelayClickEvent(action: () -> Unit) {
-        uiHandler.postDelayed({
-            action()
-        }, 150)
+        uiHandler.postDelayed({ action() }, 150)
     }
 }

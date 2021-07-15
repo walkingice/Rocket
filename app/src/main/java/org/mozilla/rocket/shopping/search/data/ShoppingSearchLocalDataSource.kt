@@ -10,11 +10,14 @@ import org.mozilla.strictmodeviolator.StrictModeViolation
 class ShoppingSearchLocalDataSource(private val appContext: Context) : ShoppingSearchDataSource {
 
     private val preference by lazy {
-        StrictModeViolation.tempGrant({ builder ->
-            builder.permitDiskReads()
-        }, {
-            appContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        })
+        StrictModeViolation.tempGrant(
+            { builder ->
+                builder.permitDiskReads()
+            },
+            {
+                appContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            }
+        )
     }
 
     override fun getHomeShoppingSearchEnabledGroups(): List<HomeShoppingSearchEnabledGroup>? {
@@ -59,7 +62,8 @@ class ShoppingSearchLocalDataSource(private val appContext: Context) : ShoppingS
 
     override fun getSearchDescription(): String {
         return if (LocalAbTesting.checkAssignedBucket(SMART_SHOPPING_COPY_AB_TESTING)
-                == SMART_SHOPPING_COPY_B) {
+            == SMART_SHOPPING_COPY_B
+        ) {
             appContext.getString(R.string.shopping_search_onboarding_body_B)
         } else {
             appContext.getString(R.string.shopping_search_onboarding_body_A)

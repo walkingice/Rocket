@@ -33,10 +33,15 @@ open class BottomBar : FrameLayout, CoordinatorLayout.AttachedBehavior {
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
-    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(context, attrs, defStyle) {
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(
+        context,
+        attrs,
+        defStyle
+    ) {
         init()
         val typedArray = context.obtainStyledAttributes(attrs, R.styleable.BottomBar, defStyle, 0)
-        val dividerColor = typedArray.getColor(R.styleable.BottomBar_dividerColor, Color.TRANSPARENT)
+        val dividerColor =
+            typedArray.getColor(R.styleable.BottomBar_dividerColor, Color.TRANSPARENT)
         val dividerDrawable = typedArray.getDrawable(R.styleable.BottomBar_dividerDrawable)
         typedArray.recycle()
         if (dividerColor != Color.TRANSPARENT) {
@@ -60,20 +65,22 @@ open class BottomBar : FrameLayout, CoordinatorLayout.AttachedBehavior {
 
     private fun addItemContainer() {
         EqualDistributeGrid(context).apply {
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
-                gravity = Gravity.CENTER_VERTICAL
-                val horizontalPadding = resources.getDimensionPixelSize(R.dimen.browser_fixed_menu_horizontal_padding)
-                if (this@BottomBar.paddingStart != 0 || this@BottomBar.paddingEnd != 0) {
-                    marginStart = this@BottomBar.paddingStart
-                    marginEnd = this@BottomBar.paddingEnd
-                    this@BottomBar.apply {
-                        setPadding(0, paddingTop, 0, paddingBottom)
+            layoutParams =
+                LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT).apply {
+                    gravity = Gravity.CENTER_VERTICAL
+                    val horizontalPadding =
+                        resources.getDimensionPixelSize(R.dimen.browser_fixed_menu_horizontal_padding)
+                    if (this@BottomBar.paddingStart != 0 || this@BottomBar.paddingEnd != 0) {
+                        marginStart = this@BottomBar.paddingStart
+                        marginEnd = this@BottomBar.paddingEnd
+                        this@BottomBar.apply {
+                            setPadding(0, paddingTop, 0, paddingBottom)
+                        }
+                    } else {
+                        marginStart = horizontalPadding
+                        marginEnd = horizontalPadding
                     }
-                } else {
-                    marginStart = horizontalPadding
-                    marginEnd = horizontalPadding
                 }
-            }
         }.let {
             grid = it
             addView(it)
@@ -97,7 +104,9 @@ open class BottomBar : FrameLayout, CoordinatorLayout.AttachedBehavior {
         items.forEachIndexed { index, item ->
             item.createView(context, grid).apply {
                 setOnClickListener { onItemClickListener?.onItemClick(item.type, index) }
-                setOnLongClickListener { onItemLongClickListener?.onItemLongClick(item.type, index) ?: false }
+                setOnLongClickListener {
+                    onItemLongClickListener?.onItemLongClick(item.type, index) ?: false
+                }
             }.let { view ->
                 view.visibility = itemVisibilities.get(index, View.VISIBLE)
                 item.view = view
@@ -123,7 +132,8 @@ open class BottomBar : FrameLayout, CoordinatorLayout.AttachedBehavior {
         if (childCount > 0) {
             val itemContainer = getChildAt(childCount - 1) as ViewGroup
             itemContainer.layoutParams = (itemContainer.layoutParams as MarginLayoutParams).apply {
-                val horizontalPadding = resources.getDimensionPixelSize(R.dimen.browser_fixed_menu_horizontal_padding)
+                val horizontalPadding =
+                    resources.getDimensionPixelSize(R.dimen.browser_fixed_menu_horizontal_padding)
                 if (this@BottomBar.paddingStart != 0 || this@BottomBar.paddingEnd != 0) {
                     marginStart = this@BottomBar.paddingStart
                     marginEnd = this@BottomBar.paddingEnd
@@ -185,7 +195,15 @@ open class BottomBar : FrameLayout, CoordinatorLayout.AttachedBehavior {
 
         private var currentState = STATE_SCROLLED_DOWN
 
-        override fun onNestedScroll(coordinatorLayout: CoordinatorLayout, child: BottomBar, target: View, dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int) {
+        override fun onNestedScroll(
+            coordinatorLayout: CoordinatorLayout,
+            child: BottomBar,
+            target: View,
+            dxConsumed: Int,
+            dyConsumed: Int,
+            dxUnconsumed: Int,
+            dyUnconsumed: Int
+        ) {
             if (currentState != STATE_SCROLLED_DOWN && dyUnconsumed < 0) {
                 slideUp(child)
             } else if (currentState != STATE_SCROLLED_UP && dyUnconsumed > 0) {

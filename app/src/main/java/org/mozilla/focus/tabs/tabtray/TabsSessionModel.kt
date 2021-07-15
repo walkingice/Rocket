@@ -9,14 +9,12 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
-
 import org.mozilla.focus.BuildConfig
 import org.mozilla.rocket.tabs.Session
 import org.mozilla.rocket.tabs.SessionManager
 import org.mozilla.rocket.tabs.SessionManager.Observer
 import org.mozilla.rocket.tabs.TabViewClient
 import org.mozilla.rocket.tabs.TabViewEngineSession
-
 import java.util.ArrayList
 
 internal class TabsSessionModel(private val sessionManager: SessionManager) : TabTrayContract.Model {

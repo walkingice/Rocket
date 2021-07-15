@@ -5,12 +5,12 @@
 package org.mozilla.rocket.urlinput
 
 import android.os.StrictMode
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.quick_search_item.view.quick_search_img
 import org.mozilla.focus.R
 import org.mozilla.icon.FavIconUtils

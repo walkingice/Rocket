@@ -13,7 +13,8 @@ import java.net.URISyntaxException
 enum class DeepLinkType {
 
     SHOPPING_SEARCH_HOME {
-        override fun match(uri: URI) = isContentLink(uri, DeepLinkConstants.PATH_SHOPPING_SEARCH, hasQuery = false)
+        override fun match(uri: URI) =
+            isContentLink(uri, DeepLinkConstants.PATH_SHOPPING_SEARCH, hasQuery = false)
 
         override fun addTasks(uri: URI) {
             addTask(StartShoppingSearchActivityTask())
@@ -21,7 +22,9 @@ enum class DeepLinkType {
     },
 
     PRIVATE_MODE {
-        override fun match(uri: URI) = isDeepLink(uri) && DeepLinkConstants.HOST_PRIVATE_MODE == uri.host && uri.path.isNullOrEmpty()
+        override fun match(uri: URI) = isDeepLink(uri) &&
+            DeepLinkConstants.HOST_PRIVATE_MODE == uri.host &&
+            uri.path.isNullOrEmpty()
 
         override fun addTasks(uri: URI) {
             addTask(OpenPrivateModeTask())
@@ -29,7 +32,8 @@ enum class DeepLinkType {
     },
 
     COMMAND_SET_DEFAULT_BROWSER {
-        override fun match(uri: URI) = isCommandUri(uri, DeepLinkConstants.COMMAND_SET_DEFAULT_BROWSER)
+        override fun match(uri: URI) =
+            isCommandUri(uri, DeepLinkConstants.COMMAND_SET_DEFAULT_BROWSER)
 
         override fun addTasks(uri: URI) {
             addTask(StartSettingsActivityTask(DeepLinkConstants.COMMAND_SET_DEFAULT_BROWSER))
@@ -96,13 +100,13 @@ enum class DeepLinkType {
         }
 
         private fun isContentLink(uri: URI) =
-                isDeepLink(uri) && DeepLinkConstants.HOST_CONTENT == uri.host
+            isDeepLink(uri) && DeepLinkConstants.HOST_CONTENT == uri.host
 
         private fun isCommandUri(uri: URI, command: String) = isCommandUri(uri) &&
-                uri.getParam(DeepLinkConstants.COMMAND_PARAM_KEY) == command
+            uri.getParam(DeepLinkConstants.COMMAND_PARAM_KEY) == command
 
         private fun isCommandUri(uri: URI) =
-                isDeepLink(uri) && DeepLinkConstants.HOST_COMMAND == uri.host
+            isDeepLink(uri) && DeepLinkConstants.HOST_COMMAND == uri.host
 
         fun isDeepLink(uri: URI) = DeepLinkConstants.SCHEMA_ROCKET == uri.scheme
     }

@@ -1,22 +1,27 @@
 package org.mozilla.rocket.nightmode.themed
 
 import android.content.Context
-import androidx.recyclerview.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.View
+import androidx.recyclerview.widget.RecyclerView
 
 open class ThemedRecyclerView : RecyclerView {
     private var isNight: Boolean = false
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
 
     /**
      * Utilize adding a custom view state ThemedWidgetUtils.STATE_NIGHT_MODE to drawable states list and turn this state on when night mode is enabled. */
     public override fun onCreateDrawableState(extraSpace: Int): IntArray {
         return if (isNight) {
-            val drawableState = super.onCreateDrawableState(extraSpace + ThemedWidgetUtils.STATE_NIGHT_MODE.size)
+            val drawableState =
+                super.onCreateDrawableState(extraSpace + ThemedWidgetUtils.STATE_NIGHT_MODE.size)
             View.mergeDrawableStates(drawableState, ThemedWidgetUtils.STATE_NIGHT_MODE)
             drawableState
         } else {

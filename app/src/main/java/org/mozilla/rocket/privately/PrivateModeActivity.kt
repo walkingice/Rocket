@@ -48,10 +48,11 @@ import org.mozilla.rocket.privately.home.PrivateHomeFragment
 import org.mozilla.rocket.tabs.TabsSessionProvider
 import javax.inject.Inject
 
-class PrivateModeActivity : BaseActivity(),
-        ScreenNavigator.Provider,
-        ScreenNavigator.HostActivity,
-        TabsSessionProvider.SessionHost {
+class PrivateModeActivity :
+    BaseActivity(),
+    ScreenNavigator.Provider,
+    ScreenNavigator.HostActivity,
+    TabsSessionProvider.SessionHost {
 
     @Inject
     lateinit var chromeViewModelCreator: Lazy<ChromeViewModel>
@@ -120,48 +121,72 @@ class PrivateModeActivity : BaseActivity(),
     override fun applyLocale() {}
 
     private fun observeChromeAction() {
-        chromeViewModel.openUrl.observe(this, Observer { action ->
-            action?.run {
+        chromeViewModel.openUrl.observe(
+            this,
+            Observer { action ->
+                action?.run {
+                    dismissUrlInput()
+                    startPrivateMode()
+                    screenNavigator.showBrowserScreen(url, false, isFromExternal)
+                }
+            }
+        )
+        chromeViewModel.showUrlInput.observe(
+            this,
+            Observer { url ->
+                if (!supportFragmentManager.isStateSaved) {
+                    screenNavigator.addUrlScreen(url)
+                }
+            }
+        )
+        chromeViewModel.dismissUrlInput.observe(
+            this,
+            Observer {
                 dismissUrlInput()
-                startPrivateMode()
-                screenNavigator.showBrowserScreen(url, false, isFromExternal)
             }
-        })
-        chromeViewModel.showUrlInput.observe(this, Observer { url ->
-            if (!supportFragmentManager.isStateSaved) {
-                screenNavigator.addUrlScreen(url)
-            }
-        })
-        chromeViewModel.dismissUrlInput.observe(this, Observer {
-            dismissUrlInput()
-        })
+        )
         // Reserve to handle more chrome actions for the bottom bar A/B testing
-        chromeViewModel.pinShortcut.observe(this, Observer {
-            onAddToHomeClicked()
-        })
-        chromeViewModel.share.observe(this, Observer {
-            chromeViewModel.currentUrl.value?.let { url ->
-                onShareClicked(url)
+        chromeViewModel.pinShortcut.observe(
+            this,
+            Observer {
+                onAddToHomeClicked()
             }
-        })
-        chromeViewModel.togglePrivateMode.observe(this, Observer {
-            checkShortcutPromotion { pushToBack() }
-        })
-        chromeViewModel.dropCurrentPage.observe(this, Observer {
-            dropBrowserFragment()
-        })
-        chromeViewModel.downloadState.observe(this, Observer { downloadState ->
-            when (downloadState) {
-                is DownloadsRepository.DownloadState.StorageUnavailable ->
-                    Toast.makeText(this, R.string.message_storage_unavailable_cancel_download, Toast.LENGTH_LONG).show()
-                is DownloadsRepository.DownloadState.FileNotSupported ->
-                    Toast.makeText(this, R.string.download_file_not_supported, Toast.LENGTH_LONG).show()
-                is DownloadsRepository.DownloadState.Success ->
-                    if (!downloadState.isStartFromContextMenu) {
-                        Toast.makeText(this, R.string.download_started, Toast.LENGTH_LONG).show()
-                    }
+        )
+        chromeViewModel.share.observe(
+            this,
+            Observer {
+                chromeViewModel.currentUrl.value?.let { url ->
+                    onShareClicked(url)
+                }
             }
-        })
+        )
+        chromeViewModel.togglePrivateMode.observe(
+            this,
+            Observer {
+                checkShortcutPromotion { pushToBack() }
+            }
+        )
+        chromeViewModel.dropCurrentPage.observe(
+            this,
+            Observer {
+                dropBrowserFragment()
+            }
+        )
+        chromeViewModel.downloadState.observe(
+            this,
+            Observer { downloadState ->
+                when (downloadState) {
+                    is DownloadsRepository.DownloadState.StorageUnavailable ->
+                        Toast.makeText(this, R.string.message_storage_unavailable_cancel_download, Toast.LENGTH_LONG).show()
+                    is DownloadsRepository.DownloadState.FileNotSupported ->
+                        Toast.makeText(this, R.string.download_file_not_supported, Toast.LENGTH_LONG).show()
+                    is DownloadsRepository.DownloadState.Success ->
+                        if (!downloadState.isStartFromContextMenu) {
+                            Toast.makeText(this, R.string.download_started, Toast.LENGTH_LONG).show()
+                        }
+                }
+            }
+        )
     }
 
     private fun onAddToHomeClicked() {
@@ -247,16 +272,22 @@ class PrivateModeActivity : BaseActivity(),
     }
 
     private fun monitorOrientationState() {
-        val orientationState = OrientationState(object : NavigationModel {
-            override val navigationState: LiveData<ScreenNavigator.NavigationState>
-                get() = ScreenNavigator.get(this@PrivateModeActivity).navigationState
-        }, portraitStateModel)
+        val orientationState = OrientationState(
+            object : NavigationModel {
+                override val navigationState: LiveData<ScreenNavigator.NavigationState>
+                    get() = ScreenNavigator.get(this@PrivateModeActivity).navigationState
+            },
+            portraitStateModel
+        )
 
-        orientationState.observe(this, Observer { orientation ->
-            orientation?.let {
-                requestedOrientation = it
+        orientationState.observe(
+            this,
+            Observer { orientation ->
+                orientation?.let {
+                    requestedOrientation = it
+                }
             }
-        })
+        )
     }
 
     private fun dropBrowserFragment() {
@@ -367,18 +398,21 @@ class PrivateModeActivity : BaseActivity(),
 
     private fun isIntentFromPrivateShortcut(intent: SafeIntent): Boolean {
         return intent.getBooleanExtra(
-                LaunchIntentDispatcher.LaunchMethod.EXTRA_BOOL_PRIVATE_MODE_SHORTCUT.value,
-                false
+            LaunchIntentDispatcher.LaunchMethod.EXTRA_BOOL_PRIVATE_MODE_SHORTCUT.value,
+            false
         )
     }
 
     private fun checkShortcutPromotion(continuation: () -> Unit) {
         ViewModelProvider(this)
-                .get(ShortcutViewModel::class.java)
-                .interceptLeavingAndCheckShortcut(this)
-                .observe(this, Observer {
+            .get(ShortcutViewModel::class.java)
+            .interceptLeavingAndCheckShortcut(this)
+            .observe(
+                this,
+                Observer {
                     continuation()
-                })
+                }
+            )
     }
 
     companion object {

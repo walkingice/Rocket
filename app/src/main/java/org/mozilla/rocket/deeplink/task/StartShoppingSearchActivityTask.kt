@@ -6,8 +6,9 @@ import org.mozilla.rocket.shopping.search.ui.ShoppingSearchActivity
 
 class StartShoppingSearchActivityTask : Task {
     override fun execute(context: Context) {
-        context.startActivity(ShoppingSearchActivity.getStartIntent(context).apply {
+        val intent = ShoppingSearchActivity.getStartIntent(context).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        })
+        }
+        context.startActivity(intent)
     }
 }

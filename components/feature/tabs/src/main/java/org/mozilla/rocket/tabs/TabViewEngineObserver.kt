@@ -63,7 +63,7 @@ class TabViewEngineObserver(
     }
 
     override fun onEnterFullScreen(callback: TabView.FullscreenCallback, view: View?) =
-            session.notifyObservers { onEnterFullScreen(callback, view) }
+        session.notifyObservers { onEnterFullScreen(callback, view) }
 
     override fun onExitFullScreen() = session.notifyObservers { onExitFullScreen() }
 
@@ -71,7 +71,7 @@ class TabViewEngineObserver(
         origin: String,
         callback: GeolocationPermissions.Callback?
     ) =
-            session.notifyObservers { onGeolocationPermissionsShowPrompt(origin, callback) }
+        session.notifyObservers { onGeolocationPermissionsShowPrompt(origin, callback) }
 
     override fun onFindResult(
         activeMatchOrdinal: Int,
@@ -90,7 +90,14 @@ class TabViewEngineObserver(
         userAgent: String?
     ) {
 
-        val download = Download(url, fileName, contentType, contentLength, userAgent, Environment.DIRECTORY_DOWNLOADS)
+        val download = Download(
+            url,
+            fileName,
+            contentType,
+            contentLength,
+            userAgent,
+            Environment.DIRECTORY_DOWNLOADS
+        )
         session.download = Consumable.from(download)
     }
 }

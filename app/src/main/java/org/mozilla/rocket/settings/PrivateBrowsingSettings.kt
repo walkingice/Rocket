@@ -25,8 +25,8 @@ class PrivateBrowsingSettings(context: Context, prefFactory: PreferencesFactory)
     private val resources = context.resources
 
     fun shouldUseTurboMode() = preferences.getBoolean(
-            resources.getString(R.string.pref_key_pb_boolean_turbo_enabled),
-            DEFAULT_TURBO_MODE_ENABLED
+        resources.getString(R.string.pref_key_pb_boolean_turbo_enabled),
+        DEFAULT_TURBO_MODE_ENABLED
     )
 
     fun setTurboMode(enabled: Boolean) {
@@ -35,31 +35,31 @@ class PrivateBrowsingSettings(context: Context, prefFactory: PreferencesFactory)
 
     fun getPrivateModeLeaveCount(): Int {
         return preferences.getInt(
-                resources.getString(R.string.pref_key_pb_int_leave_count),
-                0
+            resources.getString(R.string.pref_key_pb_int_leave_count),
+            0
         )
     }
 
     fun increasePrivateModeLeaveCount(): Int {
         val count = getPrivateModeLeaveCount() + 1
         preferences.putInt(
-                resources.getString(R.string.pref_key_pb_int_leave_count),
-                count
+            resources.getString(R.string.pref_key_pb_int_leave_count),
+            count
         )
         return count
     }
 
     fun isPrivateShortcutCreatedBefore(): Boolean {
         return preferences.getBoolean(
-                resources.getString(R.string.pref_key_pb_boolean_shortcut_created),
-                false
+            resources.getString(R.string.pref_key_pb_boolean_shortcut_created),
+            false
         )
     }
 
     fun setPrivateShortcutCreated() {
         preferences.putBoolean(
-                resources.getString(R.string.pref_key_pb_boolean_shortcut_created),
-                true
+            resources.getString(R.string.pref_key_pb_boolean_shortcut_created),
+            true
         )
     }
 }

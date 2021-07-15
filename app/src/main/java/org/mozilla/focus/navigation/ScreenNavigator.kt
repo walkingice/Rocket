@@ -108,14 +108,18 @@ open class ScreenNavigator(private val activity: HostActivity?) : DefaultLifecyc
         trace?.start()
 
         logMethod()
-        val found = transactionHelper?.popScreensUntil(HOME_FRAGMENT_TAG,
+        val found = transactionHelper?.popScreensUntil(
+            HOME_FRAGMENT_TAG,
             TransactionHelper.EntryData.TYPE_ATTACHED,
-            false) ?: false
+            false
+        ) ?: false
         log("found exist home: $found")
         if (!found) {
-            transactionHelper?.showHomeScreen(animate,
+            transactionHelper?.showHomeScreen(
+                animate,
                 TransactionHelper.EntryData.TYPE_ATTACHED,
-                false)
+                false
+            )
         }
         transactionHelper?.executePendingTransaction()
         trace?.stopAndClose()
@@ -126,8 +130,10 @@ open class ScreenNavigator(private val activity: HostActivity?) : DefaultLifecyc
      */
     open fun popToHomeScreen(animate: Boolean) {
         logMethod()
-        val found = transactionHelper?.popScreensUntil(HOME_FRAGMENT_TAG,
-            TransactionHelper.EntryData.TYPE_ROOT, false) ?: false
+        val found = transactionHelper?.popScreensUntil(
+            HOME_FRAGMENT_TAG,
+            TransactionHelper.EntryData.TYPE_ROOT, false
+        ) ?: false
         log("found exist home: $found")
         if (!found) {
             transactionHelper?.showHomeScreen(animate, TransactionHelper.EntryData.TYPE_ROOT, false)

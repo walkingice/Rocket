@@ -135,13 +135,15 @@ class SessionObserver(
         if (browserFragment.sessionManager.focusSession != null) {
             val currentUrl = browserFragment.sessionManager.focusSession?.url
             val progressIsForLoadedUrl =
-                TextUtils.equals(currentUrl?.let { removeUrlFragment(it) },
-                    browserFragment.loadedUrl?.let { removeUrlFragment(it) })
+                TextUtils.equals(
+                    currentUrl?.let { removeUrlFragment(it) },
+                    browserFragment.loadedUrl?.let { removeUrlFragment(it) }
+                )
             // Some new url may give 100 directly and then start from 0 again. don't treat
             // as loaded for these urls;
             val urlBarLoadingToFinished =
                 browserFragment.progress_bar.max != browserFragment.progress_bar.progress &&
-                        progress == browserFragment.progress_bar.max
+                    progress == browserFragment.progress_bar.max
             if (urlBarLoadingToFinished) {
                 browserFragment.loadedUrl = currentUrl
             }

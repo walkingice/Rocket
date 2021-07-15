@@ -11,7 +11,7 @@ class ShouldShowShoppingSearchOnboardingUseCase(
 ) {
     operator fun invoke(): Boolean {
         val remoteConfig = shoppingSearchRepository.getHomeShoppingSearchEnabledGroups()
-                ?.find { it.groupId == contentPrefRepo.getContentPref().id }?.isEnabled
+            ?.find { it.groupId == contentPrefRepo.getContentPref().id }?.isEnabled
         val localConfig = contentPrefRepo.getContentPref() is ContentPrefRepo.ContentPref.Shopping
         return (remoteConfig ?: localConfig) && !newFeatureNotice.hasHomeShoppingSearchOnboardingShown()
     }

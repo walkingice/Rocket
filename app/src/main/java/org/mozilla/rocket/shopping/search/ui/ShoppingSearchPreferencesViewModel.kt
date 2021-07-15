@@ -17,8 +17,10 @@ class ShoppingSearchPreferencesViewModel(
 
     val shoppingSites: LiveData<List<ShoppingSiteItem>>
 
-    private val hasSettingsChanged: MutableLiveData<Boolean> = MutableLiveData<Boolean>().apply { value = false }
-    private var isEditMode: MutableLiveData<Boolean> = MutableLiveData<Boolean>().apply { value = false }
+    private val hasSettingsChanged: MutableLiveData<Boolean> =
+        MutableLiveData<Boolean>().apply { value = false }
+    private var isEditMode: MutableLiveData<Boolean> =
+        MutableLiveData<Boolean>().apply { value = false }
     private val savedShoppingSites: LiveData<List<ShoppingSiteItem>> = getShoppingSitesUseCase()
     private val editingShoppingSites: MutableLiveData<List<ShoppingSiteItem>> = MutableLiveData()
 
@@ -44,7 +46,7 @@ class ShoppingSearchPreferencesViewModel(
 
     fun onItemMoved(fromPosition: Int, toPosition: Int) {
         editingShoppingSites.value = requireNotNull(editingShoppingSites.value)
-                .swap(fromPosition, toPosition)
+            .swap(fromPosition, toPosition)
         hasSettingsChanged.value = true
     }
 

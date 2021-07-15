@@ -67,9 +67,10 @@ private const val SITE_GLOBE = 0
 private const val SITE_LOCK = 1
 private const val ACTION_DOWNLOAD = 0
 
-class BrowserFragment : LocaleAwareFragment(),
-        ScreenNavigator.BrowserScreen,
-        BackKeyHandleable {
+class BrowserFragment :
+    LocaleAwareFragment(),
+    ScreenNavigator.BrowserScreen,
+    BackKeyHandleable {
 
     @Inject
     lateinit var privateBottomBarViewModelCreator: Lazy<PrivateBottomBarViewModel>
@@ -173,7 +174,7 @@ class BrowserFragment : LocaleAwareFragment(),
                     val download = params as Download
 
                     if (PackageManager.PERMISSION_GRANTED ==
-                            ContextCompat.checkSelfPermission(it, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        ContextCompat.checkSelfPermission(it, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     ) {
                         // We do have the permission to write to the external storage. Proceed with the download.
                         queueDownload(download)
@@ -206,10 +207,10 @@ class BrowserFragment : LocaleAwareFragment(),
             override fun makeAskAgainSnackBar(actionId: Int): Snackbar {
                 activity?.also {
                     return PermissionHandler.makeAskAgainSnackBar(
-                            this@BrowserFragment,
-                            it.findViewById(R.id.container),
-                            R.string.permission_toast_storage,
-                            browser_bottom_bar
+                        this@BrowserFragment,
+                        it.findViewById(R.id.container),
+                        R.string.permission_toast_storage,
+                        browser_bottom_bar
                     )
                 }
                 throw IllegalStateException("No Activity to show Snackbar.")
@@ -256,16 +257,20 @@ class BrowserFragment : LocaleAwareFragment(),
     // then add to the full screen size again when the device is rotated.
     private fun refreshVideoContainer() {
         if (tab_view_slot.visibility == View.VISIBLE) {
-            updateVideoContainerWithLayoutParams(FrameLayout.LayoutParams(
-                (tab_view_slot.height * 0.99).toInt(),
-                (tab_view_slot.width * 0.99).toInt()
-            ))
+            updateVideoContainerWithLayoutParams(
+                FrameLayout.LayoutParams(
+                    (tab_view_slot.height * 0.99).toInt(),
+                    (tab_view_slot.width * 0.99).toInt()
+                )
+            )
             tab_view_slot.post {
                 if (tab_view_slot.visibility == View.VISIBLE) {
-                    updateVideoContainerWithLayoutParams(FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    ))
+                    updateVideoContainerWithLayoutParams(
+                        FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                    )
                 }
             }
         }
@@ -442,9 +447,9 @@ class BrowserFragment : LocaleAwareFragment(),
         }
 
         chromeViewModel.isRefreshing.switchFrom(bottomBarViewModel.items)
-                .observe(viewLifecycleOwner, Observer { bottomBarItemAdapter.setRefreshing(it == true) })
+            .observe(viewLifecycleOwner, Observer { bottomBarItemAdapter.setRefreshing(it == true) })
         chromeViewModel.canGoForward.switchFrom(bottomBarViewModel.items)
-                .observe(viewLifecycleOwner, Observer { bottomBarItemAdapter.setCanGoForward(it == true) })
+            .observe(viewLifecycleOwner, Observer { bottomBarItemAdapter.setCanGoForward(it == true) })
 
         browser_container.setOnKeyboardVisibilityChangedListener { isKeyboardVisible ->
             val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -483,10 +488,13 @@ class BrowserFragment : LocaleAwareFragment(),
     }
 
     private fun monitorTrackerBlocked(onUpdate: (Int) -> Unit) {
-        BrowsingSession.getInstance().blockedTrackerCount.observe(viewLifecycleOwner, Observer {
-            val count = it ?: return@Observer
-            onUpdate(count)
-        })
+        BrowsingSession.getInstance().blockedTrackerCount.observe(
+            viewLifecycleOwner,
+            Observer {
+                val count = it ?: return@Observer
+                onUpdate(count)
+            }
+        )
     }
 
     private fun updateTrackerBlockedCount(count: Int) {
@@ -495,18 +503,24 @@ class BrowserFragment : LocaleAwareFragment(),
     }
 
     private fun observeChromeAction() {
-        chromeViewModel.refreshOrStop.observe(viewLifecycleOwner, Observer {
-            if (chromeViewModel.isRefreshing.value == true) {
-                stop()
-            } else {
-                reload()
+        chromeViewModel.refreshOrStop.observe(
+            viewLifecycleOwner,
+            Observer {
+                if (chromeViewModel.isRefreshing.value == true) {
+                    stop()
+                } else {
+                    reload()
+                }
             }
-        })
-        chromeViewModel.goNext.observe(viewLifecycleOwner, Observer {
-            if (chromeViewModel.canGoForward.value == true) {
-                goForward()
+        )
+        chromeViewModel.goNext.observe(
+            viewLifecycleOwner,
+            Observer {
+                if (chromeViewModel.canGoForward.value == true) {
+                    goForward()
+                }
             }
-        })
+        )
     }
 
     private val sessionManagerObserver = object : SessionManager.Observer {
@@ -541,19 +555,19 @@ class BrowserFragment : LocaleAwareFragment(),
             }
 
             val d = Download(
-                    download.url,
-                    download.fileName,
-                    download.userAgent,
-                    "",
-                    download.contentType,
-                    download.contentLength ?: 0,
-                    false
+                download.url,
+                download.fileName,
+                download.userAgent,
+                "",
+                download.contentType,
+                download.contentLength ?: 0,
+                false
             )
             permissionHandler.tryAction(
-                    this@BrowserFragment,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    ACTION_DOWNLOAD,
-                    d
+                this@BrowserFragment,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                ACTION_DOWNLOAD,
+                d
             )
             // Workaround to fix the failure on the second download
             chromeViewModel.refreshOrStop.call()
@@ -598,7 +612,8 @@ class BrowserFragment : LocaleAwareFragment(),
 
         override fun onLongPress(session: Session, hitResult: HitResult): Boolean {
             activity?.let {
-                PrivateWebContextMenu.show(true,
+                PrivateWebContextMenu.show(
+                    true,
                     it,
                     PrivateDownloadCallback(this@BrowserFragment),
                     hitResult.toHitTarget()

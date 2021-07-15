@@ -15,9 +15,9 @@ object TabsModule {
     @Singleton
     @Provides
     fun provideTabsDatabase(appContext: Context): TabsDatabase =
-            // using an in-memory database because the information stored here disappears
-            // when the process is killed
-            Room.inMemoryDatabaseBuilder(appContext, TabsDatabase::class.java).build()
+        // using an in-memory database because the information stored here disappears
+        // when the process is killed
+        Room.inMemoryDatabaseBuilder(appContext, TabsDatabase::class.java).build()
 
     @JvmStatic
     @Singleton

@@ -86,6 +86,6 @@ class TabsSessionModelTest {
 
     private fun assumeTabs(list: List<Session>) {
         Mockito.`when`(sessionManager.getTabs())
-                .thenReturn(list)
+            .thenReturn(list)
     }
 }

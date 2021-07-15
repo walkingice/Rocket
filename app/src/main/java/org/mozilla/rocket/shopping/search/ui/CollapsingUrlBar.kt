@@ -7,7 +7,9 @@ import android.view.LayoutInflater
 import android.view.ViewParent
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.appbar.AppBarLayout
-import kotlinx.android.synthetic.main.layout_collapsing_url_bar.view.*
+import kotlinx.android.synthetic.main.layout_collapsing_url_bar.view.icon
+import kotlinx.android.synthetic.main.layout_collapsing_url_bar.view.title
+import kotlinx.android.synthetic.main.layout_collapsing_url_bar.view.toolbar
 import org.mozilla.focus.R
 import org.mozilla.rocket.extension.dpToPx
 import kotlin.math.abs
@@ -33,7 +35,8 @@ class CollapsingUrlBar : ConstraintLayout, AppBarLayout.OnOffsetChangedListener 
         ).apply {
             try {
                 titleText = getString(R.styleable.CollapsingUrlBar_title)
-                iconRedId = getResourceId(R.styleable.CollapsingUrlBar_iconResId, 0).takeIf { it != 0 }
+                iconRedId =
+                    getResourceId(R.styleable.CollapsingUrlBar_iconResId, 0).takeIf { it != 0 }
             } finally {
                 recycle()
             }
@@ -92,8 +95,10 @@ class CollapsingUrlBar : ConstraintLayout, AppBarLayout.OnOffsetChangedListener 
         val scale = 1 - (1 - ICON_SIZE_RATIO) * progress
         icon.scaleX = scale
         icon.scaleY = scale
-        icon.translationX = -(titleMarginStart - titleMarginStartCollapsed) * progress * ICON_TRANSLATION_X_RATIO
-        icon.translationY = (toolbar.height - titleMarginBottomCollapsed) * progress * ICON_TRANSLATION_Y_RATIO
+        icon.translationX =
+            -(titleMarginStart - titleMarginStartCollapsed) * progress * ICON_TRANSLATION_X_RATIO
+        icon.translationY =
+            (toolbar.height - titleMarginBottomCollapsed) * progress * ICON_TRANSLATION_Y_RATIO
     }
 
     private fun updateTitle(progress: Float) {
@@ -103,7 +108,8 @@ class CollapsingUrlBar : ConstraintLayout, AppBarLayout.OnOffsetChangedListener 
             title.gravity = Gravity.BOTTOM
             isTitleMinHeightSet = true
         }
-        title.textSize = TITLE_SIZE_IN_SP * (TITLE_SIZE_RATIO + (1 - TITLE_SIZE_RATIO) * (1 - progress))
+        title.textSize =
+            TITLE_SIZE_IN_SP * (TITLE_SIZE_RATIO + (1 - TITLE_SIZE_RATIO) * (1 - progress))
         title.translationX = -(titleMarginStart - titleMarginStartCollapsed) * progress
         title.translationY = (toolbar.height - titleMarginBottomCollapsed) * progress
     }

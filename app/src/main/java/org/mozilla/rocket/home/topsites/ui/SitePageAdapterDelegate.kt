@@ -14,7 +14,7 @@ class SitePageAdapterDelegate(
     private val chromeViewModel: ChromeViewModel
 ) : AdapterDelegate {
     override fun onCreateViewHolder(view: View): DelegateAdapter.ViewHolder =
-            SitePageViewHolder(view, homeViewModel, chromeViewModel)
+        SitePageViewHolder(view, homeViewModel, chromeViewModel)
 }
 
 class SitePageViewHolder(

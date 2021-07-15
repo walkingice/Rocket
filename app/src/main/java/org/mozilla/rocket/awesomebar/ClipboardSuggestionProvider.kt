@@ -57,17 +57,19 @@ class ClipboardSuggestionProvider(
 
         engine?.speculativeConnect(url)
         return if (URLUtil.isValidUrl(url)) {
-            listOf(AwesomeBar.Suggestion(
-                provider = this,
-                id = url,
-                description = url,
-                flags = setOf(AwesomeBar.Suggestion.Flag.CLIPBOARD),
-                icon = { _, _ -> icon ?: context.getDrawable(R.drawable.ic_link)?.toBitmap() },
-                title = title ?: context.getString(R.string.awesomebar_open_link_clipboard),
-                onSuggestionClicked = {
-                    loadUrlUseCase.invoke(url)
-                }
-            ))
+            listOf(
+                AwesomeBar.Suggestion(
+                    provider = this,
+                    id = url,
+                    description = url,
+                    flags = setOf(AwesomeBar.Suggestion.Flag.CLIPBOARD),
+                    icon = { _, _ -> icon ?: context.getDrawable(R.drawable.ic_link)?.toBitmap() },
+                    title = title ?: context.getString(R.string.awesomebar_open_link_clipboard),
+                    onSuggestionClicked = {
+                        loadUrlUseCase.invoke(url)
+                    }
+                )
+            )
         } else {
             listOf()
         }

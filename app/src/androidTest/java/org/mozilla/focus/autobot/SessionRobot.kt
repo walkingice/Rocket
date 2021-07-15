@@ -2,7 +2,7 @@ package org.mozilla.focus.autobot
 
 import android.app.Activity
 import android.content.Intent
-import androidx.test.platform.app.InstrumentationRegistry
+import android.view.View
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.Tap
 import androidx.test.espresso.action.ViewActions.click
@@ -15,9 +15,9 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withClassName
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
-import android.view.View
 import org.hamcrest.Matchers
 import org.mozilla.focus.R
 import org.mozilla.focus.activity.MainActivity
@@ -70,7 +70,7 @@ class SessionRobot(menuAutomation: MenuAutomation = MenuRobot()) : MenuAutomatio
 
     fun checkAddBookmarkSnackbarIsDisplayed() {
         onView(Matchers.allOf(withId(com.google.android.material.R.id.snackbar_action), withText(R.string.bookmark_saved_edit)))
-                .check(matches(isDisplayed()))
+            .check(matches(isDisplayed()))
     }
 
     fun clickBookmarkSnackbarEdit() {
@@ -79,8 +79,8 @@ class SessionRobot(menuAutomation: MenuAutomation = MenuRobot()) : MenuAutomatio
 
     fun checkRemoveBookmarkToastIsDisplayed(activity: Activity) {
         onView(withText(R.string.bookmark_removed))
-                .inRoot(RootMatchers.withDecorView(Matchers.not<View>(Matchers.`is`<View>(activity.window.decorView))))
-                .check(matches(isDisplayed()))
+            .inRoot(RootMatchers.withDecorView(Matchers.not<View>(Matchers.`is`<View>(activity.window.decorView))))
+            .check(matches(isDisplayed()))
     }
 
     /** Screenshot related */
@@ -158,14 +158,14 @@ class SessionRobot(menuAutomation: MenuAutomation = MenuRobot()) : MenuAutomatio
         // Since text action popup menu is control by framework and we need to click overflow button to show the target string,
         // it's not easy to find a good way to let espresso track that button. So use ImageButton class name to find the target for now.
         onView(withClassName(Matchers.containsString("ImageButton")))
-                .inRoot(RootMatchers.isPlatformPopup())
-                .perform(click())
+            .inRoot(RootMatchers.isPlatformPopup())
+            .perform(click())
     }
 
     fun checkSearchInRocketIsDisplayed() {
         onView(withText(R.string.text_selection_search_action))
-                .inRoot(RootMatchers.isPlatformPopup())
-                .check(matches(isDisplayed()))
+            .inRoot(RootMatchers.isPlatformPopup())
+            .check(matches(isDisplayed()))
     }
 
     fun goHome(activity: Activity) {

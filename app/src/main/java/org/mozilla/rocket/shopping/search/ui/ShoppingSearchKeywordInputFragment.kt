@@ -12,10 +12,17 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import dagger.Lazy
-import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.*
+import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.clear
+import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.content_layout
+import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.description
+import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.input_container
+import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.logo_man
+import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.root_view
+import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.search_keyword_edit
+import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.search_suggestion_layout
+import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.search_suggestion_view
 import org.mozilla.focus.R
 import org.mozilla.focus.glide.GlideApp
 import org.mozilla.focus.telemetry.TelemetryWrapper
@@ -25,7 +32,8 @@ import org.mozilla.rocket.content.getViewModel
 import org.mozilla.rocket.shopping.search.data.ShoppingSearchMode
 import javax.inject.Inject
 
-class ShoppingSearchKeywordInputFragment : Fragment(), View.OnClickListener, ViewTreeObserver.OnGlobalLayoutListener {
+class ShoppingSearchKeywordInputFragment :
+    Fragment(), View.OnClickListener, ViewTreeObserver.OnGlobalLayoutListener {
 
     @Inject
     lateinit var viewModelCreator: Lazy<ShoppingSearchKeywordInputViewModel>
@@ -38,7 +46,11 @@ class ShoppingSearchKeywordInputFragment : Fragment(), View.OnClickListener, Vie
         viewModel = getViewModel(viewModelCreator)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_shopping_search_keyword_input, container, false)
     }
 
@@ -47,24 +59,31 @@ class ShoppingSearchKeywordInputFragment : Fragment(), View.OnClickListener, Vie
 
         ShoppingSearchMode.getInstance(view.context).deleteKeyword()
 
-        viewModel.uiModel.observe(viewLifecycleOwner, Observer { uiModel ->
+        viewModel.uiModel.observe(viewLifecycleOwner) { uiModel ->
             setupView(uiModel)
-        })
+        }
 
-        viewModel.navigateToResultTab.observe(viewLifecycleOwner, Observer { showResultTab(it) })
+        viewModel.navigateToResultTab.observe(viewLifecycleOwner) { showResultTab(it) }
 
-        search_keyword_edit.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
+        search_keyword_edit.addTextChangedListener(
+            object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                }
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    // TODO: Deal with non-sequence responses when a user types quickly
+                    s?.let { viewModel.onTypingKeyword(it.toString()) }
+                }
             }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // TODO: Deal with non-sequence responses when a user types quickly
-                s?.let { viewModel.onTypingKeyword(it.toString()) }
-            }
-        })
+        )
         search_keyword_edit.setOnEditorActionListener { editTextView, actionId, _ ->
             when (actionId) {
                 EditorInfo.IME_ACTION_SEARCH -> {
@@ -125,7 +144,8 @@ class ShoppingSearchKeywordInputFragment : Fragment(), View.OnClickListener, Vie
         val inputContainerHeight = input_container.measuredHeight
 
         val extraMargin = (contentLayoutHeight / 10)
-        val expectedContentHeight = descriptionHeight + logoManHeight + searchSuggestionLayoutHeight + inputContainerHeight + extraMargin
+        val expectedContentHeight =
+            descriptionHeight + logoManHeight + searchSuggestionLayoutHeight + inputContainerHeight + extraMargin
 
         logo_man.isVisible = (contentLayoutHeight > expectedContentHeight)
     }
@@ -134,10 +154,10 @@ class ShoppingSearchKeywordInputFragment : Fragment(), View.OnClickListener, Vie
         description.text = uiModel.description
         if (uiModel.logoManUrl.isNotEmpty()) {
             GlideApp.with(logo_man.context)
-                    .asBitmap()
-                    .placeholder(uiModel.defaultLogoManResId)
-                    .load(uiModel.logoManUrl)
-                    .into(logo_man)
+                .asBitmap()
+                .placeholder(uiModel.defaultLogoManResId)
+                .load(uiModel.logoManUrl)
+                .into(logo_man)
         }
         clear.visibility = if (uiModel.hideClear) View.GONE else View.VISIBLE
         setSuggestions(uiModel.keywordSuggestions)

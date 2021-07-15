@@ -55,34 +55,43 @@ class FocusView : RelativeLayout {
     }
 
     private fun drawSpotlight() {
-        addView(object : View(context) {
-            override fun onDraw(canvas: Canvas) {
-                super.onDraw(canvas)
+        addView(
+            object : View(context) {
+                override fun onDraw(canvas: Canvas) {
+                    super.onDraw(canvas)
 
-                path.reset()
+                    path.reset()
 
-                path.addCircle(centerX.toFloat(), (centerY - statusBarOffset).toFloat(), radius.toFloat(), Path.Direction.CW)
-                path.fillType = Path.FillType.INVERSE_EVEN_ODD
+                    path.addCircle(centerX.toFloat(), (centerY - statusBarOffset).toFloat(), radius.toFloat(), Path.Direction.CW)
+                    path.fillType = Path.FillType.INVERSE_EVEN_ODD
 
-                canvas.drawCircle(centerX.toFloat(), (centerY - statusBarOffset).toFloat(), radius.toFloat(), transparentPaint)
-                canvas.clipPath(path)
-                canvas.drawColor(backgroundDimColor)
-            }
-        }, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+                    canvas.drawCircle(centerX.toFloat(), (centerY - statusBarOffset).toFloat(), radius.toFloat(), transparentPaint)
+                    canvas.clipPath(path)
+                    canvas.drawColor(backgroundDimColor)
+                }
+            },
+            LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        )
     }
 
     private fun addSpotlightPlaceholder(width: Int, height: Int, left: Int, top: Int) {
-        addView(View(context).apply {
-            id = R.id.spotlight_anchor_view
-        }, LayoutParams(width, height).apply {
-            leftMargin = left
-            topMargin = top
-        })
-        addView(View(context).apply {
-            id = R.id.spotlight_placeholder
-        }, LayoutParams(width, height).apply {
-            addRule(ALIGN_TOP, R.id.spotlight_anchor_view)
-            addRule(ALIGN_START, R.id.spotlight_anchor_view)
-        })
+        addView(
+            View(context).apply {
+                id = R.id.spotlight_anchor_view
+            },
+            LayoutParams(width, height).apply {
+                leftMargin = left
+                topMargin = top
+            }
+        )
+        addView(
+            View(context).apply {
+                id = R.id.spotlight_placeholder
+            },
+            LayoutParams(width, height).apply {
+                addRule(ALIGN_TOP, R.id.spotlight_anchor_view)
+                addRule(ALIGN_START, R.id.spotlight_anchor_view)
+            }
+        )
     }
 }
