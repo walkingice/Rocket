@@ -3,7 +3,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply from: '../buildSrc/pmd.gradle'
 apply from: '../buildSrc/checkstyle.gradle'
-apply from: '../buildSrc/findbugs.gradle'
 
 android {
 
@@ -92,7 +91,7 @@ dependencies {
 
 
 afterEvaluate {
-    check.dependsOn 'findbugs', 'pmd', 'checkstyle'
+    check.dependsOn 'pmd', 'checkstyle'
 }
 repositories {
     mavenCentral()

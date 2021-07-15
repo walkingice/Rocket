@@ -1,7 +1,6 @@
 apply from: '../../../buildSrc/android-library-base.gradle'
 apply from: "$rootProject.projectDir/buildSrc/pmd.gradle"
 apply from: "$rootProject.projectDir/buildSrc/checkstyle.gradle"
-apply from: "$rootProject.projectDir/buildSrc/findbugs.gradle"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -11,9 +10,8 @@ dependencies {
     testImplementation "junit:junit:${Versions.junit}"
     androidTestImplementation "androidx.test:runner:${Versions.test_runner}"
     androidTestImplementation "androidx.test.espresso:espresso-core:${Versions.espresso}"
-    compileOnly("com.google.code.findbugs:annotations:${Versions.findbugs}")
 }
 
 afterEvaluate {
-    check.dependsOn 'findbugs', 'pmd', 'checkstyle'
+    check.dependsOn 'pmd', 'checkstyle'
 }

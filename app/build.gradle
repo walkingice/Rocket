@@ -6,7 +6,6 @@ apply plugin: 'com.google.android.gms.oss-licenses-plugin'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply from: '../buildSrc/pmd.gradle'
 apply from: '../buildSrc/checkstyle.gradle'
-apply from: '../buildSrc/findbugs.gradle'
 apply from: 'buildscripts/l10n.gradle'
 apply plugin: 'com.google.firebase.firebase-perf'
 
@@ -244,12 +243,6 @@ dependencies {
 
     implementation("androidx.work:work-runtime:${Versions.arch_work}")
 
-    implementation("com.google.code.findbugs:annotations:${Versions.findbugs}", {
-        // We really only need the SuppressFBWarnings annotation, everything else can be ignored.
-        // Without this we get weird failures due to dependencies.
-        transitive = false
-    })
-
     implementation "org.mozilla.components:browser-session:${Versions.android_components}"
     implementation "org.mozilla.components:browser-domains:${Versions.android_components}"
     implementation "org.mozilla.components:ui-autocomplete:${Versions.android_components}"
@@ -378,7 +371,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 }
 
 afterEvaluate {
-    check.dependsOn 'findbugs', 'pmd', 'checkstyle', 'checkTelemetryDocDirty', 'ktlint'
+    check.dependsOn 'pmd', 'checkstyle', 'checkTelemetryDocDirty', 'ktlint'
 }
 
 task checkTelemetryDocDirty() {

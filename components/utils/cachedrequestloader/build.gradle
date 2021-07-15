@@ -1,7 +1,6 @@
 apply from: '../../../buildSrc/android-library-base.gradle'
 apply from: "$rootProject.projectDir/buildSrc/pmd.gradle"
 apply from: "$rootProject.projectDir/buildSrc/checkstyle.gradle"
-apply from: "$rootProject.projectDir/buildSrc/findbugs.gradle"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -20,5 +19,5 @@ dependencies {
 }
 
 afterEvaluate {
-    check.dependsOn 'findbugs', 'pmd', 'checkstyle'
+    check.dependsOn 'pmd', 'checkstyle'
 }

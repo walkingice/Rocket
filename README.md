@@ -38,7 +38,7 @@ We're leveraging Firebase to offer some extra functionalities. However, Firebase
 Pull request checks
 ----
 To minimize the chance you are blocked by our build checks, you can self check these locally:
-1. (build) run `./gradlew clean checkstyle assembleFocusWebkitDebug lint findbugs assembleAndroidTest ktlint`
+1. (build) run `./gradlew clean checkstyle assembleFocusWebkitDebug lint assembleAndroidTest ktlint`
 2. (size check) run `python tools/metrics/apk_size.py focus webkit`
 3. (Unit test) run `./gradlew testFocusWebkitDebugUnitTest`
 4. (UI test) run `./gradlew connectedAndroidTest`
