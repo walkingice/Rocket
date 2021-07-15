@@ -2,7 +2,8 @@ package org.mozilla.focus.autobot
 
 import android.content.Intent
 import android.preference.PreferenceManager
-import androidx.test.platform.app.InstrumentationRegistry
+import android.widget.Switch
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.DataInteraction
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
@@ -17,9 +18,8 @@ import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
-import androidx.recyclerview.widget.RecyclerView
-import android.widget.Switch
 import org.hamcrest.CoreMatchers
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.core.Is
@@ -49,7 +49,8 @@ class ScreenshotRobot(menuAutomation: MenuAutomation = MenuRobot()) : MenuAutoma
         // Click the first item in my shots panel
         // Since "index=0" in ScreenshotItemAdapter is always date label, the first screenshot item will start from "index=1".
         onView(withId(R.id.screenshot_grid_recycler_view)).perform(
-                RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(1, click()))
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(1, click())
+        )
 
         // Check if screenshot is displayed
         onView(withId(R.id.screenshot_viewer_image)).check(matches(isDisplayed()))
@@ -112,14 +113,16 @@ class SettingRobot {
     fun prefSendUsageData(): SettingRobot {
         // Click on the switch multiple times...
         interaction = Espresso.onData(
-                Is.`is`(CoreMatchers.instanceOf(TelemetrySwitchPreference::class.java))).onChildView(ViewMatchers.withClassName(Is.`is`(Switch::class.java.name)))
+            Is.`is`(CoreMatchers.instanceOf(TelemetrySwitchPreference::class.java))
+        ).onChildView(ViewMatchers.withClassName(Is.`is`(Switch::class.java.name)))
         return this
     }
 
     fun prefTurboMode(): SettingRobot {
         // Click on the switch multiple times...
         interaction = Espresso.onData(
-                Is.`is`(CoreMatchers.instanceOf(TurboSwitchPreference::class.java))).onChildView(ViewMatchers.withClassName(Is.`is`(Switch::class.java.name)))
+            Is.`is`(CoreMatchers.instanceOf(TurboSwitchPreference::class.java))
+        ).onChildView(ViewMatchers.withClassName(Is.`is`(Switch::class.java.name)))
         return this
     }
 

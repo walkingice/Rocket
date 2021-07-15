@@ -7,10 +7,10 @@ package org.mozilla.rocket.home.topsites.ui
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import androidx.core.graphics.ColorUtils
-import androidx.core.graphics.drawable.DrawableCompat
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.drawable.DrawableCompat
 import org.mozilla.focus.R
 
 class PinViewWrapper(val view: ViewGroup) {

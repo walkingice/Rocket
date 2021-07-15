@@ -9,15 +9,17 @@ import org.mozilla.rocket.util.toJsonArray
 
 class ShoppingSearchRemoteDataSource : ShoppingSearchDataSource {
 
-    private val defaultShoppingSiteListJson = "[{\"title\":\"Google\",\"searchUrl\":\"https://www.google.com/search?q=\",\"displayUrl\":\"google.com\",\"showPrompt\":false},{\"title\":\"eBay\",\"searchUrl\":\"https://www.ebay.com/sch/i.html?_nkw=\",\"displayUrl\":\"ebay.com\"},{\"title\":\"Aliexpress\",\"searchUrl\":\"https://www.aliexpress.com/wholesale?SearchText=\",\"displayUrl\":\"aliexpress.com\"}]"
+    private val defaultShoppingSiteListJson =
+        "[{\"title\":\"Google\",\"searchUrl\":\"https://www.google.com/search?q=\",\"displayUrl\":\"google.com\",\"showPrompt\":false},{\"title\":\"eBay\",\"searchUrl\":\"https://www.ebay.com/sch/i.html?_nkw=\",\"displayUrl\":\"ebay.com\"},{\"title\":\"Aliexpress\",\"searchUrl\":\"https://www.aliexpress.com/wholesale?SearchText=\",\"displayUrl\":\"aliexpress.com\"}]"
 
     override fun getHomeShoppingSearchEnabledGroups(): List<HomeShoppingSearchEnabledGroup>? =
         FirebaseHelper.getFirebase().getRcString(RC_KEY_ENABLE_SHOPPING_SEARCH_V2_5)
-                .takeIf { it.isNotEmpty() }
-                ?.jsonStringToHomeShoppingSearchEnabledGroups()
+            .takeIf { it.isNotEmpty() }
+            ?.jsonStringToHomeShoppingSearchEnabledGroups()
 
     override fun getShoppingSites(): List<ShoppingSite> {
-        val shoppingSearchSites = FirebaseHelper.getFirebase().getRcString(RC_KEY_STR_SHOPPING_SEARCH_SITES)
+        val shoppingSearchSites =
+            FirebaseHelper.getFirebase().getRcString(RC_KEY_STR_SHOPPING_SEARCH_SITES)
         if (shoppingSearchSites.isNotEmpty()) {
             return shoppingSearchSites.toPreferenceSiteList()
         }
@@ -58,12 +60,13 @@ class ShoppingSearchRemoteDataSource : ShoppingSearchDataSource {
     }
 
     override fun getSearchLogoManImageUrl() =
-            FirebaseHelper.getFirebase().getRcString(RC_KEY_STR_SHOPPING_SEARCH_LOGO_MAN_IMAGE_URL)
+        FirebaseHelper.getFirebase().getRcString(RC_KEY_STR_SHOPPING_SEARCH_LOGO_MAN_IMAGE_URL)
 
     companion object {
         const val RC_KEY_ENABLE_SHOPPING_SEARCH_V2_5 = "enable_shopping_search_v2_5"
         const val RC_KEY_STR_SHOPPING_SEARCH_SITES = "str_shopping_search_sites"
-        const val RC_KEY_STR_SHOPPING_SEARCH_LOGO_MAN_IMAGE_URL = "str_shopping_search_logo_man_image_url"
+        const val RC_KEY_STR_SHOPPING_SEARCH_LOGO_MAN_IMAGE_URL =
+            "str_shopping_search_logo_man_image_url"
 
         const val JSON_KEY_ID = "id"
         const val JSON_KEY_IS_ENABLED = "is_enabled"
@@ -74,8 +77,8 @@ private fun String.jsonStringToHomeShoppingSearchEnabledGroups(): List<HomeShopp
     return try {
         val jsonArray = this.toJsonArray()
         (0 until jsonArray.length())
-                .map { index -> jsonArray.getJSONObject(index) }
-                .mapNotNull { jsonObject -> jsonObject.toHomeShoppingSearchEnabledGroup() }
+            .map { index -> jsonArray.getJSONObject(index) }
+            .mapNotNull { jsonObject -> jsonObject.toHomeShoppingSearchEnabledGroup() }
     } catch (e: JSONException) {
         e.printStackTrace()
         null

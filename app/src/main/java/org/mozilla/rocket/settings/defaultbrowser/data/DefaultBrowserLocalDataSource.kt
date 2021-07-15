@@ -10,11 +10,14 @@ import org.mozilla.strictmodeviolator.StrictModeViolation
 class DefaultBrowserLocalDataSource(private val applicationContext: Context) : DefaultBrowserDataSource {
 
     private val preference by lazy {
-        StrictModeViolation.tempGrant({ builder ->
-            builder.permitDiskReads()
-        }, {
-            PreferenceManager.getDefaultSharedPreferences(applicationContext)
-        })
+        StrictModeViolation.tempGrant(
+            { builder ->
+                builder.permitDiskReads()
+            },
+            {
+                PreferenceManager.getDefaultSharedPreferences(applicationContext)
+            }
+        )
     }
 
     override fun isDefaultBrowser() = Browsers.isDefaultBrowser(applicationContext)

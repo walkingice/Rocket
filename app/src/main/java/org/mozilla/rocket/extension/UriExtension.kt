@@ -8,13 +8,13 @@ private val URI.paramMap: Map<String, String>
     get() = if (rawQuery != null) {
         ArrayMap<String, String>().apply {
             rawQuery.split("&")
-                    .map { it.split("=") }
-                    .filter { it.size == 2 }
-                    .forEach {
-                        val key = it[0]
-                        val value = it[1]
-                        put(key, value)
-                    }
+                .map { it.split("=") }
+                .filter { it.size == 2 }
+                .forEach {
+                    val key = it[0]
+                    val value = it[1]
+                    put(key, value)
+                }
         }
     } else {
         emptyMap()

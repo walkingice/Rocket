@@ -1,10 +1,7 @@
 package org.mozilla.focus.activity
 
-import androidx.lifecycle.Observer
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
@@ -15,6 +12,9 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.lifecycle.Observer
 import dagger.Lazy
 import kotlinx.android.synthetic.main.activity_edit_bookmark.*
 import org.mozilla.focus.R
@@ -111,13 +111,16 @@ class EditBookmarkActivity : BaseActivity() {
             editTextLocation.text.clear()
         }
 
-        viewModel.getBookmarkById(itemId).observe(this, Observer<BookmarkModel> { bookmarkModel ->
-            bookmarkModel?.apply {
-                bookmark = bookmarkModel
-                editTextName.setText(bookmark.title)
-                editTextLocation.setText(bookmark.url)
+        viewModel.getBookmarkById(itemId).observe(
+            this,
+            Observer<BookmarkModel> { bookmarkModel ->
+                bookmarkModel?.apply {
+                    bookmark = bookmarkModel
+                    editTextName.setText(bookmark.title)
+                    editTextLocation.setText(bookmark.url)
+                }
             }
-        })
+        )
     }
 
     override fun onDestroy() {

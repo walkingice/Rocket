@@ -165,8 +165,8 @@ class LogoManNotification : FrameLayout {
         }
         AnimatorSet().apply {
             this.play(logoManMoveInAnimatorSet)
-                    .with(notificationBoardMoveInAnimatorSet)
-                    .after(1500)
+                .with(notificationBoardMoveInAnimatorSet)
+                .after(1500)
         }.start()
     }
 
@@ -200,12 +200,12 @@ class LogoManNotification : FrameLayout {
 
     private class RemoteNotificationAdapterDelegate(private val clickListener: () -> Unit) : AdapterDelegate {
         override fun onCreateViewHolder(view: View): DelegateAdapter.ViewHolder =
-                RemoteNotificationViewHolder(view, clickListener)
+            RemoteNotificationViewHolder(view, clickListener)
     }
 
     private class MissionNotificationAdapterDelegate(private val clickListener: () -> Unit) : AdapterDelegate {
         override fun onCreateViewHolder(view: View): DelegateAdapter.ViewHolder =
-                MissionNotificationViewHolder(view, clickListener)
+            MissionNotificationViewHolder(view, clickListener)
     }
 
     private class RemoteNotificationViewHolder(
@@ -226,10 +226,10 @@ class LogoManNotification : FrameLayout {
             if (uiModel.imageUrl != null) {
                 notification_icon.isVisible = true
                 GlideApp.with(itemView.context)
-                        .asBitmap()
-                        .centerCrop()
-                        .load(uiModel.imageUrl)
-                        .into(notification_icon)
+                    .asBitmap()
+                    .centerCrop()
+                    .load(uiModel.imageUrl)
+                    .into(notification_icon)
             } else {
                 notification_icon.isVisible = false
                 notification_icon.setImageDrawable(null)
@@ -258,14 +258,14 @@ class LogoManNotification : FrameLayout {
             val context = containerView.context
             notification_icon.setImageResource(R.drawable.ic_reward_box)
             Glide.with(context)
-                    .asBitmap()
-                    .load(uiModel.imageUrl)
-                    .apply(RequestOptions().transform(CircleCrop()))
-                    .into(object : SimpleTarget<Bitmap>() {
-                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>) {
-                            notification_icon.setImageBitmap(getRewardImage(context, imageSize, imageSize, resource))
-                        }
-                    })
+                .asBitmap()
+                .load(uiModel.imageUrl)
+                .apply(RequestOptions().transform(CircleCrop()))
+                .into(object : SimpleTarget<Bitmap>() {
+                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>) {
+                        notification_icon.setImageBitmap(getRewardImage(context, imageSize, imageSize, resource))
+                    }
+                })
         }
 
         private fun getRewardImage(context: Context, width: Int, height: Int, imageBitmap: Bitmap): Bitmap {

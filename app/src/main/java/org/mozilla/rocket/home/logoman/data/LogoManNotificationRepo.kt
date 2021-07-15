@@ -11,22 +11,25 @@ import org.mozilla.strictmodeviolator.StrictModeViolation
 
 class LogoManNotificationRepo(appContext: Context) {
 
-    private val preference = StrictModeViolation.tempGrant({ builder ->
-        builder.permitDiskReads()
-    }, {
-        appContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    })
+    private val preference = StrictModeViolation.tempGrant(
+        { builder ->
+            builder.permitDiskReads()
+        },
+        {
+            appContext.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        }
+    )
 
     fun getNotification(): LiveData<Notification?> =
-            getLastReadNotificationId().map { lastReadId ->
-                FirebaseHelper.getFirebase().getRcString(STR_LOGO_MAN_NOTIFICATION)
-                        .takeIf { it.isNotEmpty() }
-                        ?.jsonStringToNotification()
-                        ?.takeIf { it.messageId != lastReadId }
-            }
+        getLastReadNotificationId().map { lastReadId ->
+            FirebaseHelper.getFirebase().getRcString(STR_LOGO_MAN_NOTIFICATION)
+                .takeIf { it.isNotEmpty() }
+                ?.jsonStringToNotification()
+                ?.takeIf { it.messageId != lastReadId }
+        }
 
     fun getLastReadNotificationId(): LiveData<String> =
-            preference.stringLiveData(SHARED_PREF_KEY_READ_NOTIFICATION_ID, "")
+        preference.stringLiveData(SHARED_PREF_KEY_READ_NOTIFICATION_ID, "")
 
     fun saveLastReadNotificationId(readId: String) {
         preference.edit().putString(SHARED_PREF_KEY_READ_NOTIFICATION_ID, readId).apply()

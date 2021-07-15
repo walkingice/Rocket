@@ -44,10 +44,12 @@ class PreferencesContentProvider : ContentProvider() {
 
         fun <T> makeUri(prefName: String, op: Int, key: String, value: T): Uri {
             val auth = "content://$AUTHORITY"
-            return Uri.parse("$auth/$prefName?" +
+            return Uri.parse(
+                "$auth/$prefName?" +
                     "$QUERY_PARAM_OP=$op&" +
                     "$QUERY_PARAM_KEY=$key&" +
-                    "$QUERY_PARAM_VALUE=$value")
+                    "$QUERY_PARAM_VALUE=$value"
+            )
         }
 
         inline fun <reified T> put(context: Context, prefName: String, key: String, value: T) {
@@ -64,7 +66,12 @@ class PreferencesContentProvider : ContentProvider() {
             context.contentResolver.update(uri, ContentValues(), null, null)
         }
 
-        fun addObserver(context: Context, prefName: String, key: String, observer: ContentObserver) {
+        fun addObserver(
+            context: Context,
+            prefName: String,
+            key: String,
+            observer: ContentObserver
+        ) {
             val uri = makeUri(prefName, OP_OBSERVE, key, Any())
             context.contentResolver.registerContentObserver(uri, false, observer)
         }
@@ -90,11 +97,11 @@ class PreferencesContentProvider : ContentProvider() {
 
             val uri = makeUri(prefName, op, key, defaultValue)
             context.contentResolver.query(
-                    uri,
-                    null,
-                    null,
-                    null,
-                    null
+                uri,
+                null,
+                null,
+                null,
+                null
             )?.use {
                 return it.extras.get(key) as T
             }
@@ -181,7 +188,8 @@ class PreferencesContentProvider : ContentProvider() {
         }
     }
 
-    private class BundleCursor internal constructor(private var bundle: Bundle?) : MatrixCursor(arrayOf(), 1) {
+    private class BundleCursor internal constructor(private var bundle: Bundle?) :
+        MatrixCursor(arrayOf(), 1) {
 
         override fun getExtras(): Bundle? {
             return bundle

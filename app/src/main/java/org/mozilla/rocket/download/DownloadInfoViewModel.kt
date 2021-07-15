@@ -38,8 +38,8 @@ class DownloadInfoViewModel(private val repository: DownloadsRepository) : ViewM
     private val runningDownloadIds: LongArray
         get() {
             val ids = downloadInfoPack.list
-                    .filter { it.status == DownloadManager.STATUS_RUNNING || it.status == DownloadManager.STATUS_PENDING }
-                    .mapNotNull { it.downloadId }
+                .filter { it.status == DownloadManager.STATUS_RUNNING || it.status == DownloadManager.STATUS_PENDING }
+                .mapNotNull { it.downloadId }
             val array = LongArray(ids.size)
             for (i in array.indices) {
                 array[i] = ids[i]
@@ -206,7 +206,8 @@ class DownloadInfoViewModel(private val repository: DownloadsRepository) : ViewM
                         val downloadInfo = downloadInfoPack.list[j]
                         if (download.downloadId == downloadInfo.downloadId) {
                             downloadInfo.setStatusInt(download.status)
-                            downloadInfoPack.notifyType = DownloadInfoPack.Constants.NOTIFY_ITEM_CHANGED
+                            downloadInfoPack.notifyType =
+                                DownloadInfoPack.Constants.NOTIFY_ITEM_CHANGED
                             downloadInfoPack.index = j.toLong()
                             downloadInfoObservable.value = downloadInfoPack
                         }

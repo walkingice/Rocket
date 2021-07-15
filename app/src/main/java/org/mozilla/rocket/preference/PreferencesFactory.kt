@@ -14,10 +14,12 @@ interface PreferencesFactory {
 
 class AndroidPreferencesFactory : PreferencesFactory {
     override fun createPreferences(context: Context, name: String): Preferences {
-        return AndroidPreferences(if (name.isEmpty()) {
-            PreferenceManager.getDefaultSharedPreferences(context)
-        } else {
-            context.getSharedPreferences(name, Context.MODE_PRIVATE)
-        })
+        return AndroidPreferences(
+            if (name.isEmpty()) {
+                PreferenceManager.getDefaultSharedPreferences(context)
+            } else {
+                context.getSharedPreferences(name, Context.MODE_PRIVATE)
+            }
+        )
     }
 }

@@ -111,7 +111,8 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
         presenter = TabTrayPresenter(this, TabsSessionModel(sessionManager))
         itemDecoration = ShoppingSearchItemDecoration(
             ContextCompat.getDrawable(requireContext(), R.drawable.tab_tray_item_divider),
-            ContextCompat.getDrawable(requireContext(), R.drawable.tab_tray_item_divider_night))
+            ContextCompat.getDrawable(requireContext(), R.drawable.tab_tray_item_divider_night)
+        )
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -240,44 +241,50 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
 
     override fun refreshData(newTabs: List<Session>, newFocusedTab: Session?) {
         val oldTabs = adapter.data
-        DiffUtil.calculateDiff(object : DiffUtil.Callback() {
-            override fun getOldListSize(): Int {
-                return if (showShoppingSearch) oldTabs.size + 1 else oldTabs.size
-            }
-
-            override fun getNewListSize(): Int {
-                return if (showShoppingSearch) newTabs.size + 1 else newTabs.size
-            }
-
-            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return if (showShoppingSearch) {
-                    if (oldItemPosition == 0 && newItemPosition == 0) {
-                        true
-                    } else if (oldItemPosition == 0 && newItemPosition != 0 ||
-                        oldItemPosition != 0 && newItemPosition == 0) {
-                        false
-                    } else {
-                        newTabs[newItemPosition - 1].id == oldTabs[oldItemPosition - 1].id
-                    }
-                } else {
-                    newTabs[newItemPosition].id == oldTabs[oldItemPosition].id
+        DiffUtil.calculateDiff(
+            object : DiffUtil.Callback() {
+                override fun getOldListSize(): Int {
+                    return if (showShoppingSearch) oldTabs.size + 1 else oldTabs.size
                 }
-            }
 
-            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                return true
-            }
-        }, false).dispatchUpdatesTo(adapter)
+                override fun getNewListSize(): Int {
+                    return if (showShoppingSearch) newTabs.size + 1 else newTabs.size
+                }
+
+                override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return if (showShoppingSearch) {
+                        if (oldItemPosition == 0 && newItemPosition == 0) {
+                            true
+                        } else if (oldItemPosition == 0 && newItemPosition != 0 ||
+                            oldItemPosition != 0 && newItemPosition == 0
+                        ) {
+                            false
+                        } else {
+                            newTabs[newItemPosition - 1].id == oldTabs[oldItemPosition - 1].id
+                        }
+                    } else {
+                        newTabs[newItemPosition].id == oldTabs[oldItemPosition].id
+                    }
+                }
+
+                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                    return true
+                }
+            },
+            false
+        ).dispatchUpdatesTo(adapter)
         adapter.data = newTabs
-        waitItemAnimation(Runnable {
-            val oldFocused = adapter.focusedTab
-            val oldTabs1 = adapter.data
-            val oldFocusedPosition = oldTabs1.indexOf(oldFocused)
-            adapter.notifyItemChanged(if (showShoppingSearch) oldFocusedPosition + 1 else oldFocusedPosition)
-            adapter.focusedTab = newFocusedTab
-            val newFocusedPosition = oldTabs1.indexOf(newFocusedTab)
-            adapter.notifyItemChanged(if (showShoppingSearch) newFocusedPosition + 1 else newFocusedPosition)
-        })
+        waitItemAnimation(
+            Runnable {
+                val oldFocused = adapter.focusedTab
+                val oldTabs1 = adapter.data
+                val oldFocusedPosition = oldTabs1.indexOf(oldFocused)
+                adapter.notifyItemChanged(if (showShoppingSearch) oldFocusedPosition + 1 else oldFocusedPosition)
+                adapter.focusedTab = newFocusedTab
+                val newFocusedPosition = oldTabs1.indexOf(newFocusedTab)
+                adapter.notifyItemChanged(if (showShoppingSearch) newFocusedPosition + 1 else newFocusedPosition)
+            }
+        )
     }
 
     override fun refreshTabData(tab: Session) {
@@ -289,8 +296,10 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     }
 
     override fun showFocusedTab(tabPosition: Int) {
-        layoutManager.scrollToPositionWithOffset(tabPosition,
-            tab_tray_recycler_view.measuredHeight / 2)
+        layoutManager.scrollToPositionWithOffset(
+            tabPosition,
+            tab_tray_recycler_view.measuredHeight / 2
+        )
     }
 
     override fun tabSwitched(tabPosition: Int) {
@@ -343,25 +352,31 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     }
 
     private fun observeTabTrayAction() {
-        tabTrayViewModel.hasPrivateTab().observe(viewLifecycleOwner, Observer { hasPrivateTab: Boolean ->
-            // Update the UI, in this case, a TextView.
-            badge_in_private_mode.visibility = if (hasPrivateTab) View.VISIBLE else View.INVISIBLE
-        })
-        tabTrayViewModel.uiModel.observe(viewLifecycleOwner, Observer { (showShoppingSearchNewState, keyword) ->
-            val isDiff = showShoppingSearch xor showShoppingSearchNewState
-            if (isDiff) {
-                showShoppingSearch = showShoppingSearchNewState
-                presenter.setShoppingSearch(showShoppingSearch)
-                if (showShoppingSearch) {
-                    tab_tray_recycler_view.addItemDecoration(itemDecoration)
-                    adapter.notifyItemInserted(0)
-                } else {
-                    tab_tray_recycler_view.removeItemDecoration(itemDecoration)
-                    adapter.notifyItemRemoved(0)
-                }
-                adapter.setShoppingSearch(showShoppingSearch, keyword)
+        tabTrayViewModel.hasPrivateTab().observe(
+            viewLifecycleOwner,
+            Observer { hasPrivateTab: Boolean ->
+                // Update the UI, in this case, a TextView.
+                badge_in_private_mode.visibility = if (hasPrivateTab) View.VISIBLE else View.INVISIBLE
             }
-        })
+        )
+        tabTrayViewModel.uiModel.observe(
+            viewLifecycleOwner,
+            Observer { (showShoppingSearchNewState, keyword) ->
+                val isDiff = showShoppingSearch xor showShoppingSearchNewState
+                if (isDiff) {
+                    showShoppingSearch = showShoppingSearchNewState
+                    presenter.setShoppingSearch(showShoppingSearch)
+                    if (showShoppingSearch) {
+                        tab_tray_recycler_view.addItemDecoration(itemDecoration)
+                        adapter.notifyItemInserted(0)
+                    } else {
+                        tab_tray_recycler_view.removeItemDecoration(itemDecoration)
+                        adapter.notifyItemRemoved(0)
+                    }
+                    adapter.setShoppingSearch(showShoppingSearch, keyword)
+                }
+            }
+        )
     }
 
     private fun setupSwipeToDismiss(recyclerView: RecyclerView?) {
@@ -403,18 +418,21 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
         val tabs = adapter.data
         val focusedPosition = tabs.indexOf(adapter.focusedTab)
         val shouldExpand = isPositionVisibleWhenCollapse(if (showShoppingSearch) focusedPosition + 1 else focusedPosition)
-        uiHandler.postDelayed({
-            if (isVisible) {
-                if (shouldExpand) {
-                    bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
-                    logo_man.visibility = View.VISIBLE
-                    setIntercept(false)
-                } else {
-                    bottomSheetState = BottomSheetBehavior.STATE_EXPANDED
-                    setIntercept(true)
+        uiHandler.postDelayed(
+            {
+                if (isVisible) {
+                    if (shouldExpand) {
+                        bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
+                        logo_man.visibility = View.VISIBLE
+                        setIntercept(false)
+                    } else {
+                        bottomSheetState = BottomSheetBehavior.STATE_EXPANDED
+                        setIntercept(true)
+                    }
                 }
-            }
-        }, resources.getInteger(R.integer.tab_tray_transition_time).toLong())
+            },
+            resources.getInteger(R.integer.tab_tray_transition_time).toLong()
+        )
     }
 
     private fun isPositionVisibleWhenCollapse(focusedPosition: Int): Boolean {
@@ -469,8 +487,10 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
 
     private fun initRecyclerViewStyle(recyclerView: RecyclerView) {
         val context = recyclerView.context
-        recyclerView.layoutManager = LinearLayoutManager(context,
-            RecyclerView.VERTICAL, false).also { layoutManager = it }
+        recyclerView.layoutManager = LinearLayoutManager(
+            context,
+            RecyclerView.VERTICAL, false
+        ).also { layoutManager = it }
         val animator = recyclerView.itemAnimator
         if (animator is SimpleItemAnimator) {
             animator.supportsChangeAnimations = false
@@ -478,7 +498,8 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     }
 
     private fun setupTapBackgroundToExpand() {
-        val detector = GestureDetectorCompat(context,
+        val detector = GestureDetectorCompat(
+            context,
             object : SimpleOnGestureListener() {
                 override fun onSingleTapUp(e: MotionEvent): Boolean {
                     bottomSheetState = BottomSheetBehavior.STATE_EXPANDED
@@ -488,7 +509,8 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
                 override fun onDown(e: MotionEvent): Boolean {
                     return true
                 }
-            })
+            }
+        )
         root_layout.setOnTouchListener { v: View, event: MotionEvent? ->
             val result = detector.onTouchEvent(event)
             if (result) {
@@ -657,8 +679,10 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
             if (parent.clipToPadding) {
                 left = parent.paddingLeft
                 right = parent.width - parent.paddingRight
-                c.clipRect(left, parent.paddingTop, right,
-                    parent.height - parent.paddingBottom)
+                c.clipRect(
+                    left, parent.paddingTop, right,
+                    parent.height - parent.paddingBottom
+                )
             } else {
                 left = 0
                 right = parent.width

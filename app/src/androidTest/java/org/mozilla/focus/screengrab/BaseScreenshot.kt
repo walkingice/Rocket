@@ -1,7 +1,6 @@
 package org.mozilla.focus.screengrab
 
 import org.junit.ClassRule
-
 import tools.fastlane.screengrab.locale.LocaleTestRule
 
 /**

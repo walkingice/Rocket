@@ -62,18 +62,24 @@ class AddNewTopSitesFragment : Fragment() {
     }
 
     private fun bindListData() {
-        addNewTopSitesViewModel.recommendedSitesItems.observe(viewLifecycleOwner, Observer {
-            adapter.setData(it.items)
-        })
+        addNewTopSitesViewModel.recommendedSitesItems.observe(
+            viewLifecycleOwner,
+            Observer {
+                adapter.setData(it.items)
+            }
+        )
     }
 
     private fun observeActions() {
-        addNewTopSitesViewModel.pinTopSiteResult.observe(viewLifecycleOwner, Observer { pinTopSiteResult ->
-            pinTopSiteResult?.let {
-                activity?.setResult(RESULT_CODE_ADD_NEW_TOP_SITES, Intent().apply { putExtra(ADD_NEW_TOP_SITES_EXTRA, it) })
+        addNewTopSitesViewModel.pinTopSiteResult.observe(
+            viewLifecycleOwner,
+            Observer { pinTopSiteResult ->
+                pinTopSiteResult?.let {
+                    activity?.setResult(RESULT_CODE_ADD_NEW_TOP_SITES, Intent().apply { putExtra(ADD_NEW_TOP_SITES_EXTRA, it) })
+                }
+                activity?.finish()
             }
-            activity?.finish()
-        })
+        )
     }
 
     private fun initSpanSizeLookup() {

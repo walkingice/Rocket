@@ -25,21 +25,23 @@ class ShortcutUtils {
             val shortcutIntent = Intent(Intent.ACTION_MAIN)
             shortcutIntent.setClassName(context, AppConstants.LAUNCHER_PRIVATE_ACTIVITY_ALIAS)
             shortcutIntent.putExtra(
-                    LaunchIntentDispatcher.LaunchMethod.EXTRA_BOOL_PRIVATE_MODE_SHORTCUT.value,
-                    true
+                LaunchIntentDispatcher.LaunchMethod.EXTRA_BOOL_PRIVATE_MODE_SHORTCUT.value,
+                true
             )
             shortcutIntent.flags = shortcutIntent.flags or
-                    Intent.FLAG_ACTIVITY_NEW_TASK
+                Intent.FLAG_ACTIVITY_NEW_TASK
 
             val icon = IconCompat.createWithResource(context, R.drawable.ic_pb_launcher)
             val shortcut = ShortcutInfoCompat.Builder(context, SHORTCUT_ID)
-                    .setShortLabel(context.getString(
-                            R.string.private_browsing_shortcut_name,
-                            context.getString(R.string.app_name)
-                    ))
-                    .setIntent(shortcutIntent)
-                    .setIcon(icon)
-                    .build()
+                .setShortLabel(
+                    context.getString(
+                        R.string.private_browsing_shortcut_name,
+                        context.getString(R.string.app_name)
+                    )
+                )
+                .setIntent(shortcutIntent)
+                .setIcon(icon)
+                .build()
 
             // Known issue: when there is already an existing shortcut, intendSender will be called
             // immediately when system shortcut dialog is shown. i.e. Home will be brought up, and then
@@ -48,9 +50,9 @@ class ShortcutUtils {
             val intentSender = IntentUtils.getLauncherHomePendingIntent(context).intentSender
 
             (context.applicationContext as FocusApplication)
-                    .settings
-                    .privateBrowsingSettings
-                    .setPrivateShortcutCreated()
+                .settings
+                .privateBrowsingSettings
+                .setPrivateShortcutCreated()
 
             if (ShortcutManagerCompat.isRequestPinShortcutSupported(context)) {
                 TelemetryWrapper.createPrivateShortcut()

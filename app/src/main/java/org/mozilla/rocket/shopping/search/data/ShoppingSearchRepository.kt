@@ -28,7 +28,12 @@ class ShoppingSearchRepository(
         } else if (localShoppingSites.isNotEmpty()) {
             val mergedShoppingSites = arrayListOf<ShoppingSite>()
             if (shouldMergeShoppingSites(remoteShoppingSites, localShoppingSites)) {
-                mergedShoppingSites.addAll(getMergedShoppingSites(remoteShoppingSites, localShoppingSites))
+                mergedShoppingSites.addAll(
+                    getMergedShoppingSites(
+                        remoteShoppingSites,
+                        localShoppingSites
+                    )
+                )
                 updateShoppingSites(mergedShoppingSites)
             } else {
                 mergedShoppingSites.addAll(localShoppingSites)
@@ -41,7 +46,7 @@ class ShoppingSearchRepository(
     }
 
     fun getHomeShoppingSearchEnabledGroups(): List<HomeShoppingSearchEnabledGroup>? =
-            remoteDataSource.getHomeShoppingSearchEnabledGroups()
+        remoteDataSource.getHomeShoppingSearchEnabledGroups()
 
     fun getShoppingSitesData(): LiveData<List<ShoppingSite>> = shoppingSitesData
 
@@ -62,13 +67,17 @@ class ShoppingSearchRepository(
 
     fun getSearchPromptMessageShowCount() = localDataSource.getSearchPromptMessageShowCount()
 
-    fun setSearchPromptMessageShowCount(count: Int) = localDataSource.setSearchPromptMessageShowCount(count)
+    fun setSearchPromptMessageShowCount(count: Int) =
+        localDataSource.setSearchPromptMessageShowCount(count)
 
     fun getSearchDescription() = localDataSource.getSearchDescription()
 
     fun getSearchLogoManImageUrl() = remoteDataSource.getSearchLogoManImageUrl()
 
-    private fun shouldMergeShoppingSites(remoteShoppingSites: List<ShoppingSite>, localShoppingSites: List<ShoppingSite>): Boolean {
+    private fun shouldMergeShoppingSites(
+        remoteShoppingSites: List<ShoppingSite>,
+        localShoppingSites: List<ShoppingSite>
+    ): Boolean {
         if (remoteShoppingSites.size != localShoppingSites.size) {
             return true
         }
@@ -84,7 +93,10 @@ class ShoppingSearchRepository(
         return false
     }
 
-    private fun getMergedShoppingSites(remoteShoppingSites: List<ShoppingSite>, localShoppingSites: List<ShoppingSite>): List<ShoppingSite> {
+    private fun getMergedShoppingSites(
+        remoteShoppingSites: List<ShoppingSite>,
+        localShoppingSites: List<ShoppingSite>
+    ): List<ShoppingSite> {
         val sitesToAdd = arrayListOf<ShoppingSite>()
         for (remoteSite in remoteShoppingSites) {
             var matched = false
@@ -121,7 +133,10 @@ class ShoppingSearchRepository(
         return mergedSites
     }
 
-    private fun syncRemoteSettingsToLocalSites(remoteShoppingSites: List<ShoppingSite>, localShoppingSites: List<ShoppingSite>) {
+    private fun syncRemoteSettingsToLocalSites(
+        remoteShoppingSites: List<ShoppingSite>,
+        localShoppingSites: List<ShoppingSite>
+    ) {
         for (remoteSite in remoteShoppingSites) {
             for (localSite in localShoppingSites) {
                 if (localSite.contentEquals(remoteSite)) {

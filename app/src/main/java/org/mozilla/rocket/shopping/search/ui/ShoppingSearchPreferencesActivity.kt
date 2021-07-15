@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.Lazy
@@ -69,12 +68,13 @@ class ShoppingSearchPreferencesActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@ShoppingSearchPreferencesActivity)
             adapter = this@ShoppingSearchPreferencesActivity.adapter
         }
-        viewModel.shoppingSites.observe(this, Observer {
+        viewModel.shoppingSites.observe(this) {
             adapter.setData(it)
-        })
+        }
     }
 
     companion object {
-        fun getStartIntent(context: Context) = Intent(context, ShoppingSearchPreferencesActivity::class.java)
+        fun getStartIntent(context: Context) =
+            Intent(context, ShoppingSearchPreferencesActivity::class.java)
     }
 }

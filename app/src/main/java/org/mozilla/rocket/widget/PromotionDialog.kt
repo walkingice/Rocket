@@ -1,10 +1,18 @@
 @file:JvmName("PromotionDialogExt")
+
 package org.mozilla.rocket.widget
 
 import android.content.Context
 import android.view.View
 import androidx.appcompat.app.AlertDialog
-import kotlinx.android.synthetic.main.layout_promotion_dialog.view.*
+import kotlinx.android.synthetic.main.layout_promotion_dialog.view.button_divider1
+import kotlinx.android.synthetic.main.layout_promotion_dialog.view.button_divider2
+import kotlinx.android.synthetic.main.layout_promotion_dialog.view.close_button
+import kotlinx.android.synthetic.main.layout_promotion_dialog.view.description
+import kotlinx.android.synthetic.main.layout_promotion_dialog.view.image
+import kotlinx.android.synthetic.main.layout_promotion_dialog.view.negative_button
+import kotlinx.android.synthetic.main.layout_promotion_dialog.view.positive_button
+import kotlinx.android.synthetic.main.layout_promotion_dialog.view.title
 import org.mozilla.focus.R
 import org.mozilla.rocket.landing.DialogQueue
 
@@ -111,12 +119,12 @@ class PromotionDialog(
 
     private fun createDialog(): AlertDialog {
         val dialog = AlertDialog.Builder(context)
-                .setView(view)
-                .setOnCancelListener {
-                    onCancelListener?.invoke()
-                }
-                .setCancelable(cancellable)
-                .create()
+            .setView(view)
+            .setOnCancelListener {
+                onCancelListener?.invoke()
+            }
+            .setCancelable(cancellable)
+            .create()
 
         view.positive_button.setOnClickListener {
             dialog.dismiss()

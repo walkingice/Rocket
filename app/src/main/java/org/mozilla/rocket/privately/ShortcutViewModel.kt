@@ -5,11 +5,11 @@
 
 package org.mozilla.rocket.privately
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import android.content.Context
 import org.mozilla.focus.FocusApplication
 import org.mozilla.focus.R
 import org.mozilla.focus.navigation.ScreenNavigator
@@ -39,9 +39,9 @@ class ShortcutViewModel : ViewModel() {
         }
 
         val createdBefore = (context.applicationContext as FocusApplication)
-                .settings
-                .privateBrowsingSettings
-                .isPrivateShortcutCreatedBefore()
+            .settings
+            .privateBrowsingSettings
+            .isPrivateShortcutCreatedBefore()
 
         return Transformations.switchMap(isHomeState) { isHome ->
             if (!isHome) {

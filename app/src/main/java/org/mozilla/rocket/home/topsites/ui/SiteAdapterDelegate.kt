@@ -10,10 +10,10 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import kotlinx.android.synthetic.main.item_dummy_top_site.*
 import kotlinx.android.synthetic.main.item_top_site.*
 import kotlinx.android.synthetic.main.item_top_site.content_image
 import kotlinx.android.synthetic.main.item_top_site.text
-import kotlinx.android.synthetic.main.item_dummy_top_site.*
 import org.mozilla.focus.R
 import org.mozilla.focus.utils.DimenUtils
 import org.mozilla.icon.FavIconUtils
@@ -27,7 +27,7 @@ class SiteAdapterDelegate(
     private val chromeViewModel: ChromeViewModel
 ) : AdapterDelegate {
     override fun onCreateViewHolder(view: View): DelegateAdapter.ViewHolder =
-            SiteViewHolder(view, topSiteClickListener, chromeViewModel)
+        SiteViewHolder(view, topSiteClickListener, chromeViewModel)
 }
 
 class SiteViewHolder(
@@ -46,8 +46,8 @@ class SiteViewHolder(
                 // FIXME: 9/21/18 by saving bitmap color, cause FaviconUtils.getDominantColor runs slow.
                 // Favicon
                 val favicon = StrictModeViolation.tempGrant(
-                        { obj: StrictMode.ThreadPolicy.Builder -> obj.permitDiskReads() },
-                        { getFavicon(itemView.context, site) }
+                    { obj: StrictMode.ThreadPolicy.Builder -> obj.permitDiskReads() },
+                    { getFavicon(itemView.context, site) }
                 )
                 content_image.visibility = View.VISIBLE
                 content_image.imageTintList = null
@@ -125,8 +125,10 @@ class SiteViewHolder(
     }
 
     private fun createFavicon(resources: Resources, url: String, backgroundColor: Int): Bitmap {
-        return DimenUtils.getInitialBitmap(resources, FavIconUtils.getRepresentativeCharacter(url),
-                backgroundColor)
+        return DimenUtils.getInitialBitmap(
+            resources, FavIconUtils.getRepresentativeCharacter(url),
+            backgroundColor
+        )
     }
 
     private fun getBackgroundColor(bitmap: Bitmap): Int = calculateBackgroundColor(bitmap)
@@ -190,19 +192,19 @@ sealed class Site : DelegateAdapter.UiModel() {
 }
 
 fun Site.UrlSite.toSiteModel(): org.mozilla.focus.history.model.Site =
-        org.mozilla.focus.history.model.Site(
-            id,
-            title,
-            url,
-            viewCount,
-            lastViewTimestamp,
-            iconUri
-        ).apply {
-            isDefault = when (this@toSiteModel) {
-                is Site.UrlSite.FixedSite -> true
-                is Site.UrlSite.RemovableSite -> this@toSiteModel.isDefault
-            }
+    org.mozilla.focus.history.model.Site(
+        id,
+        title,
+        url,
+        viewCount,
+        lastViewTimestamp,
+        iconUri
+    ).apply {
+        isDefault = when (this@toSiteModel) {
+            is Site.UrlSite.FixedSite -> true
+            is Site.UrlSite.RemovableSite -> this@toSiteModel.isDefault
         }
+    }
 
 interface TopSiteClickListener {
     fun onTopSiteClicked(site: Site, position: Int)

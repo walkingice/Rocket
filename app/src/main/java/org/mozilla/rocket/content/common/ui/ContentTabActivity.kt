@@ -14,7 +14,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.snackbar.Snackbar
 import dagger.Lazy
@@ -76,7 +75,8 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
         sessionManager = SessionManager(tabViewProvider)
 
         appbar.setOnApplyWindowInsetsListener { v, insets ->
-            (v.layoutParams as ConstraintLayout.LayoutParams).topMargin = insets.systemWindowInsetTop
+            (v.layoutParams as ConstraintLayout.LayoutParams).topMargin =
+                insets.systemWindowInsetTop
             insets
         }
 
@@ -106,12 +106,14 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
                 .commit()
 
             Looper.myQueue().addIdleHandler {
-                contentTabFragment.setOnKeyboardVisibilityChangedListener(OnKeyboardVisibilityChangedListener { visible ->
-                    if (visible) {
-                        contentTabFragment.setOnKeyboardVisibilityChangedListener(null)
-                        telemetryViewModel.onKeyboardShown()
+                contentTabFragment.setOnKeyboardVisibilityChangedListener(
+                    OnKeyboardVisibilityChangedListener { visible ->
+                        if (visible) {
+                            contentTabFragment.setOnKeyboardVisibilityChangedListener(null)
+                            telemetryViewModel.onKeyboardShown()
+                        }
                     }
-                })
+                )
                 false
             }
         }
@@ -212,14 +214,15 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
                 }
             }
         })
-        bottomBarItemAdapter = BottomBarItemAdapter(bottomBar, BottomBarItemAdapter.Theme.PrivateMode)
+        bottomBarItemAdapter =
+            BottomBarItemAdapter(bottomBar, BottomBarItemAdapter.Theme.PrivateMode)
         val bottomBarViewModel = getViewModel(bottomBarViewModelCreator)
         bottomBarViewModel.items.nonNullObserve(this) {
             bottomBarItemAdapter.setItems(it)
         }
 
         chromeViewModel.isRefreshing.switchFrom(bottomBarViewModel.items)
-            .observe(this, Observer {
+            .observe(this) {
                 bottomBarItemAdapter.setRefreshing(it == true)
 
                 if (it == true) {
@@ -227,15 +230,16 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
                 } else {
                     telemetryViewModel.onPageLoadingStopped()
                 }
-            })
+            }
         chromeViewModel.canGoForward.switchFrom(bottomBarViewModel.items)
-            .observe(this, Observer { bottomBarItemAdapter.setCanGoForward(it == true) })
+            .observe(this) { bottomBarItemAdapter.setCanGoForward(it == true) }
     }
 
     private fun makeStatusBarTransparent() {
         var visibility = window.decorView.systemUiVisibility
         // do not overwrite existing value
-        visibility = visibility or (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+        visibility =
+            visibility or (View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
         window.decorView.systemUiVisibility = visibility
     }
 
@@ -243,50 +247,64 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
         uiMessageReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == Constants.ACTION_NOTIFY_RELOCATE_FINISH) {
-                    chromeViewModel.onRelocateFinished(intent.getLongExtra(Constants.EXTRA_ROW_ID, -1))
+                    chromeViewModel.onRelocateFinished(
+                        intent.getLongExtra(
+                            Constants.EXTRA_ROW_ID,
+                            -1
+                        )
+                    )
                 }
             }
         }
     }
 
     private fun observeChromeAction() {
-        chromeViewModel.goBack.observe(this, Observer {
+        chromeViewModel.goBack.observe(this) {
             onBackPressed()
             telemetryViewModel.onBackButtonClicked()
-        })
+        }
 
-        chromeViewModel.share.observe(this, Observer {
+        chromeViewModel.share.observe(this) {
             chromeViewModel.currentUrl.value?.let { url ->
                 onShareClicked(url)
             }
             telemetryViewModel.onShareButtonClicked()
-        })
+        }
 
-        chromeViewModel.currentUrl.observe(this, Observer {
+        chromeViewModel.currentUrl.observe(this) {
             telemetryViewModel.onUrlOpened()
-        })
+        }
 
-        chromeViewModel.downloadState.observe(this, Observer { downloadState ->
+        chromeViewModel.downloadState.observe(this) { downloadState ->
             when (downloadState) {
                 is DownloadsRepository.DownloadState.StorageUnavailable ->
-                    Toast.makeText(this, R.string.message_storage_unavailable_cancel_download, Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this,
+                        R.string.message_storage_unavailable_cancel_download,
+                        Toast.LENGTH_LONG
+                    ).show()
                 is DownloadsRepository.DownloadState.FileNotSupported ->
-                    Toast.makeText(this, R.string.download_file_not_supported, Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, R.string.download_file_not_supported, Toast.LENGTH_LONG)
+                        .show()
                 is DownloadsRepository.DownloadState.Success ->
                     if (!downloadState.isStartFromContextMenu) {
                         Toast.makeText(this, R.string.download_started, Toast.LENGTH_LONG).show()
                     }
             }
-        })
+        }
 
-        chromeViewModel.showDownloadFinishedSnackBar.observe(this, Observer { downloadInfo ->
+        chromeViewModel.showDownloadFinishedSnackBar.observe(this) { downloadInfo ->
             val message = getString(R.string.download_completed, downloadInfo.fileName)
             Snackbar.make(snack_bar_container, message, Snackbar.LENGTH_LONG).apply {
                 // Set the open action only if we can.
                 if (downloadInfo.existInDownloadManager()) {
                     setAction(R.string.open) {
                         try {
-                            IntentUtils.intentOpenFile(this@ContentTabActivity, downloadInfo.fileUri, downloadInfo.mimeType)
+                            IntentUtils.intentOpenFile(
+                                this@ContentTabActivity,
+                                downloadInfo.fileUri,
+                                downloadInfo.mimeType
+                            )
                         } catch (e: URISyntaxException) {
                             e.printStackTrace()
                         }
@@ -295,7 +313,7 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
                 anchorView = bottom_bar
                 show()
             }
-        })
+        }
     }
 
     private fun onShareClicked(url: String) {

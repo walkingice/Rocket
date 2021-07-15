@@ -17,24 +17,30 @@ class KeywordSuggestionRepository(appContext: Context) {
 
     private val searchEngine = SearchEngineManager.getInstance().getDefaultSearchEngine(appContext)
 
-    suspend fun fetchSuggestions(keyword: String): Result<List<String>> = withContext(Dispatchers.IO) {
-        return@withContext safeApiCall(
-            call = {
-                sendHttpRequest(request = Request(url = getSuggestionApiEndpoint(keyword), method = Request.Method.GET),
-                    onSuccess = {
-                        Result.Success(parseSuggestionResult(it.body.string()))
-                    },
-                    onError = {
-                        Result.Error(it)
-                    }
-                )
-            },
-            errorMessage = "Unable to get keyword suggestion"
-        )
-    }
+    suspend fun fetchSuggestions(keyword: String): Result<List<String>> =
+        withContext(Dispatchers.IO) {
+            return@withContext safeApiCall(
+                call = {
+                    sendHttpRequest(
+                        request = Request(
+                            url = getSuggestionApiEndpoint(keyword),
+                            method = Request.Method.GET
+                        ),
+                        onSuccess = {
+                            Result.Success(parseSuggestionResult(it.body.string()))
+                        },
+                        onError = {
+                            Result.Error(it)
+                        }
+                    )
+                },
+                errorMessage = "Unable to get keyword suggestion"
+            )
+        }
 
     suspend fun fetchTrendingTerms(): Result<List<String>> = withContext(Dispatchers.IO) {
-        val terms = FirebaseHelper.getFirebase().getRcString(RC_KEY_STR_SHOPPING_SEARCH_TRENDING_TERMS)
+        val terms =
+            FirebaseHelper.getFirebase().getRcString(RC_KEY_STR_SHOPPING_SEARCH_TRENDING_TERMS)
         return@withContext if (terms.isEmpty()) {
             Result.Success(emptyList())
         } else {
@@ -79,6 +85,7 @@ class KeywordSuggestionRepository(appContext: Context) {
 
     companion object {
         private const val MAX_SUGGESTION_COUNT = 5
-        private const val RC_KEY_STR_SHOPPING_SEARCH_TRENDING_TERMS = "str_shopping_search_trending_terms"
+        private const val RC_KEY_STR_SHOPPING_SEARCH_TRENDING_TERMS =
+            "str_shopping_search_trending_terms"
     }
 }

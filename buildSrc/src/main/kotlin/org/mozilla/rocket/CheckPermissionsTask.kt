@@ -38,7 +38,11 @@ open class CheckPermissionsTask : DefaultTask() {
         backupFile.delete()
     }
 
-    private fun generatePermissionsFile(apkFilePath: String, destFilePath: String, aapt2DirPath: String) {
+    private fun generatePermissionsFile(
+        apkFilePath: String,
+        destFilePath: String,
+        aapt2DirPath: String
+    ) {
         val permissionsText = "${aapt2DirPath}aapt2 dump permissions $apkFilePath".runCommand()
         val trimmedText = if (permissionsText.isNotEmpty()) {
             // Ignore package name in the first line
@@ -47,13 +51,13 @@ open class CheckPermissionsTask : DefaultTask() {
             permissionsText
         }
         File(destFilePath)
-                .also { it.delete() }
-                .also { it.createNewFile() }
-                .writeText(trimmedText)
+            .also { it.delete() }
+            .also { it.createNewFile() }
+            .writeText(trimmedText)
     }
 
     private fun isNewLineAdded(gitDiff: String): Boolean = gitDiff.split('\n')
-            .any { it.startsWith("+    ") }
+        .any { it.startsWith("+    ") }
 
     private fun String.runCommand(): String = runCommand(WORKING_DIR)
 
@@ -72,10 +76,10 @@ private fun String.runCommand(workingDir: File): String {
     println("run command: $this")
     val parts = this.split("\\s".toRegex())
     val process = ProcessBuilder(*parts.toTypedArray())
-            .directory(workingDir)
-            .redirectOutput(ProcessBuilder.Redirect.PIPE)
-            .redirectError(ProcessBuilder.Redirect.PIPE)
-            .start()
+        .directory(workingDir)
+        .redirectOutput(ProcessBuilder.Redirect.PIPE)
+        .redirectError(ProcessBuilder.Redirect.PIPE)
+        .start()
 
     process.waitFor(60, TimeUnit.MINUTES)
     return process.inputStream.bufferedReader().readText()

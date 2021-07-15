@@ -10,7 +10,7 @@ open class DelegatePagedListAdapter(
 ) : PagedListAdapter<DelegateAdapter.UiModel, DelegateAdapter.ViewHolder>(diffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DelegateAdapter.ViewHolder =
-            delegatesManager.onCreateViewHolder(parent, viewType)
+        delegatesManager.onCreateViewHolder(parent, viewType)
 
     override fun getItemViewType(position: Int): Int {
         val item = getItem(position)

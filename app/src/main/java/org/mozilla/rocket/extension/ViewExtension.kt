@@ -17,7 +17,7 @@ fun View.dpToPx(value: Float): Int = context.dpToPx(value)
 fun Fragment.dpToPx(value: Float): Int = requireContext().dpToPx(value)
 
 fun Activity.inflate(@LayoutRes layoutRes: Int, root: ViewGroup? = null): View =
-        LayoutInflater.from(this).inflate(layoutRes, root)
+    LayoutInflater.from(this).inflate(layoutRes, root)
 
 fun ViewGroup.inflate(@LayoutRes layoutRes: Int, attachToRoot: Boolean = false): View =
-        LayoutInflater.from(context).inflate(layoutRes, this, attachToRoot)
+    LayoutInflater.from(context).inflate(layoutRes, this, attachToRoot)

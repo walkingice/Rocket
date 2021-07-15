@@ -45,7 +45,8 @@ class SharedPreferencePinSiteDelegate(private val context: Context) : PinSiteDel
     }
 
     override fun pin(site: Site) {
-        sites.add(Site(
+        sites.add(
+            Site(
                 site.id,
                 site.title,
                 site.url,
@@ -116,7 +117,9 @@ class SharedPreferencePinSiteDelegate(private val context: Context) : PinSiteDel
         try {
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
-                sites.add(Site(obj.getLong(TopSitesUtils.KEY_ID),
+                sites.add(
+                    Site(
+                        obj.getLong(TopSitesUtils.KEY_ID),
                         obj.getString(TopSitesUtils.KEY_TITLE),
                         obj.getString(TopSitesUtils.KEY_URL),
                         obj.getLong(TopSitesUtils.KEY_VIEW_COUNT),

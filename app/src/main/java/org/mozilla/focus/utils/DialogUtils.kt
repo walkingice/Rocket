@@ -63,42 +63,51 @@ object DialogUtils {
         val data = CustomViewDialogData()
         data.drawable = ContextCompat.getDrawable(context, R.drawable.promotion_02)
         val configTitle = AppConfigWrapper.getRateAppDialogTitle()
-        val defaultTitle = context.getString(R.string.rate_app_dialog_text_title, context.getString(R.string.app_name))
+        val defaultTitle = context.getString(
+            R.string.rate_app_dialog_text_title,
+            context.getString(R.string.app_name)
+        )
         data.title = if (TextUtils.isEmpty(configTitle)) defaultTitle else configTitle
         val configContent = AppConfigWrapper.getRateAppDialogContent()
         val defaultContent = context.getString(R.string.rate_app_dialog_text_content)
         data.description = if (TextUtils.isEmpty(configContent)) defaultContent else configContent
         val configPositiveText = AppConfigWrapper.getRateAppPositiveString()
         val defaultPositiveText = context.getString(R.string.rate_app_dialog_btn_go_rate)
-        val positiveText = if (TextUtils.isEmpty(configPositiveText)) defaultPositiveText else configPositiveText
+        val positiveText =
+            if (TextUtils.isEmpty(configPositiveText)) defaultPositiveText else configPositiveText
         data.positiveText = positiveText
         val configNegativeText = AppConfigWrapper.getRateAppNegativeString()
         val defaultNegativeText = context.getString(R.string.rate_app_dialog_btn_feedback)
-        val negativeText = if (TextUtils.isEmpty(configNegativeText)) defaultNegativeText else configNegativeText
+        val negativeText =
+            if (TextUtils.isEmpty(configNegativeText)) defaultNegativeText else configNegativeText
         data.negativeText = negativeText
         data.showCloseButton = true
         return PromotionDialog(context, data)
-                .onPositive {
-                    IntentUtils.goToPlayStore(context)
-                    telemetryFeedback(context, TelemetryWrapper.Value.POSITIVE)
-                }
-                .onNegative {
-                    Settings.getInstance(context).setShareAppDialogDidShow()
-                    IntentUtils.openUrl(context, context.getString(R.string.rate_app_feedback_url), true)
-                    telemetryFeedback(context, TelemetryWrapper.Value.NEGATIVE)
-                }
-                .onClose {
-                    Settings.getInstance(context).setRateAppDialogDidDismiss()
-                    telemetryFeedback(context, TelemetryWrapper.Value.DISMISS)
-                }
-                .onCancel {
-                    Settings.getInstance(context).setRateAppDialogDidDismiss()
-                    telemetryFeedback(context, TelemetryWrapper.Value.DISMISS)
-                }
-                .addOnShowListener {
-                    Settings.getInstance(context).setRateAppDialogDidShow()
-                }
-                .setCancellable(true)
+            .onPositive {
+                IntentUtils.goToPlayStore(context)
+                telemetryFeedback(context, TelemetryWrapper.Value.POSITIVE)
+            }
+            .onNegative {
+                Settings.getInstance(context).setShareAppDialogDidShow()
+                IntentUtils.openUrl(
+                    context,
+                    context.getString(R.string.rate_app_feedback_url),
+                    true
+                )
+                telemetryFeedback(context, TelemetryWrapper.Value.NEGATIVE)
+            }
+            .onClose {
+                Settings.getInstance(context).setRateAppDialogDidDismiss()
+                telemetryFeedback(context, TelemetryWrapper.Value.DISMISS)
+            }
+            .onCancel {
+                Settings.getInstance(context).setRateAppDialogDidDismiss()
+                telemetryFeedback(context, TelemetryWrapper.Value.DISMISS)
+            }
+            .addOnShowListener {
+                Settings.getInstance(context).setRateAppDialogDidShow()
+            }
+            .setCancellable(true)
     }
 
     private fun telemetryFeedback(context: Context, value: String) {
@@ -118,24 +127,24 @@ object DialogUtils {
         data.positiveText = context.getString(R.string.share_app_dialog_btn_share)
         data.showCloseButton = true
         return PromotionDialog(context, data)
-                .onPositive {
-                    val sendIntent = Intent(Intent.ACTION_SEND)
-                    sendIntent.type = "text/plain"
-                    sendIntent.putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.app_name))
-                    sendIntent.putExtra(Intent.EXTRA_TEXT, AppConfigWrapper.getShareAppMessage())
-                    context.startActivity(Intent.createChooser(sendIntent, null))
-                    telemetryShareApp(context, TelemetryWrapper.Value.SHARE)
-                }
-                .onClose {
-                    telemetryShareApp(context, TelemetryWrapper.Value.DISMISS)
-                }
-                .onCancel {
-                    telemetryShareApp(context, TelemetryWrapper.Value.DISMISS)
-                }
-                .addOnShowListener {
-                    Settings.getInstance(context).setShareAppDialogDidShow()
-                }
-                .setCancellable(true)
+            .onPositive {
+                val sendIntent = Intent(Intent.ACTION_SEND)
+                sendIntent.type = "text/plain"
+                sendIntent.putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.app_name))
+                sendIntent.putExtra(Intent.EXTRA_TEXT, AppConfigWrapper.getShareAppMessage())
+                context.startActivity(Intent.createChooser(sendIntent, null))
+                telemetryShareApp(context, TelemetryWrapper.Value.SHARE)
+            }
+            .onClose {
+                telemetryShareApp(context, TelemetryWrapper.Value.DISMISS)
+            }
+            .onCancel {
+                telemetryShareApp(context, TelemetryWrapper.Value.DISMISS)
+            }
+            .addOnShowListener {
+                Settings.getInstance(context).setShareAppDialogDidShow()
+            }
+            .setCancellable(true)
     }
 
     private fun telemetryShareApp(context: Context, value: String) {
@@ -149,24 +158,41 @@ object DialogUtils {
     @JvmStatic
     fun showRateAppNotification(context: Context) { // Brings up Rocket and display full screen "Love Rocket" dialog
         val openRocket = IntentUtils.genFeedbackNotificationClickForBroadcastReceiver(context)
-        val openRocketPending = PendingIntent.getBroadcast(context, REQUEST_RATE_CLICK, openRocket,
-                PendingIntent.FLAG_ONE_SHOT)
-        val string = context.getString(R.string.rate_app_dialog_text_title, context.getString(R.string.app_name)) + "\uD83D\uDE00"
+        val openRocketPending = PendingIntent.getBroadcast(
+            context, REQUEST_RATE_CLICK, openRocket,
+            PendingIntent.FLAG_ONE_SHOT
+        )
+        val string = context.getString(
+            R.string.rate_app_dialog_text_title,
+            context.getString(R.string.app_name)
+        ) + "\uD83D\uDE00"
         val builder = NotificationUtil.importantBuilder(context)
-                .setContentText(string)
-                .setContentIntent(openRocketPending)
+            .setContentText(string)
+            .setContentIntent(openRocketPending)
         // Send this intent in Broadcast receiver so we can cancel the notification there.
         // Build notification action for rate 5 stars
         val rateStar = IntentUtils.genRateStarNotificationActionForBroadcastReceiver(context)
-        val rateStarPending = PendingIntent.getBroadcast(context, REQUEST_RATE_RATE, rateStar,
-                PendingIntent.FLAG_ONE_SHOT)
-        builder.addAction(R.drawable.notification_rating, context.getString(R.string.rate_app_notification_action_rate), rateStarPending)
+        val rateStarPending = PendingIntent.getBroadcast(
+            context, REQUEST_RATE_RATE, rateStar,
+            PendingIntent.FLAG_ONE_SHOT
+        )
+        builder.addAction(
+            R.drawable.notification_rating,
+            context.getString(R.string.rate_app_notification_action_rate),
+            rateStarPending
+        )
         // Send this intent in Broadcast receiver so we can canel the notification there.
         // Build notification action for  feedback
         val feedback = IntentUtils.genFeedbackNotificationActionForBroadcastReceiver(context)
-        val feedbackPending = PendingIntent.getBroadcast(context, REQUEST_RATE_FEEDBACK, feedback,
-                PendingIntent.FLAG_ONE_SHOT)
-        builder.addAction(R.drawable.notification_feedback, context.getString(R.string.rate_app_notification_action_feedback), feedbackPending)
+        val feedbackPending = PendingIntent.getBroadcast(
+            context, REQUEST_RATE_FEEDBACK, feedback,
+            PendingIntent.FLAG_ONE_SHOT
+        )
+        builder.addAction(
+            R.drawable.notification_feedback,
+            context.getString(R.string.rate_app_notification_action_feedback),
+            feedbackPending
+        )
         // Show notification
         NotificationUtil.sendNotification(context, NotificationId.LOVE_FIREFOX, builder)
         Settings.getInstance(context).setRateAppNotificationDidShow()
@@ -174,18 +200,24 @@ object DialogUtils {
 
     @JvmStatic
     @JvmOverloads
-    fun showDefaultSettingNotification(context: Context, message: String? = null) { // Let NotificationActionBroadcastReceiver handle what to do
-        val openDefaultBrowserSetting = IntentUtils.genDefaultBrowserSettingIntentForBroadcastReceiver(context)
-        val openRocketPending = PendingIntent.getBroadcast(context, REQUEST_DEFAULT_CLICK, openDefaultBrowserSetting,
-                PendingIntent.FLAG_ONE_SHOT)
+    fun showDefaultSettingNotification(
+        context: Context,
+        message: String? = null
+    ) { // Let NotificationActionBroadcastReceiver handle what to do
+        val openDefaultBrowserSetting =
+            IntentUtils.genDefaultBrowserSettingIntentForBroadcastReceiver(context)
+        val openRocketPending = PendingIntent.getBroadcast(
+            context, REQUEST_DEFAULT_CLICK, openDefaultBrowserSetting,
+            PendingIntent.FLAG_ONE_SHOT
+        )
         val title: String? = if (TextUtils.isEmpty(message)) {
             context.getString(R.string.preference_default_browser) + "?\uD83D\uDE0A"
         } else {
             message
         }
         val builder = NotificationUtil.importantBuilder(context)
-                .setContentTitle(title)
-                .setContentIntent(openRocketPending)
+            .setContentTitle(title)
+            .setContentIntent(openRocketPending)
         // Show notification
         NotificationUtil.sendNotification(context, NotificationId.DEFAULT_BROWSER, builder)
         Settings.getInstance(context).setDefaultBrowserSettingDidShow()
@@ -193,78 +225,107 @@ object DialogUtils {
 
     @JvmStatic
     fun showPrivacyPolicyUpdateNotification(context: Context) {
-        val privacyPolicyUpdateNotice = IntentUtils.genPrivacyPolicyUpdateNotificationActionForBroadcastReceiver(context)
-        val openRocketPending = PendingIntent.getBroadcast(context, REQUEST_PRIVACY_POLICY_CLICK, privacyPolicyUpdateNotice,
-                PendingIntent.FLAG_ONE_SHOT)
+        val privacyPolicyUpdateNotice =
+            IntentUtils.genPrivacyPolicyUpdateNotificationActionForBroadcastReceiver(context)
+        val openRocketPending = PendingIntent.getBroadcast(
+            context, REQUEST_PRIVACY_POLICY_CLICK, privacyPolicyUpdateNotice,
+            PendingIntent.FLAG_ONE_SHOT
+        )
         val builder = NotificationUtil.importantBuilder(context)
-                .setContentTitle(context.getString(R.string.privacy_policy_update_notification_title))
-                .setContentText(context.getString(R.string.privacy_policy_update_notification_action))
-                .setStyle(NotificationCompat.BigTextStyle()
-                        .bigText(context.getString(R.string.privacy_policy_update_notification_action)))
-                .setContentIntent(openRocketPending)
+            .setContentTitle(context.getString(R.string.privacy_policy_update_notification_title))
+            .setContentText(context.getString(R.string.privacy_policy_update_notification_action))
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(context.getString(R.string.privacy_policy_update_notification_action))
+            )
+            .setContentIntent(openRocketPending)
         // Show notification
         NotificationUtil.sendNotification(context, NotificationId.PRIVACY_POLICY_UPDATE, builder)
         NewFeatureNotice.getInstance(context).setPrivacyPolicyUpdateNoticeDidShow()
     }
 
-    fun showMyShotOnBoarding(activity: Activity, targetView: View, cancelListener: DialogInterface.OnCancelListener, learnMore: View.OnClickListener?): Dialog =
-            SpotlightDialog.Builder(activity, targetView)
-                    .spotlightConfigs(
-                        CircleSpotlightConfigs(
-                            radius = activity.resources.getDimensionPixelSize(R.dimen.myshot_focus_view_radius),
-                            backgroundDimColor = ContextCompat.getColor(activity, R.color.myShotOnBoardingBackground)
-                        )
+    fun showMyShotOnBoarding(
+        activity: Activity,
+        targetView: View,
+        cancelListener: DialogInterface.OnCancelListener,
+        learnMore: View.OnClickListener?
+    ): Dialog =
+        SpotlightDialog.Builder(activity, targetView)
+            .spotlightConfigs(
+                CircleSpotlightConfigs(
+                    radius = activity.resources.getDimensionPixelSize(R.dimen.myshot_focus_view_radius),
+                    backgroundDimColor = ContextCompat.getColor(
+                        activity,
+                        R.color.myShotOnBoardingBackground
                     )
-                    .addView(
-                        activity.inflate(R.layout.myshot_onboarding).apply {
-                            my_shot_category_learn_more.setOnClickListener(learnMore)
-                        },
-                        RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
-                            addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-                        }
-                    )
-                    .setAttachedView(
-                        (activity.inflate(R.layout.spotlight_hand_pointer) as ImageView).apply {
-                            scaleX = -1f
-                        },
-                        AttachedViewConfigs(
-                            position = AttachedPosition.TOP,
-                            gravity = AttachedGravity.START_ALIGN_END,
-                            marginStart = activity.dpToPx(-42f),
-                            marginBottom = activity.dpToPx(-42f)
-                        )
-                    )
-                    .addView(
-                        activity.inflate(R.layout.spotlight_message).apply {
-                            spotlight_message.setText(R.string.my_shot_on_boarding_message)
-                        }, RelativeLayout.LayoutParams(RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
-                            addRule(RelativeLayout.ABOVE, R.id.spotlight_hand_pointer) // Root view in spotlight_hand_pointer.xml
-                            addRule(RelativeLayout.CENTER_HORIZONTAL)
-                        })
-                    )
-                    .cancelListener(cancelListener)
-                    .build()
-                    .also { it.show() }
+                )
+            )
+            .addView(
+                activity.inflate(R.layout.myshot_onboarding).apply {
+                    my_shot_category_learn_more.setOnClickListener(learnMore)
+                },
+                RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+                }
+            )
+            .setAttachedView(
+                (activity.inflate(R.layout.spotlight_hand_pointer) as ImageView).apply {
+                    scaleX = -1f
+                },
+                AttachedViewConfigs(
+                    position = AttachedPosition.TOP,
+                    gravity = AttachedGravity.START_ALIGN_END,
+                    marginStart = activity.dpToPx(-42f),
+                    marginBottom = activity.dpToPx(-42f)
+                )
+            )
+            .addView(
+                activity.inflate(R.layout.spotlight_message).apply {
+                    spotlight_message.setText(R.string.my_shot_on_boarding_message)
+                },
+                RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        addRule(
+                            RelativeLayout.ABOVE,
+                            R.id.spotlight_hand_pointer
+                        ) // Root view in spotlight_hand_pointer.xml
+                        addRule(RelativeLayout.CENTER_HORIZONTAL)
+                    }
+                )
+            )
+            .cancelListener(cancelListener)
+            .build()
+            .also { it.show() }
 
     fun showShoppingSearchSpotlight(
         activity: Activity,
         targetView: View,
         dismissListener: DialogInterface.OnDismissListener
     ): Dialog =
-            SpotlightDialog.Builder(activity, targetView)
-                    .spotlightConfigs(
-                        CircleSpotlightConfigs(radius = activity.resources.getDimensionPixelSize(R.dimen.shopping_focus_view_radius))
-                    )
-                    .addView(activity.inflate(R.layout.onboarding_spotlight_shopping_search))
-                    .dismissListener(dismissListener)
-                    .build()
-                    .also { it.show() }
+        SpotlightDialog.Builder(activity, targetView)
+            .spotlightConfigs(
+                CircleSpotlightConfigs(radius = activity.resources.getDimensionPixelSize(R.dimen.shopping_focus_view_radius))
+            )
+            .addView(activity.inflate(R.layout.onboarding_spotlight_shopping_search))
+            .dismissListener(dismissListener)
+            .build()
+            .also { it.show() }
 
     fun showThemeSettingDialog(activity: FragmentActivity, homeViewModel: HomeViewModel) {
         ThemeSettingDialogBuilder(activity, homeViewModel).show()
     }
 
-    fun showSetAsDefaultBrowserDialog(activity: FragmentActivity, onPositiveButtonClicked: () -> Unit, onNegativeButtonClicked: () -> Unit) {
+    fun showSetAsDefaultBrowserDialog(
+        activity: FragmentActivity,
+        onPositiveButtonClicked: () -> Unit,
+        onNegativeButtonClicked: () -> Unit
+    ) {
         val customContentView = View.inflate(activity, R.layout.dialog_set_as_default_browser, null)
         customContentView.findViewById<TextView>(R.id.description).apply {
             text = context.getString(
@@ -297,7 +358,10 @@ object DialogUtils {
         }
     }
 
-    fun showGoToSystemAppsSettingsDialog(context: Context, viewModel: DefaultBrowserPreferenceViewModel) {
+    fun showGoToSystemAppsSettingsDialog(
+        context: Context,
+        viewModel: DefaultBrowserPreferenceViewModel
+    ) {
         val title = context.getString(
             R.string.setting_default_browser_instruction_system_settings,
             context.getString(R.string.app_name)

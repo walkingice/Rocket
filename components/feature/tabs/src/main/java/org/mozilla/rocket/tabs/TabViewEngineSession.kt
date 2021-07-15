@@ -115,6 +115,7 @@ class TabViewEngineSession constructor(
             filePathCallback: ValueCallback<Array<Uri>>?,
             fileChooserParams: WebChromeClient.FileChooserParams?
         ): Boolean
+
         fun onHttpAuthRequest(
             callback: TabViewClient.HttpAuthCallback,
             host: String?,
@@ -177,7 +178,7 @@ class TabViewEngineSession constructor(
         }
 
         override fun onProgressChanged(progress: Int) =
-                es.notifyObservers { onProgress(progress) }
+            es.notifyObservers { onProgress(progress) }
 
         override fun onShowFileChooser(
             tabView: TabView,
@@ -185,8 +186,11 @@ class TabViewEngineSession constructor(
             fileChooserParams: WebChromeClient.FileChooserParams?
         ): Boolean {
 
-            return es.engineSessionClient?.onShowFileChooser(es, filePathCallback, fileChooserParams)
-                    ?: false
+            return es.engineSessionClient?.onShowFileChooser(
+                es,
+                filePathCallback,
+                fileChooserParams
+            ) ?: false
         }
 
         override fun onReceivedTitle(view: TabView, title: String?) {
@@ -201,13 +205,13 @@ class TabViewEngineSession constructor(
         }
 
         override fun onReceivedIcon(view: TabView, icon: Bitmap?) =
-                es.notifyObservers { onReceivedIcon(icon) }
+            es.notifyObservers { onReceivedIcon(icon) }
 
         override fun onLongPress(hitTarget: TabView.HitTarget) =
-                es.notifyObservers { onLongPress(hitTarget) }
+            es.notifyObservers { onLongPress(hitTarget) }
 
         override fun onEnterFullScreen(callback: TabView.FullscreenCallback, view: View?) =
-                es.notifyObservers { onEnterFullScreen(callback, view) }
+            es.notifyObservers { onEnterFullScreen(callback, view) }
 
         override fun onExitFullScreen() = es.notifyObservers { onExitFullScreen() }
 
@@ -215,7 +219,7 @@ class TabViewEngineSession constructor(
             origin: String,
             callback: GeolocationPermissions.Callback?
         ) =
-                es.notifyObservers { onGeolocationPermissionsShowPrompt(origin, callback) }
+            es.notifyObservers { onGeolocationPermissionsShowPrompt(origin, callback) }
     }
 
     class FindListener(private val es: TabViewEngineSession) : TabView.FindListener {
@@ -228,16 +232,19 @@ class TabViewEngineSession constructor(
         }
     }
 
-    class DownloadCallback(private val es: TabViewEngineSession) : org.mozilla.rocket.tabs.web.DownloadCallback {
+    class DownloadCallback(private val es: TabViewEngineSession) :
+        org.mozilla.rocket.tabs.web.DownloadCallback {
         override fun onDownloadStart(download: Download) {
             val cookie = CookieManager.getInstance().getCookie(download.url)
             es.notifyObservers {
-                onExternalResource(download.url,
-                        download.name,
-                        download.contentLength,
-                        download.mimeType,
-                        cookie,
-                        download.userAgent)
+                onExternalResource(
+                    download.url,
+                    download.name,
+                    download.contentLength,
+                    download.mimeType,
+                    cookie,
+                    download.userAgent
+                )
             }
         }
     }

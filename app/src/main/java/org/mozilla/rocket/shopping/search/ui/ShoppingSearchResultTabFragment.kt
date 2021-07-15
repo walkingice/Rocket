@@ -14,7 +14,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager.widget.ViewPager
@@ -35,7 +34,6 @@ import kotlinx.android.synthetic.main.toolbar.site_identity
 import org.mozilla.focus.R
 import org.mozilla.focus.utils.AppConstants
 import org.mozilla.focus.widget.BackKeyHandleable
-import org.mozilla.focus.widget.ResizableKeyboardLayout.OnKeyboardVisibilityChangedListener
 import org.mozilla.rocket.chrome.BottomBarItemAdapter
 import org.mozilla.rocket.chrome.ChromeViewModel
 import org.mozilla.rocket.content.appComponent
@@ -83,7 +81,12 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
         ValueAnimator().apply {
             interpolator = AnimationUtils.FAST_OUT_SLOW_IN_INTERPOLATOR
             duration = ANIMATION_DURATION
-            addUpdateListener { animator -> tab_layout_scroll_view.scrollTo(animator.animatedValue as Int, 0) }
+            addUpdateListener { animator ->
+                tab_layout_scroll_view.scrollTo(
+                    animator.animatedValue as Int,
+                    0
+                )
+            }
         }
     }
 
@@ -99,7 +102,11 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
         telemetryViewModel = getActivityViewModel(telemetryViewModelCreator)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_shopping_search_result_tab, container, false)
     }
 
@@ -113,8 +120,12 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
         }
         view_pager.setOnApplyWindowInsetsListener { v, insets ->
             if (insets.systemWindowInsetBottom == 0) {
-                v.setPadding(0, 0, 0, resources.getDimensionPixelSize(R.dimen.fixed_menu_height) +
-                        insets.systemWindowInsetTop)
+                v.setPadding(
+                    0,
+                    0,
+                    0,
+                    resources.getDimensionPixelSize(R.dimen.fixed_menu_height) + insets.systemWindowInsetTop
+                )
             } else {
                 v.setPadding(0, 0, 0, insets.systemWindowInsetTop)
             }
@@ -145,9 +156,9 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
     }
 
     private fun observeAction() {
-        shoppingSearchResultViewModel.goBackToInputPage.observe(viewLifecycleOwner, Observer {
+        shoppingSearchResultViewModel.goBackToInputPage.observe(viewLifecycleOwner) {
             goBackToSearchInputPage()
-        })
+        }
     }
 
     override fun onResume() {
@@ -216,14 +227,15 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
                 }
             }
         })
-        bottomBarItemAdapter = BottomBarItemAdapter(bottomBar, BottomBarItemAdapter.Theme.ShoppingSearch)
+        bottomBarItemAdapter =
+            BottomBarItemAdapter(bottomBar, BottomBarItemAdapter.Theme.ShoppingSearch)
         val bottomBarViewModel = getActivityViewModel(bottomBarViewModelCreator)
         bottomBarViewModel.items.nonNullObserve(this) {
             bottomBarItemAdapter.setItems(it)
         }
 
         chromeViewModel.isRefreshing.switchFrom(bottomBarViewModel.items)
-            .observe(viewLifecycleOwner, Observer {
+            .observe(viewLifecycleOwner) {
                 bottomBarItemAdapter.setRefreshing(it == true)
 
                 if (it == true) {
@@ -231,9 +243,9 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
                 } else {
                     telemetryViewModel.onPageLoadingStopped()
                 }
-            })
+            }
         chromeViewModel.canGoForward.switchFrom(bottomBarViewModel.items)
-            .observe(viewLifecycleOwner, Observer { bottomBarItemAdapter.setCanGoForward(it == true) })
+            .observe(viewLifecycleOwner) { bottomBarItemAdapter.setCanGoForward(it == true) }
     }
 
     private fun initUrlBar() {
@@ -242,22 +254,29 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
     }
 
     private fun initViewPager() {
-        shoppingSearchResultViewModel.uiModel.observe(viewLifecycleOwner, Observer { uiModel ->
+        shoppingSearchResultViewModel.uiModel.observe(viewLifecycleOwner) { uiModel ->
             tabItems.clear()
-            tabItems.addAll(uiModel.shoppingSearchSiteList.mapIndexed { index, site ->
-                TabItem(
-                    site.title,
-                    site.searchUrl,
-                    createTabSession(site.searchUrl, index == 0, uiModel.shouldEnableTurboMode)
-                )
-            })
-            val shoppingSearchTabsAdapter = ShoppingSearchTabsAdapter(childFragmentManager, tabItems)
+            tabItems.addAll(
+                uiModel.shoppingSearchSiteList.mapIndexed { index, site ->
+                    TabItem(
+                        site.title,
+                        site.searchUrl,
+                        createTabSession(site.searchUrl, index == 0, uiModel.shouldEnableTurboMode)
+                    )
+                }
+            )
+            val shoppingSearchTabsAdapter =
+                ShoppingSearchTabsAdapter(childFragmentManager, tabItems)
             view_pager.adapter = shoppingSearchTabsAdapter
             view_pager.clearOnPageChangeListeners()
             view_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
                 override fun onPageScrollStateChanged(state: Int) = Unit
 
-                override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) = Unit
+                override fun onPageScrolled(
+                    position: Int,
+                    positionOffset: Float,
+                    positionOffsetPixels: Int
+                ) = Unit
 
                 override fun onPageSelected(position: Int) {
                     animateToTab(position)
@@ -277,7 +296,7 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
                 }
                 false
             }
-        })
+        }
     }
 
     private fun animateToTab(newPosition: Int) {
@@ -285,7 +304,10 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
             return
         }
 
-        if (tab_layout_scroll_view.windowToken == null || !ViewCompat.isLaidOut(tab_layout_scroll_view)) {
+        if (tab_layout_scroll_view.windowToken == null || !ViewCompat.isLaidOut(
+                tab_layout_scroll_view
+            )
+        ) {
             // If we don't have a window token, or we haven't been laid out yet just draw the new
             // position now
             if (scrollAnimator.isRunning) {
@@ -306,10 +328,14 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
     private fun calculateScrollXForTab(position: Int, positionOffset: Float): Int {
         val slidingTabIndicator = tab_layout.getChildAt(0) as ViewGroup
         val selectedChild: View = slidingTabIndicator.getChildAt(position)
-        val nextChild: View? = if (position + 1 < slidingTabIndicator.childCount) slidingTabIndicator.getChildAt(position + 1) else null
+        val nextChild: View? =
+            if (position + 1 < slidingTabIndicator.childCount) slidingTabIndicator.getChildAt(
+                position + 1
+            ) else null
         val selectedWidth = selectedChild.width
         val nextWidth = nextChild?.width ?: 0
-        val scrollBase: Int = selectedChild.left + selectedWidth / 2 - tab_layout_scroll_view.width / 2
+        val scrollBase: Int =
+            selectedChild.left + selectedWidth / 2 - tab_layout_scroll_view.width / 2
         val scrollOffset = ((selectedWidth + nextWidth).toFloat() * 0.5f * positionOffset).toInt()
         return if (ViewCompat.getLayoutDirection(tab_layout) == ViewCompat.LAYOUT_DIRECTION_LTR) scrollBase + scrollOffset else scrollBase - scrollOffset
     }
@@ -324,12 +350,12 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
             telemetryViewModel.onTabSelected(tabItems[position].title, tabItems[position].title)
         }
 
-        contentFragment.setOnKeyboardVisibilityChangedListener(OnKeyboardVisibilityChangedListener { visible ->
+        contentFragment.setOnKeyboardVisibilityChangedListener { visible ->
             if (visible) {
                 contentFragment.setOnKeyboardVisibilityChangedListener(null)
                 telemetryViewModel.onKeyboardShown()
             }
-        })
+        }
     }
 
     private fun createTabSession(url: String, focus: Boolean, enableTurboMode: Boolean): Session {
@@ -350,37 +376,37 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
             shoppingSearchResultViewModel.goPreferences.call()
         }
 
-        shoppingSearchResultViewModel.goPreferences.observe(viewLifecycleOwner, Observer {
+        shoppingSearchResultViewModel.goPreferences.observe(viewLifecycleOwner) {
             activity?.baseContext?.let {
                 startActivity(ShoppingSearchPreferencesActivity.getStartIntent(it))
             }
-        })
+        }
     }
 
     private fun observeChromeAction() {
-        chromeViewModel.refreshOrStop.observe(viewLifecycleOwner, Observer {
+        chromeViewModel.refreshOrStop.observe(viewLifecycleOwner) {
             if (chromeViewModel.isRefreshing.value == true) {
                 stop()
             } else {
                 reload()
             }
-        })
-        chromeViewModel.goNext.observe(viewLifecycleOwner, Observer {
+        }
+        chromeViewModel.goNext.observe(viewLifecycleOwner) {
             if (chromeViewModel.canGoForward.value == true) {
                 goForward()
             }
-        })
-        chromeViewModel.share.observe(viewLifecycleOwner, Observer {
+        }
+        chromeViewModel.share.observe(viewLifecycleOwner) {
             chromeViewModel.currentUrl.value?.let { url ->
                 onShareClicked(url)
             }
-        })
+        }
 
-        chromeViewModel.currentUrl.observe(viewLifecycleOwner, Observer {
+        chromeViewModel.currentUrl.observe(viewLifecycleOwner) {
             appbar.setExpanded(true)
             bottom_bar.slideUp()
             telemetryViewModel.onUrlOpened()
-        })
+        }
     }
 
     private fun onShareClicked(url: String) {

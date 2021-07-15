@@ -58,10 +58,11 @@ class ContentTabHelper(private val contentTabViewContract: ContentTabViewContrac
             override fun doActionDirect(permission: String?, actionId: Int, params: Parcelable?) {
                 contentTabViewContract.getHostActivity()?.let {
                     val download = params as Download
-
-                    if (PackageManager.PERMISSION_GRANTED ==
-                        ContextCompat.checkSelfPermission(it, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    ) {
+                    val permission = ContextCompat.checkSelfPermission(
+                        it,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    )
+                    if (PackageManager.PERMISSION_GRANTED == permission) {
                         // We do have the permission to write to the external storage. Proceed with the download.
                         queueDownload(download)
                     }
@@ -89,7 +90,8 @@ class ContentTabHelper(private val contentTabViewContract: ContentTabViewContrac
             }
 
             override fun makeAskAgainSnackBar(actionId: Int): Snackbar {
-                val snackBarContainer: View? = contentTabViewContract.getHostActivity()?.findViewById(R.id.snack_bar_container)
+                val snackBarContainer: View? =
+                    contentTabViewContract.getHostActivity()?.findViewById(R.id.snack_bar_container)
                 if (snackBarContainer != null) {
                     return PermissionHandler.makeAskAgainSnackBar(
                         contentTabViewContract.getHostActivity(),
@@ -103,20 +105,28 @@ class ContentTabHelper(private val contentTabViewContract: ContentTabViewContrac
 
             override fun permissionDeniedToast(actionId: Int) {
                 contentTabViewContract.getHostActivity()?.let {
-                    Toast.makeText(it, R.string.permission_toast_storage_deny, Toast.LENGTH_LONG).show()
+                    Toast.makeText(it, R.string.permission_toast_storage_deny, Toast.LENGTH_LONG)
+                        .show()
                 }
             }
 
             override fun requestPermissions(actionId: Int) {
                 contentTabViewContract.getHostActivity()?.let {
-                    ActivityCompat.requestPermissions(it, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), actionId)
+                    ActivityCompat.requestPermissions(
+                        it,
+                        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                        actionId
+                    )
                 }
             }
 
             private fun queueDownload(download: Download?) {
                 contentTabViewContract.getHostActivity()?.let {
                     download?.let {
-                        contentTabViewContract.getChromeViewModel().onEnqueueDownload(it, contentTabViewContract.getDisplayUrlView()?.text.toString())
+                        contentTabViewContract.getChromeViewModel().onEnqueueDownload(
+                            it,
+                            contentTabViewContract.getDisplayUrlView()?.text.toString()
+                        )
                     }
                 }
             }
@@ -175,10 +185,12 @@ class ContentTabHelper(private val contentTabViewContract: ContentTabViewContrac
 
         override fun onLongPress(session: Session, hitTarget: TabView.HitTarget) {
             contentTabViewContract.getHostActivity()?.let {
-                WebContextMenu.show(true,
+                WebContextMenu.show(
+                    true,
                     it,
                     DownloadCallback(it, permissionHandler),
-                    hitTarget)
+                    hitTarget
+                )
             }
         }
 
@@ -193,7 +205,8 @@ class ContentTabHelper(private val contentTabViewContract: ContentTabViewContrac
             contentTabViewContract.getFullScreenContainerView().addView(view)
 
             // Switch to immersive mode: Hide system bars other UI controls
-            systemVisibility = ViewUtils.switchToImmersiveMode(contentTabViewContract.getHostActivity())
+            systemVisibility =
+                ViewUtils.switchToImmersiveMode(contentTabViewContract.getHostActivity())
         }
 
         override fun onExitFullScreen() {
@@ -207,7 +220,10 @@ class ContentTabHelper(private val contentTabViewContract: ContentTabViewContrac
             contentTabViewContract.getFullScreenContainerView().removeAllViews()
 
             if (systemVisibility != ViewUtils.SYSTEM_UI_VISIBILITY_NONE) {
-                ViewUtils.exitImmersiveMode(systemVisibility, contentTabViewContract.getHostActivity())
+                ViewUtils.exitImmersiveMode(
+                    systemVisibility,
+                    contentTabViewContract.getHostActivity()
+                )
             }
 
             callback?.fullScreenExited()
@@ -288,7 +304,11 @@ class ContentTabHelper(private val contentTabViewContract: ContentTabViewContrac
             host: String?,
             realm: String?
         ) {
-            val builder = HttpAuthenticationDialogBuilder.Builder(contentTabViewContract.getHostActivity(), host, realm)
+            val builder = HttpAuthenticationDialogBuilder.Builder(
+                contentTabViewContract.getHostActivity(),
+                host,
+                realm
+            )
                 .setOkListener { _, _, username, password -> callback.proceed(username, password) }
                 .setCancelListener { callback.cancel() }
                 .build()
@@ -297,8 +317,13 @@ class ContentTabHelper(private val contentTabViewContract: ContentTabViewContrac
             builder.show()
         }
 
-        override fun onNavigationStateChanged(session: Session, canGoBack: Boolean, canGoForward: Boolean) {
-            contentTabViewContract.getChromeViewModel().onNavigationStateChanged(canGoBack, canGoForward)
+        override fun onNavigationStateChanged(
+            session: Session,
+            canGoBack: Boolean,
+            canGoForward: Boolean
+        ) {
+            contentTabViewContract.getChromeViewModel()
+                .onNavigationStateChanged(canGoBack, canGoForward)
         }
 
         override fun onFocusChanged(session: Session?, factor: SessionManager.Factor) {
@@ -312,12 +337,16 @@ class ContentTabHelper(private val contentTabViewContract: ContentTabViewContrac
             if (session != null) {
                 val canGoBack = contentTabViewContract.getCurrentSession()?.canGoBack ?: false
                 val canGoForward = contentTabViewContract.getCurrentSession()?.canGoForward ?: false
-                contentTabViewContract.getChromeViewModel().onNavigationStateChanged(canGoBack, canGoForward)
+                contentTabViewContract.getChromeViewModel()
+                    .onNavigationStateChanged(canGoBack, canGoForward)
             }
         }
     }
 
-    private class DownloadCallback(val activity: AppCompatActivity, val permissionHandler: PermissionHandler) : org.mozilla.rocket.tabs.web.DownloadCallback {
+    private class DownloadCallback(
+        val activity: AppCompatActivity,
+        val permissionHandler: PermissionHandler
+    ) : org.mozilla.rocket.tabs.web.DownloadCallback {
         override fun onDownloadStart(download: Download) {
             activity.let {
                 if (!it.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {

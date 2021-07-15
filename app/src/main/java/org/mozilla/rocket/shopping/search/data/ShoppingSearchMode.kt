@@ -31,13 +31,16 @@ class ShoppingSearchMode private constructor(context: Context) {
     }
 
     fun saveKeyword(keyword: String) {
-        PreferenceManager.getDefaultSharedPreferences(appContext)?.edit()?.putString(PREF_KEY_SHOPPING_SEARCH_KEYWORD, keyword)?.apply()
+        PreferenceManager.getDefaultSharedPreferences(appContext)?.edit()
+            ?.putString(PREF_KEY_SHOPPING_SEARCH_KEYWORD, keyword)?.apply()
     }
 
-    fun retrieveKeyword() = PreferenceManager.getDefaultSharedPreferences(appContext)?.getString(PREF_KEY_SHOPPING_SEARCH_KEYWORD, "")
+    fun retrieveKeyword() = PreferenceManager.getDefaultSharedPreferences(appContext)
+        ?.getString(PREF_KEY_SHOPPING_SEARCH_KEYWORD, "")
 
     fun deleteKeyword() {
-        PreferenceManager.getDefaultSharedPreferences(appContext)?.edit()?.remove(PREF_KEY_SHOPPING_SEARCH_KEYWORD)?.apply()
+        PreferenceManager.getDefaultSharedPreferences(appContext)?.edit()
+            ?.remove(PREF_KEY_SHOPPING_SEARCH_KEYWORD)?.apply()
     }
 
     companion object {

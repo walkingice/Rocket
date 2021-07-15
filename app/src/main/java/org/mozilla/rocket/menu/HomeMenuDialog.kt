@@ -50,6 +50,7 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
 
     @Inject
     lateinit var chromeViewModelCreator: Lazy<ChromeViewModel>
+
     @Inject
     lateinit var menuViewModelCreator: Lazy<MenuViewModel>
 
@@ -98,7 +99,8 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
         rootView.scroll_view.apply {
             outlineProvider = object : ViewOutlineProvider() {
                 override fun getOutline(view: View, outline: Outline) {
-                    outline.setRoundRect(0, 0, view.width, view.height, resources.getDimension(R.dimen.menu_corner_radius))
+                    val dimen = resources.getDimension(R.dimen.menu_corner_radius)
+                    outline.setRoundRect(0, 0, view.width, view.height, dimen)
                 }
             }
             clipToOutline = true
@@ -110,9 +112,9 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
 
     private fun initMenuTabs(contentLayout: View) {
         contentLayout.apply {
-            chromeViewModel.hasUnreadScreenshot.observe(this@HomeMenuDialog, Observer {
+            chromeViewModel.hasUnreadScreenshot.observe(this@HomeMenuDialog) {
                 img_screenshots.isActivated = it
-            })
+            }
 
             menu_screenshots.setOnClickListener {
                 postDelayClickEvent {
@@ -146,22 +148,22 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
 
     private fun initMenuItems(contentLayout: View) {
         contentLayout.apply {
-            chromeViewModel.isNightMode.observe(this@HomeMenuDialog, Observer { nightModeSettings ->
+            chromeViewModel.isNightMode.observe(this@HomeMenuDialog) { nightModeSettings ->
                 night_mode_switch.isChecked = nightModeSettings.isEnabled
-            })
-            menuViewModel.isHomeScreenShoppingSearchEnabled.observe(this@HomeMenuDialog, Observer {
+            }
+            menuViewModel.isHomeScreenShoppingSearchEnabled.observe(this@HomeMenuDialog) {
                 btn_private_browsing.isVisible = !it
                 menu_smart_shopping_search.isVisible = it
-            })
-            chromeViewModel.isPrivateBrowsingActive.observe(this@HomeMenuDialog, Observer {
+            }
+            chromeViewModel.isPrivateBrowsingActive.observe(this@HomeMenuDialog) {
                 img_private_mode.isActivated = it
-            })
-            menuViewModel.shouldShowNewMenuItemHint.observe(this@HomeMenuDialog, Observer {
+            }
+            menuViewModel.shouldShowNewMenuItemHint.observe(this@HomeMenuDialog) {
                 if (it) {
                     showNewItemHint()
                     menuViewModel.onNewMenuItemDisplayed()
                 }
-            })
+            }
 
             btn_private_browsing.setOnClickListener {
                 postDelayClickEvent {
@@ -180,7 +182,8 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
                 chromeViewModel.adjustNightMode()
             }
             night_mode_switch.setOnCheckedChangeListener { _, isChecked ->
-                val needToUpdate = isChecked != (chromeViewModel.isNightMode.value?.isEnabled == true)
+                val needToUpdate =
+                    isChecked != (chromeViewModel.isNightMode.value?.isEnabled == true)
                 if (needToUpdate) {
                     chromeViewModel.onNightModeToggled()
                 }
@@ -236,7 +239,8 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
 
     private fun onDeleteClicked() {
         val diff = FileUtils.clearCache(context)
-        val stringId = if (diff < 0) R.string.message_clear_cache_fail else R.string.message_cleared_cached
+        val stringId =
+            if (diff < 0) R.string.message_clear_cache_fail else R.string.message_cleared_cached
         val msg = context.getString(stringId, FormatUtils.getReadableStringFromFileSize(diff))
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
@@ -246,7 +250,11 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
     }
 
     private fun showAdjustBrightness() {
-        ContextCompat.startActivity(context, AdjustBrightnessDialog.Intents.getStartIntentFromMenu(context), null)
+        ContextCompat.startActivity(
+            context,
+            AdjustBrightnessDialog.Intents.getStartIntentFromMenu(context),
+            null
+        )
     }
 
     private fun showShoppingSearch() {
@@ -258,8 +266,11 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
      * Post delay click event to wait the clicking feedback shows
      */
     private fun postDelayClickEvent(action: () -> Unit) {
-        uiHandler.postDelayed({
-            action()
-        }, 150)
+        uiHandler.postDelayed(
+            {
+                action()
+            },
+            150
+        )
     }
 }

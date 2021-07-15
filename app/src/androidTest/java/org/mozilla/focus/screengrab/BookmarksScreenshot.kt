@@ -1,8 +1,8 @@
 package org.mozilla.focus.screengrab
 
 import android.content.Intent
-import androidx.test.rule.ActivityTestRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.ActivityTestRule
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
@@ -35,12 +35,16 @@ class BookmarksScreenshot : BaseScreenshot() {
 
             webServer = MockWebServer()
             try {
-                webServer.enqueue(MockResponse()
+                webServer.enqueue(
+                    MockResponse()
                         .setBody(AndroidTestUtils.readTestAsset(HTML_FILE_GET_LOCATION))
-                        .addHeader("Set-Cookie", "sphere=battery; Expires=Wed, 21 Oct 2035 07:28:00 GMT;"))
-                webServer.enqueue(MockResponse()
+                        .addHeader("Set-Cookie", "sphere=battery; Expires=Wed, 21 Oct 2035 07:28:00 GMT;")
+                )
+                webServer.enqueue(
+                    MockResponse()
                         .setBody(AndroidTestUtils.readTestAsset(HTML_FILE_GET_LOCATION))
-                        .addHeader("Set-Cookie", "sphere=battery; Expires=Wed, 21 Oct 2035 07:28:00 GMT;"))
+                        .addHeader("Set-Cookie", "sphere=battery; Expires=Wed, 21 Oct 2035 07:28:00 GMT;")
+                )
                 webServer.start()
             } catch (e: IOException) {
                 throw AssertionError("Could not start web server", e)
@@ -62,8 +66,8 @@ class BookmarksScreenshot : BaseScreenshot() {
     @Before
     fun setUp() {
         BeforeTestTask.Builder()
-                .build()
-                .execute()
+            .build()
+            .execute()
         activityTestRule.launchActivity(Intent())
         Screengrab.setDefaultScreenshotStrategy(FalconScreenshotStrategy(activityTestRule.activity))
     }

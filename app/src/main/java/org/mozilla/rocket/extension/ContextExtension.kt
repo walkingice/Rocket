@@ -12,10 +12,10 @@ fun Context.toActivity(): Activity = when {
 }
 
 fun Context.toFragmentActivity(): FragmentActivity =
-        this.toActivity().let {
-            if (it is FragmentActivity) {
-                it
-            } else {
-                error("context is not a FragmentActivity")
-            }
+    this.toActivity().let {
+        if (it is FragmentActivity) {
+            it
+        } else {
+            error("context is not a FragmentActivity")
         }
+    }

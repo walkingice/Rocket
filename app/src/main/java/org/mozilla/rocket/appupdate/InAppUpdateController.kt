@@ -9,7 +9,6 @@ import android.app.Activity
 import android.content.Intent
 import android.util.Log
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.install.InstallState
 import com.google.android.play.core.install.InstallStateUpdatedListener
@@ -30,23 +29,24 @@ class InAppUpdateController(
     private val appUpdateManager: AppUpdateManager,
     private val viewDelegate: ViewDelegate,
     private val inAppUpdateModel: InAppUpdateManager.InAppUpdateModel =
-            object : InAppUpdateManager.InAppUpdateModel {
-                override fun isInAppUpdateLogEnabled(): Boolean {
-                    return AppConstants.isNightlyBuild() || BuildConfig.DEBUG
-                }
-
-                override fun getLastPromptInAppUpdateVersion(): Int {
-                    return Settings.getInstance(activity.applicationContext).lastPromptInAppUpdateVersion
-                }
-
-                override fun setLastPromptInAppUpdateVersion(version: Int) {
-                    Settings.getInstance(activity.applicationContext).lastPromptInAppUpdateVersion = version
-                }
-
-                override fun getInAppUpdateConfig(): InAppUpdateConfig? {
-                    return AppConfigWrapper.getInAppUpdateConfig()
-                }
+        object : InAppUpdateManager.InAppUpdateModel {
+            override fun isInAppUpdateLogEnabled(): Boolean {
+                return AppConstants.isNightlyBuild() || BuildConfig.DEBUG
             }
+
+            override fun getLastPromptInAppUpdateVersion(): Int {
+                return Settings.getInstance(activity.applicationContext).lastPromptInAppUpdateVersion
+            }
+
+            override fun setLastPromptInAppUpdateVersion(version: Int) {
+                Settings.getInstance(activity.applicationContext).lastPromptInAppUpdateVersion =
+                    version
+            }
+
+            override fun getInAppUpdateConfig(): InAppUpdateConfig? {
+                return AppConfigWrapper.getInAppUpdateConfig()
+            }
+        }
 ) {
 
     private val appContext = activity.applicationContext
@@ -65,20 +65,28 @@ class InAppUpdateController(
     init {
         with(inAppUpdateManager) {
             startUpdate.nonNullObserve(activity) { startUpdate(activity, appUpdateManager, it) }
-            startInstall.observe(activity, Observer {
-                startInstall(appUpdateManager, isExistingDownload = false, isFromNotification = false)
-            })
-            startInstallExistingDownload.observe(activity, Observer {
-                startInstall(appUpdateManager, isExistingDownload = true, isFromNotification = false)
-            })
-            closeApp.observe(activity, Observer { activity.finish() })
+            startInstall.observe(activity) {
+                startInstall(
+                    appUpdateManager,
+                    isExistingDownload = false,
+                    isFromNotification = false
+                )
+            }
+            startInstallExistingDownload.observe(activity) {
+                startInstall(
+                    appUpdateManager,
+                    isExistingDownload = true,
+                    isFromNotification = false
+                )
+            }
+            closeApp.observe(activity) { activity.finish() }
 
             showIntroDialog.nonNullObserve(activity) { showIntroDialog(it, viewDelegate) }
             showInstallPrompt.nonNullObserve(activity) { showInstallPrompt(it, viewDelegate) }
             showInstallPromptForExistDownload.nonNullObserve(activity) {
                 showInstallPromptForExistDownload(it, viewDelegate)
             }
-            showDownloadStartHint.observe(activity, Observer { showDownloadStartHint(viewDelegate) })
+            showDownloadStartHint.observe(activity) { showDownloadStartHint(viewDelegate) }
         }
     }
 
@@ -135,20 +143,27 @@ class InAppUpdateController(
     private fun showIntroDialog(data: InAppUpdateManager.InAppUpdateData, delegate: ViewDelegate) {
         TelemetryWrapper.showIntroDialog(data)
         val intro = data.config.introData ?: return
-        delegate.showIntroDialog(intro, {
-            TelemetryWrapper.clickIntroDialog(data, true)
-            inAppUpdateManager.onIntroAgreed(data)
-        }, {
-            TelemetryWrapper.clickIntroDialog(data, false)
-            inAppUpdateManager.onIntroDenied(data)
-        })
+        delegate.showIntroDialog(
+            intro,
+            {
+                TelemetryWrapper.clickIntroDialog(data, true)
+                inAppUpdateManager.onIntroAgreed(data)
+            },
+            {
+                TelemetryWrapper.clickIntroDialog(data, false)
+                inAppUpdateManager.onIntroDenied(data)
+            }
+        )
     }
 
     private fun showInstallPrompt(
         data: InAppUpdateManager.InAppUpdateData,
         delegate: ViewDelegate
     ) {
-        TelemetryWrapper.showInstallPrompt(data.info.availableVersionCode(), isExistingDownload = true)
+        TelemetryWrapper.showInstallPrompt(
+            data.info.availableVersionCode(),
+            isExistingDownload = true
+        )
 
         delegate.showInstallPrompt {
             inAppUpdateManager.onInstallAgreed()
@@ -160,7 +175,10 @@ class InAppUpdateController(
         data: InAppUpdateManager.InAppUpdateData,
         delegate: ViewDelegate
     ) {
-        TelemetryWrapper.showInstallPrompt(data.info.availableVersionCode(), isExistingDownload = false)
+        TelemetryWrapper.showInstallPrompt(
+            data.info.availableVersionCode(),
+            isExistingDownload = false
+        )
 
         delegate.showInstallPrompt {
             inAppUpdateManager.onInstallExistingDownloadAgreed()
@@ -179,10 +197,10 @@ class InAppUpdateController(
         pendingRequestData = data
         manager.registerListener(createUpdateListener(manager, data))
         manager.startUpdateFlowForResult(
-                data.info,
-                AppUpdateType.FLEXIBLE,
-                activity,
-                MainActivity.REQUEST_CODE_IN_APP_UPDATE
+            data.info,
+            AppUpdateType.FLEXIBLE,
+            activity,
+            MainActivity.REQUEST_CODE_IN_APP_UPDATE
         )
         TelemetryWrapper.showGooglePlayDialog(data)
     }
@@ -199,9 +217,9 @@ class InAppUpdateController(
             }
 
             TelemetryWrapper.clickInstallPrompt(
-                    info.availableVersionCode(),
-                    isExistingDownload,
-                    isFromNotification
+                info.availableVersionCode(),
+                isExistingDownload,
+                isFromNotification
             )
 
             manager.completeUpdate().addOnSuccessListener {
@@ -263,6 +281,7 @@ class InAppUpdateController(
             positiveCallback: () -> Unit,
             negativeCallback: () -> Unit
         ): Boolean
+
         fun showInstallPrompt(actionCallback: () -> Unit)
         fun showInstallPromptNotification()
         fun showDownloadStartHint()
@@ -282,13 +301,13 @@ private fun TelemetryWrapper.clickIntroDialog(
     isAccepted: Boolean
 ) {
     clickInAppUpdateIntroDialog(
-            if (isAccepted) {
-                TelemetryWrapper.Value.POSITIVE
-            } else {
-                TelemetryWrapper.Value.NEGATIVE
-            },
-            data.config.forceCloseOnDenied,
-            data.info.availableVersionCode()
+        if (isAccepted) {
+            TelemetryWrapper.Value.POSITIVE
+        } else {
+            TelemetryWrapper.Value.NEGATIVE
+        },
+        data.config.forceCloseOnDenied,
+        data.info.availableVersionCode()
     )
 }
 
@@ -301,24 +320,24 @@ private fun TelemetryWrapper.clickGooglePlayDialog(
     isAccepted: Boolean
 ) {
     clickInAppUpdateGooglePlayDialog(
-            if (isAccepted) {
-                TelemetryWrapper.Value.POSITIVE
-            } else {
-                TelemetryWrapper.Value.NEGATIVE
-            },
-            data.config.forceCloseOnDenied,
-            data.info.availableVersionCode()
+        if (isAccepted) {
+            TelemetryWrapper.Value.POSITIVE
+        } else {
+            TelemetryWrapper.Value.NEGATIVE
+        },
+        data.config.forceCloseOnDenied,
+        data.info.availableVersionCode()
     )
 }
 
 private fun TelemetryWrapper.showInstallPrompt(toVersion: Int, isExistingDownload: Boolean) {
     showInAppUpdateInstallPrompt(
-            if (isExistingDownload) {
-                TelemetryWrapper.Extra_Value.REMINDER
-            } else {
-                TelemetryWrapper.Extra_Value.NEW
-            },
-            toVersion
+        if (isExistingDownload) {
+            TelemetryWrapper.Extra_Value.REMINDER
+        } else {
+            TelemetryWrapper.Extra_Value.NEW
+        },
+        toVersion
     )
 }
 
@@ -328,16 +347,16 @@ private fun TelemetryWrapper.clickInstallPrompt(
     isFromNotification: Boolean
 ) {
     clickInAppUpdateInstallPrompt(
-            if (isFromNotification) {
-                TelemetryWrapper.Extra_Value.NOTIFICATION
-            } else {
-                TelemetryWrapper.Extra_Value.SNACKBAR
-            },
-            if (isExistingDownload) {
-                TelemetryWrapper.Extra_Value.REMINDER
-            } else {
-                TelemetryWrapper.Extra_Value.NEW
-            },
-            toVersion
+        if (isFromNotification) {
+            TelemetryWrapper.Extra_Value.NOTIFICATION
+        } else {
+            TelemetryWrapper.Extra_Value.SNACKBAR
+        },
+        if (isExistingDownload) {
+            TelemetryWrapper.Extra_Value.REMINDER
+        } else {
+            TelemetryWrapper.Extra_Value.NEW
+        },
+        toVersion
     )
 }

@@ -39,10 +39,10 @@ class GetLogoManNotificationUseCase(
 }
 
 private fun Notification.toLogoManNotification() = GetLogoManNotificationUseCase.Notification.RemoteNotification(
-            messageId,
-            title,
-            subtitle,
-            imageUrl,
-            action?.let { GetLogoManNotificationUseCase.LogoManAction.UriAction(it) },
-            type
-        )
+    messageId,
+    title,
+    subtitle,
+    imageUrl,
+    action?.let { GetLogoManNotificationUseCase.LogoManAction.UriAction(it) },
+    type
+)

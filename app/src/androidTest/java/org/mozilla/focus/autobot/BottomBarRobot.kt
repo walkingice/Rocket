@@ -59,7 +59,7 @@ class BottomBarRobot : BottomBarAutomation {
     }
 
     private fun List<BottomBarItemAdapter.ItemData>.toJsonString(): String =
-            joinToString(separator = ",", prefix = "[", postfix = "]") { "{\"type\":\"${it.type}\"}" }
+        joinToString(separator = ",", prefix = "[", postfix = "]") { "{\"type\":\"${it.type}\"}" }
 
     override fun clickBrowserBottomBarItem(id: Int) {
         onView(bottomBarItemView(R.id.browser_bottom_bar, id)).perform(click())
@@ -70,13 +70,13 @@ class BottomBarRobot : BottomBarAutomation {
     }
 
     override fun browserBottomBarItemView(id: Int): Matcher<View> =
-            bottomBarItemView(R.id.browser_bottom_bar, id)
+        bottomBarItemView(R.id.browser_bottom_bar, id)
 
     override fun menuBottomBarItemView(id: Int): Matcher<View> =
-            bottomBarItemView(R.id.menu_bottom_bar, id)
+        bottomBarItemView(R.id.menu_bottom_bar, id)
 
     private fun bottomBarItemView(bottomBarId: Int, viewId: Int): Matcher<View> =
-            allOf(isDescendantOfA(withId(bottomBarId)), withId(viewId))
+        allOf(isDescendantOfA(withId(bottomBarId)), withId(viewId))
 }
 
 fun List<BottomBarItemAdapter.ItemData>.indexOfType(type: Int): Int = indexOf(BottomBarItemAdapter.ItemData(type))

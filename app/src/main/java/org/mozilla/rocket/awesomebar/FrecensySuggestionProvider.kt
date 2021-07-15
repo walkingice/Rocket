@@ -124,7 +124,7 @@ class FrecensySuggestionProvider(
             val url = it.url
             val title = it.title
             if (url == null || !url.contains(text) && !title.toLowerCase(Locale.getDefault())
-                    .contains(text)
+                .contains(text)
             ) {
                 return@forEach
             }

@@ -59,12 +59,12 @@ class SettingProvider : ContentProvider() {
             val preferences = PreferenceManager.getDefaultSharedPreferences(context)
             when (uriMatcher.match(uri)) {
                 GET_FLOAT -> bundle.putFloat(
-                        KEY,
-                        preferences.getFloat(key, java.lang.Float.parseFloat(defValue))
+                    KEY,
+                    preferences.getFloat(key, java.lang.Float.parseFloat(defValue))
                 )
                 GET_BOOLEAN -> bundle.putBoolean(
-                        KEY,
-                        preferences.getBoolean(key, java.lang.Boolean.parseBoolean(defValue))
+                    KEY,
+                    preferences.getBoolean(key, java.lang.Boolean.parseBoolean(defValue))
                 )
                 else -> throw IllegalArgumentException("Unknown uri：" + uri)
             }

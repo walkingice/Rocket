@@ -42,7 +42,12 @@ class SessionManagerTest {
     internal val states: MutableList<SessionWithState> = ArrayList()
     internal val sessions: MutableList<Session> = ArrayList()
 
-    internal val urls = arrayOf("https://mozilla.org", "https://mozilla.com", "https://wikipedia.org", "https://en.wikipedia.org/wiki/Taiwan")
+    internal val urls = arrayOf(
+        "https://mozilla.org",
+        "https://mozilla.com",
+        "https://wikipedia.org",
+        "https://en.wikipedia.org/wiki/Taiwan"
+    )
 
     @Before
     fun setUp() {
@@ -51,9 +56,9 @@ class SessionManagerTest {
         for (url in urls) {
             // use url as id for convenience
             Session(url, "", url)
-                    .also { sessions.add(it) }
-                    .let { SessionWithState(it, null) }
-                    .also { states.add(it) }
+                .also { sessions.add(it) }
+                .let { SessionWithState(it, null) }
+                .also { states.add(it) }
         }
     }
 
@@ -221,7 +226,10 @@ class SessionManagerTest {
         mgr.register(spy0)
         val tabId0 = mgr.addTab("url0", TabUtil.argument(null, false, true))
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
-        verify<Observer>(spy0, times(1)).onFocusChanged(ArgumentMatchers.any(Session::class.java), eq(Factor.FACTOR_TAB_ADDED))
+        verify<Observer>(spy0, times(1)).onFocusChanged(
+            ArgumentMatchers.any(Session::class.java),
+            eq(Factor.FACTOR_TAB_ADDED)
+        )
         Assert.assertEquals(mgr.focusSession!!.id, tabId0)
         mgr.unregister(spy0)
 
@@ -259,7 +267,7 @@ class SessionManagerTest {
         val tabId1 = mgr.addTab("url1", TabUtil.argument(null, true, false))
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
         verify<Observer>(spy1, times(1))
-                .onFocusChanged(ArgumentMatchers.any(Session::class.java), eq(Factor.FACTOR_TAB_ADDED))
+            .onFocusChanged(ArgumentMatchers.any(Session::class.java), eq(Factor.FACTOR_TAB_ADDED))
         Assert.assertEquals(mgr.focusSession!!.id, tabId1)
         mgr.unregister(spy1)
 
@@ -269,7 +277,10 @@ class SessionManagerTest {
         mgr.register(spy2)
         mgr.addTab("url2", TabUtil.argument(null, false, false))
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
-        verify(spy2, times(0)).onFocusChanged(ArgumentMatchers.any(Session::class.java), ArgumentMatchers.any())
+        verify(spy2, times(0)).onFocusChanged(
+            ArgumentMatchers.any(Session::class.java),
+            ArgumentMatchers.any()
+        )
         Assert.assertEquals(mgr.focusSession!!.id, tabId1) // focus should not be changed
         mgr.unregister(spy2)
     }

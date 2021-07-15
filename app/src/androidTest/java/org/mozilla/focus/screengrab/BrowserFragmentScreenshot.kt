@@ -8,10 +8,10 @@ package org.mozilla.focus.screengrab
 import android.Manifest
 import android.content.Intent
 import android.os.Build
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SdkSuppress
 import androidx.test.rule.ActivityTestRule
 import androidx.test.rule.GrantPermissionRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
@@ -48,13 +48,19 @@ class BrowserFragmentScreenshot : BaseScreenshot() {
             webServer = MockWebServer()
 
             try {
-                webServer.enqueue(MockResponse()
+                webServer.enqueue(
+                    MockResponse()
                         .setBody(AndroidTestUtils.readTestAsset(HTML_FILE_FULL_SCREEN_IMAGE))
-                        .addHeader("Set-Cookie", "sphere=battery; Expires=Wed, 21 Oct 2035 07:28:00 GMT;"))
-                webServer.enqueue(MockResponse()
-                        .setBody(AndroidTestUtils.readTestAsset(IMAGE_FILE_NAME_DOWNLOADED)))
-                webServer.enqueue(MockResponse()
-                        .setBody(AndroidTestUtils.readTestAsset(IMAGE_FILE_NAME_DOWNLOADED)))
+                        .addHeader("Set-Cookie", "sphere=battery; Expires=Wed, 21 Oct 2035 07:28:00 GMT;")
+                )
+                webServer.enqueue(
+                    MockResponse()
+                        .setBody(AndroidTestUtils.readTestAsset(IMAGE_FILE_NAME_DOWNLOADED))
+                )
+                webServer.enqueue(
+                    MockResponse()
+                        .setBody(AndroidTestUtils.readTestAsset(IMAGE_FILE_NAME_DOWNLOADED))
+                )
 
                 webServer.start()
             } catch (e: IOException) {

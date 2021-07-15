@@ -16,14 +16,15 @@ import org.hamcrest.Matcher
 import org.hamcrest.Matchers
 
 fun visibleWithId(resId: Int): Matcher<View> =
-        Matchers.allOf(ViewMatchers.withId(resId), ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE))
+    Matchers.allOf(ViewMatchers.withId(resId), ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE))
 
 fun nestedScrollTo(): ViewAction? {
     return object : ViewAction {
         override fun getConstraints(): Matcher<View> {
             return Matchers.allOf(
-                    isDescendantOfA(isAssignableFrom(NestedScrollView::class.java)),
-                    withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE))
+                isDescendantOfA(isAssignableFrom(NestedScrollView::class.java)),
+                withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
+            )
         }
 
         override fun getDescription(): String {
@@ -40,10 +41,10 @@ fun nestedScrollTo(): ViewAction? {
                 }
             } catch (e: Exception) {
                 throw PerformException.Builder()
-                        .withActionDescription(this.description)
-                        .withViewDescription(HumanReadables.describe(view))
-                        .withCause(e)
-                        .build()
+                    .withActionDescription(this.description)
+                    .withViewDescription(HumanReadables.describe(view))
+                    .withCause(e)
+                    .build()
             }
             uiController.loopMainThreadUntilIdle()
         }

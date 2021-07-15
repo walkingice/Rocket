@@ -12,8 +12,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import kotlinx.android.synthetic.main.activity_debug.*
+import kotlinx.android.synthetic.main.activity_debug.debug_firebase_id
+import kotlinx.android.synthetic.main.activity_debug.debug_firebase_register_token
+import kotlinx.android.synthetic.main.activity_debug.debug_locale_layout
+import kotlinx.android.synthetic.main.activity_debug.debug_locale_text
+import kotlinx.android.synthetic.main.activity_debug.debug_mission_reminder
+import kotlinx.android.synthetic.main.activity_debug.switch_disable_server_push
+import kotlinx.android.synthetic.main.activity_debug.toolbar
 import org.json.JSONArray
 import org.mozilla.focus.R
 import org.mozilla.focus.utils.FirebaseHelper
@@ -51,9 +56,9 @@ class DebugActivity : AppCompatActivity() {
 
     private fun initDebugLocale() {
         val debugLocales = getDebugLocales()
-        getDebugLocaleLiveData().observe(this, Observer {
+        getDebugLocaleLiveData().observe(this) {
             debug_locale_text.text = it
-        })
+        }
         debug_locale_layout.setOnClickListener {
             showDropDownListDialog(debugLocales)
         }
@@ -72,10 +77,10 @@ class DebugActivity : AppCompatActivity() {
     }
 
     private fun getDebugLocales(): List<String> =
-            parseDebugLocalesJson(FirebaseHelper.getFirebase().getRcString(STR_RC_DEBUG_LOCALES))
+        parseDebugLocalesJson(FirebaseHelper.getFirebase().getRcString(STR_RC_DEBUG_LOCALES))
 
     private fun getDebugLocaleLiveData(): LiveData<String> =
-            preference.stringLiveData(SHARED_PREF_KEY_DEBUG_LOCALE, DEBUG_DEFAULT_LOCALE)
+        preference.stringLiveData(SHARED_PREF_KEY_DEBUG_LOCALE, DEBUG_DEFAULT_LOCALE)
 
     private fun saveDebugLocale(locale: String) {
         preference.edit().putString(SHARED_PREF_KEY_DEBUG_LOCALE, locale).apply()
@@ -85,13 +90,13 @@ class DebugActivity : AppCompatActivity() {
         val appContext = applicationContext
         val adapter = ArrayAdapter<String>(this, android.R.layout.select_dialog_singlechoice, data)
         AlertDialog.Builder(this)
-                .setAdapter(adapter) { _, which ->
-                    val selectedLocale = data[which]
-                    FirebaseHelper.setUserProperty(appContext, "debug_locale", selectedLocale)
-                    saveDebugLocale(selectedLocale)
-                    refreshAppConfigs()
-                }
-                .create().show()
+            .setAdapter(adapter) { _, which ->
+                val selectedLocale = data[which]
+                FirebaseHelper.setUserProperty(appContext, "debug_locale", selectedLocale)
+                saveDebugLocale(selectedLocale)
+                refreshAppConfigs()
+            }
+            .create().show()
     }
 
     private fun refreshAppConfigs() {
@@ -107,7 +112,8 @@ class DebugActivity : AppCompatActivity() {
     private fun initDebugMissionReminderNotification() {
         debug_mission_reminder.setOnClickListener {
             isMissionReminderDebugEnabled = true
-            Toast.makeText(this, "Repeat interval has been set to 15 minutes", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Repeat interval has been set to 15 minutes", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
@@ -138,5 +144,5 @@ private fun parseDebugLocalesJson(jsonStr: String): List<String> {
     }
     val jsonArray = JSONArray(jsonStr)
     return (0 until jsonArray.length())
-            .map { jsonArray.getJSONObject(it).getString("country") }
+        .map { jsonArray.getJSONObject(it).getString("country") }
 }

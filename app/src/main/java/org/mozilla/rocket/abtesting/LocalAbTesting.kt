@@ -20,10 +20,14 @@ object LocalAbTesting {
     }
     private val activeExperiments: List<Experiment> by lazy {
         AssetsUtils.loadStringFromRawResource(appContext, R.raw.abtesting)!!
-                .getJsonArray { it.toExperiment() }
-                .filter { it.enabled && (isAlreadyInExperiment(it.name) ||
-                        it.matchNewUserCondition(isNewUser) || it.matchUpgradedUserCondition(isNewUser)) }
-                .also { updateActiveExperiments(it) }
+            .getJsonArray { it.toExperiment() }
+            .filter {
+                it.enabled && (
+                    isAlreadyInExperiment(it.name) ||
+                        it.matchNewUserCondition(isNewUser) || it.matchUpgradedUserCondition(isNewUser)
+                    )
+            }
+            .also { updateActiveExperiments(it) }
     }
     private val assignedBucketMap = ArrayMap<String, String?>()
 
@@ -31,13 +35,13 @@ object LocalAbTesting {
     val userGroup: Int by lazy { loadUserGroup() }
     val assignedBuckets: List<String> by lazy {
         activeExperiments.flatMap { it.buckets }
-                .filter { it.bucket_range_start <= userGroup && userGroup <= it.bucket_range_end }
-                .map { it.experiment_name }
-                .also { experimentName ->
-                    if (experimentName.any { it.length > FIREBASE_USER_PROPERTY_VALUE_MAX_LENGTH }) {
-                        error("UserProperty values can only be up to 36 characters long.")
-                    }
+            .filter { it.bucket_range_start <= userGroup && userGroup <= it.bucket_range_end }
+            .map { it.experiment_name }
+            .also { experimentName ->
+                if (experimentName.any { it.length > FIREBASE_USER_PROPERTY_VALUE_MAX_LENGTH }) {
+                    error("UserProperty values can only be up to 36 characters long.")
                 }
+            }
     }
 
     fun init(context: Context) {
@@ -45,16 +49,16 @@ object LocalAbTesting {
     }
 
     fun isExperimentEnabled(experiment: String): Boolean =
-            assignedBucketMap.containsKey(experiment) || activeExperiments.any { experiment == it.name }
+        assignedBucketMap.containsKey(experiment) || activeExperiments.any { experiment == it.name }
 
     fun checkAssignedBucket(experiment: String): String? {
         return if (assignedBucketMap.containsKey(experiment)) {
             assignedBucketMap[experiment]
         } else {
             val bucket = activeExperiments.find { experiment == it.name }
-                    ?.buckets
-                    ?.find { it.bucket_range_start <= userGroup && userGroup <= it.bucket_range_end }
-                    ?.experiment_name
+                ?.buckets
+                ?.find { it.bucket_range_start <= userGroup && userGroup <= it.bucket_range_end }
+                ?.experiment_name
             assignedBucketMap[experiment] = bucket
             return bucket
         }
@@ -77,10 +81,10 @@ object LocalAbTesting {
     }
 
     private fun Experiment.matchNewUserCondition(isNewUser: Boolean): Boolean =
-            isNewUser && this.newUserEnabled
+        isNewUser && this.newUserEnabled
 
     private fun Experiment.matchUpgradedUserCondition(isNewUser: Boolean): Boolean =
-            !isNewUser && this.upgradedUserEnabled
+        !isNewUser && this.upgradedUserEnabled
 
     private fun isAlreadyInExperiment(name: String): Boolean = isActiveExperiment(name)
 
@@ -88,8 +92,8 @@ object LocalAbTesting {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(appContext)
         val prefKey = appContext.getString(R.string.pref_key_is_under_experiment)
         return sharedPref.getString(prefKey, "")
-                ?.split(",")
-                ?.find { it == name } != null
+            ?.split(",")
+            ?.find { it == name } != null
     }
 
     private fun updateActiveExperiments(experiments: List<Experiment>) {

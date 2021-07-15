@@ -78,23 +78,23 @@ class RemoveTopSitesTest {
 
         // Check the title of test site is matched
         onView(visibleWithId(R.id.page_list))
-                .check(matches(atPosition(siteIndex, hasDescendant(withText(testSite.title)))))
+            .check(matches(atPosition(siteIndex, hasDescendant(withText(testSite.title)))))
 
         // Long click the test site
         onView(visibleWithId(R.id.page_list))
-                .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(siteIndex, longClick()))
+            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(siteIndex, longClick()))
 
         // Check the remove button is displayed
         onView(withText(removeLabel)).check(matches(isDisplayed()))
 
         // Click the remove button
         onView(withText(removeLabel))
-                .inRoot(RootMatchers.isPlatformPopup())
-                .perform(click())
+            .inRoot(RootMatchers.isPlatformPopup())
+            .perform(click())
 
         // Check the test site is removed
         onView(visibleWithId(R.id.page_list))
-                .check(matches(not(atPosition(siteIndex, hasDescendant(withText(testSite.title))))))
+            .check(matches(not(atPosition(siteIndex, hasDescendant(withText(testSite.title))))))
     }
 
     /**
@@ -116,22 +116,22 @@ class RemoveTopSitesTest {
 
         // Check the title of test site is matched
         onView(visibleWithId(R.id.page_list))
-                .check(matches(atPosition(siteIndex, hasDescendant(withText(testSite.title)))))
+            .check(matches(atPosition(siteIndex, hasDescendant(withText(testSite.title)))))
 
         // Long click the test site
         onView(visibleWithId(R.id.page_list))
-                .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(siteIndex, longClick()))
+            .perform(RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(siteIndex, longClick()))
 
         // Check the remove button is displayed
         onView(withText(removeLabel))
-                .check(matches(isDisplayed()))
+            .check(matches(isDisplayed()))
 
         // Press the back key
         Espresso.pressBack()
 
         // Check the title of test site is matched
         onView(visibleWithId(R.id.page_list))
-                .check(matches(atPosition(siteIndex, hasDescendant(withText(testSite.title)))))
+            .check(matches(atPosition(siteIndex, hasDescendant(withText(testSite.title)))))
     }
 
     private fun prepareTopSiteList() {

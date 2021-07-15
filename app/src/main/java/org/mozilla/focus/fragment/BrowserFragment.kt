@@ -140,7 +140,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     var webContextMenu: Dialog? = null
 
     val geolocationController: GeolocationPermissionController
-            by lazy { GeolocationPermissionController() }
+        by lazy { GeolocationPermissionController() }
 
     var fullscreenCallback: FullscreenCallback? = null
     var isLoading = false
@@ -360,7 +360,8 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             Observer {
                 startActivity(getStartIntent(requireContext()))
                 ScreenNavigator.get(context).popToHomeScreen(false)
-            })
+            }
+        )
         shoppingSearchPromptMessageViewModel.promptVisibilityState.observe(
             viewLifecycleOwner,
             Observer { visibilityState: VisibilityState? ->
@@ -372,12 +373,14 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 } else {
                     changeShoppingSearchPromptMessageState(BottomSheetBehavior.STATE_HIDDEN)
                 }
-            })
+            }
+        )
         shoppingSearchPromptMessageViewModel.shoppingSiteList.observe(
             viewLifecycleOwner,
             Observer<List<ShoppingSiteItem?>> {
                 shoppingSearchPromptMessageViewModel.checkShoppingSearchPromptVisibility(url)
-            })
+            }
+        )
     }
 
     private fun setupShoppingSearchPrompt(view: View) {
@@ -412,17 +415,20 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             viewLifecycleOwner,
             Observer { enabled: Boolean ->
                 setContentBlockingEnabled(enabled)
-            })
+            }
+        )
         chromeViewModel.isBlockImageEnabled.observe(
             viewLifecycleOwner,
             Observer { enabled: Boolean ->
                 setImageBlockingEnabled(enabled)
-            })
+            }
+        )
         chromeViewModel.isBlockJavaScriptEnabled.observe(
             viewLifecycleOwner,
             Observer { enabled: Boolean ->
                 setJavaScriptBlockingEnabled(enabled)
-            })
+            }
+        )
         chromeViewModel.doScreenshot.observe(
             viewLifecycleOwner,
             Observer { telemetryData: ScreenCaptureTelemetryData? ->
@@ -432,39 +438,56 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                     ACTION_CAPTURE,
                     telemetryData
                 )
-            })
-        chromeViewModel.refreshOrStop.observe(viewLifecycleOwner, Observer {
-            if (isLoading) {
-                stop()
-            } else {
-                reload()
             }
-        })
-        chromeViewModel.goNext.observe(viewLifecycleOwner, Observer {
-            if (canGoForward()) {
-                goForward()
+        )
+        chromeViewModel.refreshOrStop.observe(
+            viewLifecycleOwner,
+            Observer {
+                if (isLoading) {
+                    stop()
+                } else {
+                    reload()
+                }
             }
-        })
-        chromeViewModel.goBack.observe(viewLifecycleOwner, Observer {
-            if (canGoBack()) {
-                goBack()
+        )
+        chromeViewModel.goNext.observe(
+            viewLifecycleOwner,
+            Observer {
+                if (canGoForward()) {
+                    goForward()
+                }
             }
-        })
-        chromeViewModel.showFindInPage.observe(viewLifecycleOwner, Observer {
-            if (chromeViewModel.navigationState.value?.isBrowser == true) {
-                showFindInPage()
+        )
+        chromeViewModel.goBack.observe(
+            viewLifecycleOwner,
+            Observer {
+                if (canGoBack()) {
+                    goBack()
+                }
             }
-        })
-        chromeViewModel.currentUrl.observe(viewLifecycleOwner, Observer {
-            appbar.setExpanded(true)
-            browser_bottom_bar.slideUp()
-        })
+        )
+        chromeViewModel.showFindInPage.observe(
+            viewLifecycleOwner,
+            Observer {
+                if (chromeViewModel.navigationState.value?.isBrowser == true) {
+                    showFindInPage()
+                }
+            }
+        )
+        chromeViewModel.currentUrl.observe(
+            viewLifecycleOwner,
+            Observer {
+                appbar.setExpanded(true)
+                browser_bottom_bar.slideUp()
+            }
+        )
     }
 
     private fun observeDarkTheme() {
         chromeViewModel.isDarkTheme.observe(
             viewLifecycleOwner,
-            Observer { setDarkThemeEnabled(it) })
+            Observer { setDarkThemeEnabled(it) }
+        )
     }
 
     private fun setupBottomBar() {
@@ -557,27 +580,43 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
             viewLifecycleOwner,
             Observer { types: List<BottomBarItemAdapter.ItemData> ->
                 bottomBarItemAdapter.setItems(types)
-            })
+            }
+        )
         chromeViewModel.isDarkTheme.switchFrom(bottomBarViewModel.items)
-            .observe(viewLifecycleOwner, Observer { isDarkTheme ->
-                bottomBarItemAdapter.setDarkTheme(isDarkTheme)
-            })
+            .observe(
+                viewLifecycleOwner,
+                Observer { isDarkTheme ->
+                    bottomBarItemAdapter.setDarkTheme(isDarkTheme)
+                }
+            )
         chromeViewModel.tabCount.switchFrom(bottomBarViewModel.items)
-            .observe(viewLifecycleOwner, Observer { count: Int ->
-                bottomBarItemAdapter.setTabCount(count, true)
-            })
+            .observe(
+                viewLifecycleOwner,
+                Observer { count: Int ->
+                    bottomBarItemAdapter.setTabCount(count, true)
+                }
+            )
         chromeViewModel.isRefreshing.switchFrom(bottomBarViewModel.items)
-            .observe(viewLifecycleOwner, Observer { isRefreshing: Boolean ->
-                bottomBarItemAdapter.setRefreshing(isRefreshing)
-            })
+            .observe(
+                viewLifecycleOwner,
+                Observer { isRefreshing: Boolean ->
+                    bottomBarItemAdapter.setRefreshing(isRefreshing)
+                }
+            )
         chromeViewModel.canGoForward.switchFrom(bottomBarViewModel.items)
-            .observe(viewLifecycleOwner, Observer { canGoForward: Boolean ->
-                bottomBarItemAdapter.setCanGoForward(canGoForward)
-            })
+            .observe(
+                viewLifecycleOwner,
+                Observer { canGoForward: Boolean ->
+                    bottomBarItemAdapter.setCanGoForward(canGoForward)
+                }
+            )
         chromeViewModel.isCurrentUrlBookmarked.switchFrom(bottomBarViewModel.items)
-            .observe(viewLifecycleOwner, Observer { isBookmark: Boolean ->
-                bottomBarItemAdapter.setBookmark(isBookmark)
-            })
+            .observe(
+                viewLifecycleOwner,
+                Observer { isBookmark: Boolean ->
+                    bottomBarItemAdapter.setBookmark(isBookmark)
+                }
+            )
         setupDownloadIndicator()
     }
 
@@ -588,38 +627,42 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     private fun setupDownloadIndicator() {
         val downloadIndicatorViewModel = getActivityViewModel(downloadIndicatorViewModelCreator)
         downloadIndicatorViewModel.downloadIndicatorObservable.switchFrom(bottomBarViewModel.items)
-            .observe(viewLifecycleOwner, Observer { status: DownloadIndicatorViewModel.Status ->
-                when (status) {
-                    DownloadIndicatorViewModel.Status.DOWNLOADING -> bottomBarItemAdapter.setDownloadState(
-                        BottomBarItemAdapter.DOWNLOAD_STATE_DOWNLOADING
-                    )
-                    DownloadIndicatorViewModel.Status.UNREAD -> bottomBarItemAdapter.setDownloadState(
-                        BottomBarItemAdapter.DOWNLOAD_STATE_UNREAD
-                    )
-                    DownloadIndicatorViewModel.Status.WARNING -> bottomBarItemAdapter.setDownloadState(
-                        BottomBarItemAdapter.DOWNLOAD_STATE_WARNING
-                    )
-                    DownloadIndicatorViewModel.Status.DEFAULT -> bottomBarItemAdapter.setDownloadState(
-                        BottomBarItemAdapter.DOWNLOAD_STATE_DEFAULT
-                    )
-                }
-                val eventHistory = Settings.getInstance(activity).eventHistory
-                if (!eventHistory.contains(Settings.Event.ShowDownloadIndicatorIntro) && status !== DownloadIndicatorViewModel.Status.DEFAULT) {
-                    eventHistory.add(Settings.Event.ShowDownloadIndicatorIntro)
-                    val menuItem = bottomBarItemAdapter.getItem(BottomBarItemAdapter.TYPE_MENU)
-                    if (menuItem?.view != null) {
-                        initDownloadIndicatorIntroView(
-                            this,
-                            menuItem.view,
-                            rootView,
-                            object : OnViewInflated {
-                                override fun onInflated(view: View) {
-                                    downloadIndicatorIntro = view
+            .observe(
+                viewLifecycleOwner,
+                Observer { status: DownloadIndicatorViewModel.Status ->
+                    when (status) {
+                        DownloadIndicatorViewModel.Status.DOWNLOADING -> bottomBarItemAdapter.setDownloadState(
+                            BottomBarItemAdapter.DOWNLOAD_STATE_DOWNLOADING
+                        )
+                        DownloadIndicatorViewModel.Status.UNREAD -> bottomBarItemAdapter.setDownloadState(
+                            BottomBarItemAdapter.DOWNLOAD_STATE_UNREAD
+                        )
+                        DownloadIndicatorViewModel.Status.WARNING -> bottomBarItemAdapter.setDownloadState(
+                            BottomBarItemAdapter.DOWNLOAD_STATE_WARNING
+                        )
+                        DownloadIndicatorViewModel.Status.DEFAULT -> bottomBarItemAdapter.setDownloadState(
+                            BottomBarItemAdapter.DOWNLOAD_STATE_DEFAULT
+                        )
+                    }
+                    val eventHistory = Settings.getInstance(activity).eventHistory
+                    if (!eventHistory.contains(Settings.Event.ShowDownloadIndicatorIntro) && status !== DownloadIndicatorViewModel.Status.DEFAULT) {
+                        eventHistory.add(Settings.Event.ShowDownloadIndicatorIntro)
+                        val menuItem = bottomBarItemAdapter.getItem(BottomBarItemAdapter.TYPE_MENU)
+                        if (menuItem?.view != null) {
+                            initDownloadIndicatorIntroView(
+                                this,
+                                menuItem.view,
+                                rootView,
+                                object : OnViewInflated {
+                                    override fun onInflated(view: View) {
+                                        downloadIndicatorIntro = view
+                                    }
                                 }
-                            })
+                            )
+                        }
                     }
                 }
-            })
+            )
     }
 
     override fun onViewCreated(container: View, savedInstanceState: Bundle?) {
@@ -838,16 +881,16 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     }
 
     @VisibleForTesting
-            /**
-             * Set a (singular) LoadStateListener. Only one listener is supported at any given time. Setting
-             * a new listener means any previously set listeners will be dropped. This is only intended
-             * to be used by NavigationItemViewHolder. If you want to use this method for any other
-             * parts of the codebase, please extend it to handle a list of listeners. (We would also need
-             * to automatically clean up expired listeners from that list, probably when adding to that list.)
-             *
-             * @param listener The listener to notify of load state changes. Only a weak reference will be kept,
-             * no more calls will be sent once the listener is garbage collected.
-             */
+    /**
+     * Set a (singular) LoadStateListener. Only one listener is supported at any given time. Setting
+     * a new listener means any previously set listeners will be dropped. This is only intended
+     * to be used by NavigationItemViewHolder. If you want to use this method for any other
+     * parts of the codebase, please extend it to handle a list of listeners. (We would also need
+     * to automatically clean up expired listeners from that list, probably when adding to that list.)
+     *
+     * @param listener The listener to notify of load state changes. Only a weak reference will be kept,
+     * no more calls will be sent once the listener is garbage collected.
+     */
     fun setIsLoadingListener(listener: LoadStateListener?) {
         loadStateListenerWeakReference = WeakReference(listener)
     }
@@ -884,7 +927,8 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
                 capturingFragment,
                 requireActivity().findViewById(R.id.container),
                 telemetryData
-            ), CAPTURE_WAIT_INTERVAL.toLong()
+            ),
+            CAPTURE_WAIT_INTERVAL.toLong()
         )
     }
 
@@ -1112,7 +1156,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
 
     val isPopupWindowAllowed: Boolean
         get() = ScreenNavigator.get(context).isBrowserInForeground &&
-                isAdded && !TabTray.isShowing(parentFragmentManager)
+            isAdded && !TabTray.isShowing(parentFragmentManager)
 
     private fun showFindInPage() {
         val focusTab = sessionManager.focusSession

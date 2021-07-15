@@ -9,10 +9,10 @@ class StorageHelper(context: Context) {
     private val appContext = context.applicationContext
 
     fun getAppMediaDirOnRemovableStorage(): File? =
-            StorageUtils.getAppMediaDirOnRemovableStorage(appContext)
+        StorageUtils.getAppMediaDirOnRemovableStorage(appContext)
 
     fun getTargetDirOnRemovableStorageForDownloads(type: String): File? =
-            StorageUtils.getTargetDirOnRemovableStorageForDownloads(appContext, type)
+        StorageUtils.getTargetDirOnRemovableStorageForDownloads(appContext, type)
 
     fun hasRemovableStorage(): Boolean = try {
         getTargetDirOnRemovableStorageForDownloads("*/*") != null
@@ -21,5 +21,5 @@ class StorageHelper(context: Context) {
     }
 
     fun getTargetDirForSaveScreenshot(): File? =
-            StorageUtils.getTargetDirForSaveScreenshot(appContext)
+        StorageUtils.getTargetDirForSaveScreenshot(appContext)
 }

@@ -8,13 +8,12 @@ package org.mozilla.rocket.extension
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.Transformations
 
 fun <T> LiveData<T>.nonNullObserve(owner: LifecycleOwner, observer: (t: T) -> Unit) {
-    this.observe(owner, Observer {
+    this.observe(owner) {
         observer(it!!)
-    })
+    }
 }
 
 fun <X> LiveData<X>.take(count: Int): LiveData<X> {
@@ -43,22 +42,22 @@ fun <X, Y> LiveData<X>.switchMap(body: (X) -> LiveData<Y>): LiveData<Y> {
 }
 
 fun <X, Y> LiveData<X>.switchFrom(source: LiveData<Y>): LiveData<X> =
-        source.switchMap { this.map { it } }
+    source.switchMap { this.map { it } }
 
 fun <A, B> combineLatest(a: LiveData<A>, b: LiveData<B>): LiveData<Pair<A, B>> =
-        MediatorLiveData<Pair<A, B>>().apply {
-            var lastA: WrapperClass<A>? = null
-            var lastB: WrapperClass<B>? = null
+    MediatorLiveData<Pair<A, B>>().apply {
+        var lastA: WrapperClass<A>? = null
+        var lastB: WrapperClass<B>? = null
 
-            addSource(a) {
-                lastA = WrapperClass(it)
-                if (lastB != null) value = lastA!!.data to lastB!!.data
-            }
-
-            addSource(b) {
-                lastB = WrapperClass(it)
-                if (lastA != null) value = lastA!!.data to lastB!!.data
-            }
+        addSource(a) {
+            lastA = WrapperClass(it)
+            if (lastB != null) value = lastA!!.data to lastB!!.data
         }
+
+        addSource(b) {
+            lastB = WrapperClass(it)
+            if (lastA != null) value = lastA!!.data to lastB!!.data
+        }
+    }
 
 private class WrapperClass<T>(var data: T)

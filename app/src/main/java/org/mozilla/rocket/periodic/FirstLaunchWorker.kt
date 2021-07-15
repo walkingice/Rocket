@@ -62,18 +62,22 @@ class FirstLaunchWorker(context: Context, workerParams: WorkerParameters) : Work
 
     private fun showNotification(context: Context, messageId: String, title: String?, message: String, openUrl: String?, command: String?, deepLink: String?) {
         val intent = IntentUtils.genFirstrunNotificationClickForBroadcastReceiver(context, messageId, openUrl, command, deepLink)
-        val openRocketPending = PendingIntent.getBroadcast(context, REQUEST_CODE_CLICK_NOTIFICATION, intent,
-                PendingIntent.FLAG_ONE_SHOT)
+        val openRocketPending = PendingIntent.getBroadcast(
+            context, REQUEST_CODE_CLICK_NOTIFICATION, intent,
+            PendingIntent.FLAG_ONE_SHOT
+        )
         val builder = NotificationUtil.importantBuilder(context)
-                .also {
-                    if (title != null) {
-                        it.setContentTitle(title)
-                    }
+            .also {
+                if (title != null) {
+                    it.setContentTitle(title)
                 }
-                .setContentText(message)
-                .setStyle(NotificationCompat.BigTextStyle()
-                        .bigText(message))
-                .setContentIntent(openRocketPending)
+            }
+            .setContentText(message)
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(message)
+            )
+            .setContentIntent(openRocketPending)
 
         addDeleteTelemetry(applicationContext, builder, messageId, openUrl ?: command ?: deepLink)
         // Show notification
