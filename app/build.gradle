@@ -11,6 +11,11 @@ apply from: 'buildscripts/l10n.gradle'
 apply plugin: 'com.google.firebase.firebase-perf'
 
 android {
+
+    buildFeatures {
+        viewBinding true
+    }
+
     compileSdkVersion Versions.compile_sdk
     buildToolsVersion Versions.build_tools
     defaultConfig {
