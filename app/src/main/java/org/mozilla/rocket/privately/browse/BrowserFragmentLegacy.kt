@@ -76,6 +76,7 @@ class BrowserFragmentLegacy :
 
     @Inject
     lateinit var privateBottomBarViewModelCreator: Lazy<PrivateBottomBarViewModel>
+
     @Inject
     lateinit var chromeViewModelCreator: Lazy<ChromeViewModel>
 
@@ -145,10 +146,11 @@ class BrowserFragmentLegacy :
 
         monitorTrackerBlocked { count -> updateTrackerBlockedCount(count) }
 
-        view.findViewById<View>(R.id.browser_container).setOnApplyWindowInsetsListener { v, insets ->
-            (v.layoutParams as FrameLayout.LayoutParams).topMargin = insets.systemWindowInsetTop
-            insets
-        }
+        view.findViewById<View>(R.id.browser_container)
+            .setOnApplyWindowInsetsListener { v, insets ->
+                (v.layoutParams as FrameLayout.LayoutParams).topMargin = insets.systemWindowInsetTop
+                insets
+            }
 
         toolbarRoot = view.findViewById(R.id.toolbar_root)
 
@@ -186,7 +188,10 @@ class BrowserFragmentLegacy :
                     val download = params as Download
 
                     if (PackageManager.PERMISSION_GRANTED ==
-                        ContextCompat.checkSelfPermission(it, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        ContextCompat.checkSelfPermission(
+                                it,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            )
                     ) {
                         // We do have the permission to write to the external storage. Proceed with the download.
                         queueDownload(download)
@@ -229,17 +234,28 @@ class BrowserFragmentLegacy :
             }
 
             override fun permissionDeniedToast(actionId: Int) {
-                Toast.makeText(getContext(), R.string.permission_toast_storage_deny, Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    getContext(),
+                    R.string.permission_toast_storage_deny,
+                    Toast.LENGTH_LONG
+                ).show()
             }
 
             override fun requestPermissions(actionId: Int) {
-                this@BrowserFragmentLegacy.requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), actionId)
+                this@BrowserFragmentLegacy.requestPermissions(
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    actionId
+                )
             }
 
             private fun queueDownload(download: Download?) {
                 activity?.let {
                     download?.let {
-                        chromeViewModel.onEnqueueDownload(it, displayUrlView.text.toString(), shouldShowInDownloadList = false)
+                        chromeViewModel.onEnqueueDownload(
+                            it,
+                            displayUrlView.text.toString(),
+                            shouldShowInDownloadList = false
+                        )
                     }
                 }
             }
@@ -371,7 +387,12 @@ class BrowserFragmentLegacy :
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        permissionHandler.onRequestPermissionsResult(context, requestCode, permissions, grantResults)
+        permissionHandler.onRequestPermissionsResult(
+            context,
+            requestCode,
+            permissions,
+            grantResults
+        )
     }
 
     private fun goBack() = sessionManager.focusSession?.engineSession?.goBack()
@@ -393,25 +414,26 @@ class BrowserFragmentLegacy :
 
     private fun setupBottomBar(rootView: View) {
         val bottomBar = rootView.findViewById<BottomBar>(R.id.browser_bottom_bar)
-        bottomBar.setOnItemClickListener(object : BottomBar.OnItemClickListener {
-            override fun onItemClick(type: Int, position: Int) {
-                when (type) {
-                    BottomBarItemAdapter.TYPE_SEARCH -> chromeViewModel.showUrlInput.setValue(chromeViewModel.currentUrl.value)
-                    BottomBarItemAdapter.TYPE_PIN_SHORTCUT -> chromeViewModel.pinShortcut.call()
-                    BottomBarItemAdapter.TYPE_REFRESH -> chromeViewModel.refreshOrStop.call()
-                    BottomBarItemAdapter.TYPE_SHARE -> chromeViewModel.share.call()
-                    BottomBarItemAdapter.TYPE_NEXT -> chromeViewModel.goNext.call()
-                    BottomBarItemAdapter.TYPE_PRIVATE_HOME -> {
-                        chromeViewModel.togglePrivateMode.call()
-                        TelemetryWrapper.togglePrivateMode(true)
-                    }
-                    BottomBarItemAdapter.TYPE_DELETE -> onDeleteClicked()
-                    BottomBarItemAdapter.TYPE_TRACKER -> onTrackerButtonClicked()
-                    else -> throw IllegalArgumentException("Unhandled bottom bar item, type: $type")
+        bottomBar.setOnItemClickListener { type, position ->
+            when (type) {
+                BottomBarItemAdapter.TYPE_SEARCH -> chromeViewModel.showUrlInput.setValue(
+                    chromeViewModel.currentUrl.value
+                )
+                BottomBarItemAdapter.TYPE_PIN_SHORTCUT -> chromeViewModel.pinShortcut.call()
+                BottomBarItemAdapter.TYPE_REFRESH -> chromeViewModel.refreshOrStop.call()
+                BottomBarItemAdapter.TYPE_SHARE -> chromeViewModel.share.call()
+                BottomBarItemAdapter.TYPE_NEXT -> chromeViewModel.goNext.call()
+                BottomBarItemAdapter.TYPE_PRIVATE_HOME -> {
+                    chromeViewModel.togglePrivateMode.call()
+                    TelemetryWrapper.togglePrivateMode(true)
                 }
+                BottomBarItemAdapter.TYPE_DELETE -> onDeleteClicked()
+                BottomBarItemAdapter.TYPE_TRACKER -> onTrackerButtonClicked()
+                else -> throw IllegalArgumentException("Unhandled bottom bar item, type: $type")
             }
-        })
-        bottomBarItemAdapter = BottomBarItemAdapter(bottomBar, BottomBarItemAdapter.Theme.PrivateMode)
+        }
+        bottomBarItemAdapter =
+            BottomBarItemAdapter(bottomBar, BottomBarItemAdapter.Theme.PrivateMode)
         val bottomBarViewModel = getActivityViewModel(privateBottomBarViewModelCreator)
         bottomBarViewModel.items.nonNullObserve(this) {
             bottomBarItemAdapter.setItems(it)
@@ -420,9 +442,15 @@ class BrowserFragmentLegacy :
         }
 
         chromeViewModel.isRefreshing.switchFrom(bottomBarViewModel.items)
-            .observe(viewLifecycleOwner, Observer { bottomBarItemAdapter.setRefreshing(it == true) })
+            .observe(
+                viewLifecycleOwner,
+                Observer { bottomBarItemAdapter.setRefreshing(it == true) }
+            )
         chromeViewModel.canGoForward.switchFrom(bottomBarViewModel.items)
-            .observe(viewLifecycleOwner, Observer { bottomBarItemAdapter.setCanGoForward(it == true) })
+            .observe(
+                viewLifecycleOwner,
+                Observer { bottomBarItemAdapter.setCanGoForward(it == true) }
+            )
     }
 
     private fun initTrackerView(parentView: View) {
@@ -480,7 +508,9 @@ class BrowserFragmentLegacy :
         )
     }
 
-    class Observer(val fragment: BrowserFragmentLegacy) : SessionManager.Observer, Session.Observer {
+    class Observer(val fragment: BrowserFragmentLegacy) :
+        SessionManager.Observer,
+        Session.Observer {
         override fun updateFailingUrl(url: String?, updateFromError: Boolean) {
             // do nothing, exist for interface compatibility only.
         }
@@ -638,7 +668,11 @@ class BrowserFragmentLegacy :
             builder.show()
         }
 
-        override fun onNavigationStateChanged(session: Session, canGoBack: Boolean, canGoForward: Boolean) {
+        override fun onNavigationStateChanged(
+            session: Session,
+            canGoBack: Boolean,
+            canGoForward: Boolean
+        ) {
             fragment.chromeViewModel.onNavigationStateChanged(canGoBack, canGoForward)
         }
 
@@ -653,7 +687,8 @@ class BrowserFragmentLegacy :
         }
     }
 
-    class PrivateDownloadCallback(val fragment: BrowserFragmentLegacy, val refererUrl: String?) : DownloadCallback {
+    class PrivateDownloadCallback(val fragment: BrowserFragmentLegacy, val refererUrl: String?) :
+        DownloadCallback {
         override fun onDownloadStart(download: Download) {
             fragment.activity?.let {
                 if (!it.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {

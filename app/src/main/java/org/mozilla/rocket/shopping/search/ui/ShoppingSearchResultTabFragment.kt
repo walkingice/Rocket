@@ -215,18 +215,16 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
 
     private fun setupBottomBar(rootView: View) {
         val bottomBar = rootView.findViewById<BottomBar>(R.id.bottom_bar)
-        bottomBar.setOnItemClickListener(object : BottomBar.OnItemClickListener {
-            override fun onItemClick(type: Int, position: Int) {
-                when (type) {
-                    BottomBarItemAdapter.TYPE_HOME -> sendHomeIntent(requireContext())
-                    BottomBarItemAdapter.TYPE_REFRESH -> chromeViewModel.refreshOrStop.call()
-                    BottomBarItemAdapter.TYPE_SHOPPING_SEARCH -> shoppingSearchResultViewModel.onShoppingSearchButtonClick()
-                    BottomBarItemAdapter.TYPE_NEXT -> chromeViewModel.goNext.call()
-                    BottomBarItemAdapter.TYPE_SHARE -> chromeViewModel.share.call()
-                    else -> throw IllegalArgumentException("Unhandled bottom bar item, type: $type")
-                }
+        bottomBar.setOnItemClickListener { type, position ->
+            when (type) {
+                BottomBarItemAdapter.TYPE_HOME -> sendHomeIntent(requireContext())
+                BottomBarItemAdapter.TYPE_REFRESH -> chromeViewModel.refreshOrStop.call()
+                BottomBarItemAdapter.TYPE_SHOPPING_SEARCH -> shoppingSearchResultViewModel.onShoppingSearchButtonClick()
+                BottomBarItemAdapter.TYPE_NEXT -> chromeViewModel.goNext.call()
+                BottomBarItemAdapter.TYPE_SHARE -> chromeViewModel.share.call()
+                else -> throw IllegalArgumentException("Unhandled bottom bar item, type: $type")
             }
-        })
+        }
         bottomBarItemAdapter =
             BottomBarItemAdapter(bottomBar, BottomBarItemAdapter.Theme.ShoppingSearch)
         val bottomBarViewModel = getActivityViewModel(bottomBarViewModelCreator)

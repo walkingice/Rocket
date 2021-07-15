@@ -144,10 +144,11 @@ class BrowserFragment :
 
         monitorTrackerBlocked { count -> updateTrackerBlockedCount(count) }
 
-        view.findViewById<View>(R.id.browser_container).setOnApplyWindowInsetsListener { v, insets ->
-            (v.layoutParams as FrameLayout.LayoutParams).topMargin = insets.systemWindowInsetTop
-            insets
-        }
+        view.findViewById<View>(R.id.browser_container)
+            .setOnApplyWindowInsetsListener { v, insets ->
+                (v.layoutParams as FrameLayout.LayoutParams).topMargin = insets.systemWindowInsetTop
+                insets
+            }
 
         sessionManager.register(sessionManagerObserver)
         sessionManager.selectedSession?.let {
@@ -174,7 +175,10 @@ class BrowserFragment :
                     val download = params as Download
 
                     if (PackageManager.PERMISSION_GRANTED ==
-                        ContextCompat.checkSelfPermission(it, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        ContextCompat.checkSelfPermission(
+                                it,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            )
                     ) {
                         // We do have the permission to write to the external storage. Proceed with the download.
                         queueDownload(download)
@@ -217,17 +221,28 @@ class BrowserFragment :
             }
 
             override fun permissionDeniedToast(actionId: Int) {
-                Toast.makeText(getContext(), R.string.permission_toast_storage_deny, Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    getContext(),
+                    R.string.permission_toast_storage_deny,
+                    Toast.LENGTH_LONG
+                ).show()
             }
 
             override fun requestPermissions(actionId: Int) {
-                this@BrowserFragment.requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), actionId)
+                this@BrowserFragment.requestPermissions(
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    actionId
+                )
             }
 
             private fun queueDownload(download: Download?) {
                 activity?.let {
                     download?.let {
-                        chromeViewModel.onEnqueueDownload(it, displayUrlView.text.toString(), shouldShowInDownloadList = false)
+                        chromeViewModel.onEnqueueDownload(
+                            it,
+                            displayUrlView.text.toString(),
+                            shouldShowInDownloadList = false
+                        )
                     }
                 }
             }
@@ -291,12 +306,14 @@ class BrowserFragment :
         tabViewSlot.layoutParams = params
         tabViewSlot.requestLayout()
 
-        view?.findViewById<View>(R.id.browser_container)?.setOnApplyWindowInsetsListener { v, insets ->
-            // When in full screen mode we don't need any extra top margin,
-            // whereas we need extra top margin to prevent website's button area is covered
-            (v.layoutParams as FrameLayout.LayoutParams).topMargin = if (isFullScreenMode) 0 else insets.systemWindowInsetTop
-            insets
-        }
+        view?.findViewById<View>(R.id.browser_container)
+            ?.setOnApplyWindowInsetsListener { v, insets ->
+                // When in full screen mode we don't need any extra top margin,
+                // whereas we need extra top margin to prevent website's button area is covered
+                (v.layoutParams as FrameLayout.LayoutParams).topMargin =
+                    if (isFullScreenMode) 0 else insets.systemWindowInsetTop
+                insets
+            }
     }
 
     override fun applyLocale() {
@@ -375,7 +392,12 @@ class BrowserFragment :
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        permissionHandler.onRequestPermissionsResult(context, requestCode, permissions, grantResults)
+        permissionHandler.onRequestPermissionsResult(
+            context,
+            requestCode,
+            permissions,
+            grantResults
+        )
     }
 
     private fun goBack() = sessionManager.selectedSession?.let {
@@ -411,7 +433,11 @@ class BrowserFragment :
         parentView.addView(engineView.asView())
     }
 
-    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
+    override fun onCreateContextMenu(
+        menu: ContextMenu,
+        v: View,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
         if (v is SystemEngineView && v.onLongClick(v)) {
             return
         }
@@ -420,25 +446,26 @@ class BrowserFragment :
 
     private fun setupBottomBar(rootView: View) {
         val bottomBar = rootView.findViewById<BottomBar>(R.id.browser_bottom_bar)
-        bottomBar.setOnItemClickListener(object : BottomBar.OnItemClickListener {
-            override fun onItemClick(type: Int, position: Int) {
-                when (type) {
-                    BottomBarItemAdapter.TYPE_SEARCH -> chromeViewModel.showUrlInput.setValue(chromeViewModel.currentUrl.value)
-                    BottomBarItemAdapter.TYPE_PIN_SHORTCUT -> chromeViewModel.pinShortcut.call()
-                    BottomBarItemAdapter.TYPE_REFRESH -> chromeViewModel.refreshOrStop.call()
-                    BottomBarItemAdapter.TYPE_SHARE -> chromeViewModel.share.call()
-                    BottomBarItemAdapter.TYPE_NEXT -> chromeViewModel.goNext.call()
-                    BottomBarItemAdapter.TYPE_PRIVATE_HOME -> {
-                        chromeViewModel.togglePrivateMode.call()
-                        TelemetryWrapper.togglePrivateMode(true)
-                    }
-                    BottomBarItemAdapter.TYPE_DELETE -> onDeleteClicked()
-                    BottomBarItemAdapter.TYPE_TRACKER -> onTrackerButtonClicked()
-                    else -> throw IllegalArgumentException("Unhandled bottom bar item, type: $type")
+        bottomBar.setOnItemClickListener { type, position ->
+            when (type) {
+                BottomBarItemAdapter.TYPE_SEARCH -> chromeViewModel.showUrlInput.setValue(
+                    chromeViewModel.currentUrl.value
+                )
+                BottomBarItemAdapter.TYPE_PIN_SHORTCUT -> chromeViewModel.pinShortcut.call()
+                BottomBarItemAdapter.TYPE_REFRESH -> chromeViewModel.refreshOrStop.call()
+                BottomBarItemAdapter.TYPE_SHARE -> chromeViewModel.share.call()
+                BottomBarItemAdapter.TYPE_NEXT -> chromeViewModel.goNext.call()
+                BottomBarItemAdapter.TYPE_PRIVATE_HOME -> {
+                    chromeViewModel.togglePrivateMode.call()
+                    TelemetryWrapper.togglePrivateMode(true)
                 }
+                BottomBarItemAdapter.TYPE_DELETE -> onDeleteClicked()
+                BottomBarItemAdapter.TYPE_TRACKER -> onTrackerButtonClicked()
+                else -> throw IllegalArgumentException("Unhandled bottom bar item, type: $type")
             }
-        })
-        bottomBarItemAdapter = BottomBarItemAdapter(bottomBar, BottomBarItemAdapter.Theme.PrivateMode)
+        }
+        bottomBarItemAdapter =
+            BottomBarItemAdapter(bottomBar, BottomBarItemAdapter.Theme.PrivateMode)
         val bottomBarViewModel = getActivityViewModel(privateBottomBarViewModelCreator)
         bottomBarViewModel.items.nonNullObserve(this) {
             bottomBarItemAdapter.setItems(it)
@@ -447,12 +474,19 @@ class BrowserFragment :
         }
 
         chromeViewModel.isRefreshing.switchFrom(bottomBarViewModel.items)
-            .observe(viewLifecycleOwner, Observer { bottomBarItemAdapter.setRefreshing(it == true) })
+            .observe(
+                viewLifecycleOwner,
+                Observer { bottomBarItemAdapter.setRefreshing(it == true) }
+            )
         chromeViewModel.canGoForward.switchFrom(bottomBarViewModel.items)
-            .observe(viewLifecycleOwner, Observer { bottomBarItemAdapter.setCanGoForward(it == true) })
+            .observe(
+                viewLifecycleOwner,
+                Observer { bottomBarItemAdapter.setCanGoForward(it == true) }
+            )
 
         browser_container.setOnKeyboardVisibilityChangedListener { isKeyboardVisible ->
-            val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+            val isLandscape =
+                resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             bottomBar.isVisible = !isKeyboardVisible && !isLandscape
         }
     }
@@ -547,7 +581,10 @@ class BrowserFragment :
     }
 
     private val sessionObserver = object : Session.Observer {
-        override fun onDownload(session: Session, download: mozilla.components.browser.session.Download): Boolean {
+        override fun onDownload(
+            session: Session,
+            download: mozilla.components.browser.session.Download
+        ): Boolean {
             activity.let {
                 if (it == null || !it.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
                     return false
@@ -576,7 +613,8 @@ class BrowserFragment :
         }
 
         override fun onFullScreenChanged(session: Session, enabled: Boolean) {
-            val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+            val isLandscape =
+                resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             if (enabled) {
                 if (!isLandscape) {
                     toolbar_root.visibility = View.GONE
@@ -623,7 +661,11 @@ class BrowserFragment :
             return false
         }
 
-        override fun onNavigationStateChanged(session: Session, canGoBack: Boolean, canGoForward: Boolean) {
+        override fun onNavigationStateChanged(
+            session: Session,
+            canGoBack: Boolean,
+            canGoForward: Boolean
+        ) {
             chromeViewModel.onNavigationStateChanged(canGoBack, canGoForward)
         }
 

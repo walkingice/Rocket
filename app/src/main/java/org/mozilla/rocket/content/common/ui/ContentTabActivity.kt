@@ -201,19 +201,17 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
     override fun getFullScreenContainerView(): ViewGroup = video_container
 
     private fun setupBottomBar(bottomBar: BottomBar) {
-        bottomBar.setOnItemClickListener(object : BottomBar.OnItemClickListener {
-            override fun onItemClick(type: Int, position: Int) {
-                when (type) {
-                    BottomBarItemAdapter.TYPE_BACK -> chromeViewModel.goBack.call()
-                    BottomBarItemAdapter.TYPE_REFRESH -> {
-                        chromeViewModel.refreshOrStop.call()
-                        telemetryViewModel.onReloadButtonClicked()
-                    }
-                    BottomBarItemAdapter.TYPE_SHARE -> chromeViewModel.share.call()
-                    else -> throw IllegalArgumentException("Unhandled bottom bar item, type: $type")
+        bottomBar.setOnItemClickListener { type, position ->
+            when (type) {
+                BottomBarItemAdapter.TYPE_BACK -> chromeViewModel.goBack.call()
+                BottomBarItemAdapter.TYPE_REFRESH -> {
+                    chromeViewModel.refreshOrStop.call()
+                    telemetryViewModel.onReloadButtonClicked()
                 }
+                BottomBarItemAdapter.TYPE_SHARE -> chromeViewModel.share.call()
+                else -> throw IllegalArgumentException("Unhandled bottom bar item, type: $type")
             }
-        })
+        }
         bottomBarItemAdapter =
             BottomBarItemAdapter(bottomBar, BottomBarItemAdapter.Theme.PrivateMode)
         val bottomBarViewModel = getViewModel(bottomBarViewModelCreator)
