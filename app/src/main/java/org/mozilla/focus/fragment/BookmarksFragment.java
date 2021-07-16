@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,7 +29,6 @@ import org.mozilla.rocket.chrome.ChromeViewModel;
 import org.mozilla.rocket.content.BaseViewModelFactory;
 import org.mozilla.rocket.content.ExtentionKt;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import dagger.Lazy;
@@ -59,7 +59,7 @@ public class BookmarksFragment extends PanelFragment implements BookmarkAdapter.
     }
 
     @Override
-    public View onCreateView(@Nonnull LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_bookmarks, container, false);
         recyclerView = v.findViewById(R.id.recyclerview);

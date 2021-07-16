@@ -2,10 +2,10 @@ object Versions {
     const val min_sdk = 21
     const val target_sdk = 29
     const val compile_sdk = 29
-    const val build_tools = "29.0.2"
+    const val build_tools = "30.0.3"
     const val version_code = 1
     const val version_name = "2.6.2"
-    const val android_gradle_plugin = "3.6.1"
+    const val android_gradle_plugin = "4.2.1"
     const val gms_oss_licenses_plugin = "0.10.2"
     const val support = "1.0.0"
     const val appcompat = "1.1.0-rc01"
@@ -29,7 +29,6 @@ object Versions {
     const val gms = "11.8.0"
     const val navigation = "2.2.1"
     const val paging = "2.1.2"
-    const val findbugs = "3.0.1"
     const val lottie = "3.4.0"
     const val leakcanary = "2.6"
     const val android_components = "0.52.0"
@@ -48,8 +47,8 @@ object Versions {
     const val firebase_bom = "27.0.0"
     const val google_services_plugin = "3.1.1"
     const val fabric_plugin = "1.25.1"
-    const val fastlane_screengrab = "1.2.0"
-    const val jraska_falcon = "2.0.1"
+    const val fastlane_screengrab = "2.1.0"
+    const val jraska_falcon = "2.2.0"
     const val dagger = "2.16"
     const val play = "1.7.0"
     const val coroutine = "1.3.4"

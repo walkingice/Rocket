@@ -10,9 +10,9 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.mozilla.focus.R;
+import androidx.annotation.Nullable;
 
-import javax.annotation.Nullable;
+import org.mozilla.focus.R;
 
 /**
  * A just-work custom ViewGroup for UI requirement. It *ASSUME* each children has the same width and
