@@ -148,11 +148,11 @@ open class BottomBar : FrameLayout, CoordinatorLayout.AttachedBehavior {
         }
     }
 
-    interface OnItemClickListener {
-        fun onItemClick(type: Int, position: Int)
+    fun interface OnItemClickListener {
+        fun onItemClick(type: Int, position: Int): Unit
     }
 
-    interface OnItemLongClickListener {
+    fun interface OnItemLongClickListener {
         fun onItemLongClick(type: Int, position: Int): Boolean
     }
 

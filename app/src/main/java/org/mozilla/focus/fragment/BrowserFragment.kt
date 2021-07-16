@@ -83,7 +83,6 @@ import org.mozilla.rocket.chrome.ChromeViewModel
 import org.mozilla.rocket.chrome.ChromeViewModel.ScreenCaptureTelemetryData
 import org.mozilla.rocket.content.appComponent
 import org.mozilla.rocket.content.getActivityViewModel
-import org.mozilla.rocket.content.view.BottomBar
 import org.mozilla.rocket.content.view.BottomBar.BottomBarBehavior.Companion.slideUp
 import org.mozilla.rocket.download.DownloadIndicatorIntroViewHelper.OnViewInflated
 import org.mozilla.rocket.download.DownloadIndicatorIntroViewHelper.initDownloadIndicatorIntroView
@@ -491,89 +490,86 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
     }
 
     private fun setupBottomBar() {
-        browser_bottom_bar.setOnItemClickListener(object : BottomBar.OnItemClickListener {
-            override fun onItemClick(type: Int, position: Int) {
-                when (type) {
-                    BottomBarItemAdapter.TYPE_TAB_COUNTER -> {
-                        chromeViewModel.showTabTray.call()
-                        TelemetryWrapper.showTabTrayToolbar(
-                            Extra_Value.WEBVIEW,
-                            position,
-                            isInLandscape()
-                        )
-                    }
-                    BottomBarItemAdapter.TYPE_MENU -> {
-                        chromeViewModel.showBrowserMenu.call()
-                        TelemetryWrapper.showMenuToolbar(Extra_Value.WEBVIEW, position)
-                    }
-                    BottomBarItemAdapter.TYPE_HOME -> {
-                        chromeViewModel.showNewTab.call()
-                        TelemetryWrapper.clickAddTabToolbar(
-                            Extra_Value.WEBVIEW,
-                            position,
-                            isInLandscape()
-                        )
-                    }
-                    BottomBarItemAdapter.TYPE_SEARCH -> {
-                        chromeViewModel.showUrlInput.value = url
-                        TelemetryWrapper.clickToolbarSearch(
-                            Extra_Value.WEBVIEW,
-                            position,
-                            isInLandscape()
-                        )
-                    }
-                    BottomBarItemAdapter.TYPE_CAPTURE -> chromeViewModel.onDoScreenshot(
-                        ScreenCaptureTelemetryData(Extra_Value.WEBVIEW, position)
+        browser_bottom_bar.setOnItemClickListener { type, position ->
+            when (type) {
+                BottomBarItemAdapter.TYPE_TAB_COUNTER -> {
+                    chromeViewModel.showTabTray.call()
+                    TelemetryWrapper.showTabTrayToolbar(
+                        Extra_Value.WEBVIEW,
+                        position,
+                        isInLandscape()
                     )
-                    BottomBarItemAdapter.TYPE_PIN_SHORTCUT -> {
-                        chromeViewModel.pinShortcut.call()
-                        TelemetryWrapper.clickAddToHome(Extra_Value.WEBVIEW, position)
-                    }
-                    BottomBarItemAdapter.TYPE_BOOKMARK -> {
-                        val isActivated =
-                            bottomBarItemAdapter.getItem(BottomBarItemAdapter.TYPE_BOOKMARK)?.view?.isActivated == true
-                        TelemetryWrapper.clickToolbarBookmark(
-                            !isActivated,
-                            Extra_Value.WEBVIEW,
-                            position
-                        )
-                        chromeViewModel.toggleBookmark()
-                    }
-                    BottomBarItemAdapter.TYPE_REFRESH -> {
-                        chromeViewModel.refreshOrStop.call()
-                        TelemetryWrapper.clickToolbarReload(
-                            Extra_Value.WEBVIEW,
-                            position,
-                            isInLandscape()
-                        )
-                    }
-                    BottomBarItemAdapter.TYPE_SHARE -> {
-                        chromeViewModel.share.call()
-                        TelemetryWrapper.clickToolbarShare(
-                            Extra_Value.WEBVIEW,
-                            position,
-                            isInLandscape()
-                        )
-                    }
-                    BottomBarItemAdapter.TYPE_NEXT -> {
-                        chromeViewModel.goNext.call()
-                        TelemetryWrapper.clickToolbarForward(Extra_Value.WEBVIEW, position)
-                    }
-                    else -> throw IllegalArgumentException("Unhandled bottom bar item, type: $type")
                 }
-            }
-        })
-        browser_bottom_bar.setOnItemLongClickListener(object : BottomBar.OnItemLongClickListener {
-            override fun onItemLongClick(type: Int, position: Int): Boolean {
-                if (type == BottomBarItemAdapter.TYPE_MENU) {
-                    // Long press menu always show download panel
-                    chromeViewModel.showDownloadPanel.call()
-                    longPressDownloadIndicator()
-                    return true
+                BottomBarItemAdapter.TYPE_MENU -> {
+                    chromeViewModel.showBrowserMenu.call()
+                    TelemetryWrapper.showMenuToolbar(Extra_Value.WEBVIEW, position)
                 }
-                return false
+                BottomBarItemAdapter.TYPE_HOME -> {
+                    chromeViewModel.showNewTab.call()
+                    TelemetryWrapper.clickAddTabToolbar(
+                        Extra_Value.WEBVIEW,
+                        position,
+                        isInLandscape()
+                    )
+                }
+                BottomBarItemAdapter.TYPE_SEARCH -> {
+                    chromeViewModel.showUrlInput.value = url
+                    TelemetryWrapper.clickToolbarSearch(
+                        Extra_Value.WEBVIEW,
+                        position,
+                        isInLandscape()
+                    )
+                }
+                BottomBarItemAdapter.TYPE_CAPTURE -> chromeViewModel.onDoScreenshot(
+                    ScreenCaptureTelemetryData(Extra_Value.WEBVIEW, position)
+                )
+                BottomBarItemAdapter.TYPE_PIN_SHORTCUT -> {
+                    chromeViewModel.pinShortcut.call()
+                    TelemetryWrapper.clickAddToHome(Extra_Value.WEBVIEW, position)
+                }
+                BottomBarItemAdapter.TYPE_BOOKMARK -> {
+                    val isActivated =
+                        bottomBarItemAdapter.getItem(BottomBarItemAdapter.TYPE_BOOKMARK)?.view?.isActivated == true
+                    TelemetryWrapper.clickToolbarBookmark(
+                        !isActivated,
+                        Extra_Value.WEBVIEW,
+                        position
+                    )
+                    chromeViewModel.toggleBookmark()
+                }
+                BottomBarItemAdapter.TYPE_REFRESH -> {
+                    chromeViewModel.refreshOrStop.call()
+                    TelemetryWrapper.clickToolbarReload(
+                        Extra_Value.WEBVIEW,
+                        position,
+                        isInLandscape()
+                    )
+                }
+                BottomBarItemAdapter.TYPE_SHARE -> {
+                    chromeViewModel.share.call()
+                    TelemetryWrapper.clickToolbarShare(
+                        Extra_Value.WEBVIEW,
+                        position,
+                        isInLandscape()
+                    )
+                }
+                BottomBarItemAdapter.TYPE_NEXT -> {
+                    chromeViewModel.goNext.call()
+                    TelemetryWrapper.clickToolbarForward(Extra_Value.WEBVIEW, position)
+                }
+                else -> throw IllegalArgumentException("Unhandled bottom bar item, type: $type")
             }
-        })
+        }
+        browser_bottom_bar.setOnItemLongClickListener { type: Int, _: Int ->
+            if (type == BottomBarItemAdapter.TYPE_MENU) {
+                // Long press menu always show download panel
+                chromeViewModel.showDownloadPanel.call()
+                longPressDownloadIndicator()
+                true
+            } else {
+                false
+            }
+        }
         bottomBarItemAdapter =
             BottomBarItemAdapter(browser_bottom_bar, BottomBarItemAdapter.Theme.Light)
         bottomBarViewModel.items.observe(
@@ -880,7 +876,6 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
         fun isLoadingChanged(isLoading: Boolean)
     }
 
-    @VisibleForTesting
     /**
      * Set a (singular) LoadStateListener. Only one listener is supported at any given time. Setting
      * a new listener means any previously set listeners will be dropped. This is only intended
@@ -891,6 +886,7 @@ class BrowserFragment : LocaleAwareFragment(), BrowserScreen, LifecycleOwner, Ba
      * @param listener The listener to notify of load state changes. Only a weak reference will be kept,
      * no more calls will be sent once the listener is garbage collected.
      */
+    @VisibleForTesting
     fun setIsLoadingListener(listener: LoadStateListener?) {
         loadStateListenerWeakReference = WeakReference(listener)
     }
