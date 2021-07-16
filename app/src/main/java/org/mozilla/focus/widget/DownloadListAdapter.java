@@ -33,8 +33,6 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 /**
  * Created by anlin on 01/08/2017.
  */
@@ -249,7 +247,6 @@ public class DownloadListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public static class DownloadViewHolder extends RecyclerView.ViewHolder {
 
-        @SuppressFBWarnings("URF_UNREAD_FIELD")
         ImageView icon;
         TextView title;
         TextView subtitle;
@@ -269,7 +266,6 @@ public class DownloadListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     public static class DownloadEmptyViewHolder extends RecyclerView.ViewHolder {
 
-        @SuppressFBWarnings("URF_UNREAD_FIELD")
         ImageView imag;
 
         DownloadEmptyViewHolder(View itemView) {
