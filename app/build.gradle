@@ -6,6 +6,7 @@ apply plugin: 'com.google.android.gms.oss-licenses-plugin'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply from: '../buildSrc/pmd.gradle'
 apply from: '../buildSrc/checkstyle.gradle'
+apply from: '../buildSrc/ktlint.gradle'
 apply from: 'buildscripts/l10n.gradle'
 apply plugin: 'com.google.firebase.firebase-perf'
 
