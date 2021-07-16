@@ -7,7 +7,11 @@ configurations {
 }
 
 dependencies {
-    ktlint "com.pinterest:ktlint:${Versions.ktlint}"
+    ktlint("com.pinterest:ktlint:${Versions.ktlint}") {
+        attributes {
+            attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
+        }
+    }
 }
 
 task ktlint(type: JavaExec, group: "verification") {
@@ -25,4 +29,20 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     main = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "-F", "**/*.kt"
+}
+
+task ktlintApplyToIDEA(type: JavaExec, group: "formatting") {
+    description = "To make your AndroidStudio/IDEA IDE align with ktlint"
+    main = "com.pinterest.ktlint.Main"
+    classpath = configurations.ktlint
+    args "applyToIDEAProject", "-y"
+}
+
+task ktlintExec(type: JavaExec, group: "formatting") {
+    description = "Run ktlint command with arguments. ie: ./gradlew ktlintCommand -Parg='....' "
+    main = "com.pinterest.ktlint.Main"
+    classpath = configurations.ktlint
+    if (project.hasProperty("arg")) {
+        args "$arg".split()
+    }
 }
