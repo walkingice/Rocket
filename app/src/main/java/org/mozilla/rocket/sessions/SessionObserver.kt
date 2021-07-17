@@ -17,12 +17,6 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.lifecycle.Lifecycle
-import kotlinx.android.synthetic.main.fragment_browser.app_bar
-import kotlinx.android.synthetic.main.fragment_browser.browser_bottom_bar
-import kotlinx.android.synthetic.main.fragment_browser.progress_bar
-import kotlinx.android.synthetic.main.fragment_browser.video_container
-import kotlinx.android.synthetic.main.fragment_browser.webview_container
-import kotlinx.android.synthetic.main.toolbar.site_identity
 import org.mozilla.focus.fragment.BrowserFragment
 import org.mozilla.focus.fragment.BrowserFragment.Companion.ANIMATION_DURATION
 import org.mozilla.focus.menu.WebContextMenu
@@ -78,7 +72,7 @@ class SessionObserver(
 
     override fun onSecurityChanged(session: Session, isSecure: Boolean) {
         val level = if (isSecure) BrowserFragment.SITE_LOCK else BrowserFragment.SITE_GLOBE
-        browserFragment.site_identity.setImageLevel(level)
+        browserFragment.binding?.toolbar?.siteIdentity?.setImageLevel(level)
     }
 
     override fun onUrlChanged(session: Session, url: String?) {
@@ -141,18 +135,22 @@ class SessionObserver(
                 )
             // Some new url may give 100 directly and then start from 0 again. don't treat
             // as loaded for these urls;
-            val urlBarLoadingToFinished =
-                browserFragment.progress_bar.max != browserFragment.progress_bar.progress &&
-                    progress == browserFragment.progress_bar.max
+            val progressBar = browserFragment.binding?.progressBar
+            val urlBarLoadingToFinished = if (progressBar == null) {
+                false
+            } else {
+                progressBar.max != progressBar.progress && progress == progressBar.max
+            }
             if (urlBarLoadingToFinished) {
                 browserFragment.loadedUrl = currentUrl
             }
-            // Some URL cause progress bar to stuck at loading state, allowing progress update to progress_bar.max solve the issue
-            if (progressIsForLoadedUrl && progress != browserFragment.progress_bar.max) {
+            // Some URL cause progress bar to stuck at loading state,
+            // allowing progress update to progressBar.max solve the issue
+            if (progressIsForLoadedUrl && progress != progressBar?.max) {
                 return
             }
         }
-        browserFragment.progress_bar.progress = progress
+        browserFragment.binding?.progressBar?.progress = progress
     }
 
     override fun onShowFileChooser(
@@ -207,6 +205,7 @@ class SessionObserver(
         if (session == null) {
             return
         }
+        val binding = browserFragment.binding ?: return
         if (!isForegroundSession(session)) {
             callback.fullScreenExited()
             return
@@ -214,17 +213,17 @@ class SessionObserver(
         browserFragment.fullscreenCallback = callback
         if (session?.engineSession?.tabView != null && view != null) {
             // Hide browser UI and web content
-            browserFragment.app_bar.visibility = View.INVISIBLE
-            browserFragment.webview_container.visibility = View.INVISIBLE
+            binding.appBar.visibility = View.INVISIBLE
+            binding.webviewContainer.visibility = View.INVISIBLE
             browserFragment.shoppingSearchViewStub.visibility = View.INVISIBLE
-            browserFragment.browser_bottom_bar.visibility = View.INVISIBLE
+            binding.browserBottomBar.visibility = View.INVISIBLE
 
             // Add view to video container and make it visible
             val params = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
             )
-            browserFragment.video_container.addView(view, params)
-            browserFragment.video_container.visibility = View.VISIBLE
+            binding.videoContainer.addView(view, params)
+            binding.videoContainer.visibility = View.VISIBLE
 
             // Switch to immersive mode: Hide system bars other UI controls
             browserFragment.systemVisibility =
@@ -236,15 +235,16 @@ class SessionObserver(
         if (session == null) {
             return
         }
+        val binding = browserFragment.binding ?: return
         // Remove custom video views and hide container
-        browserFragment.video_container.removeAllViews()
-        browserFragment.video_container.visibility = View.GONE
+        binding.videoContainer.removeAllViews()
+        binding.videoContainer.visibility = View.GONE
 
         // Show browser UI and web content again
-        browserFragment.app_bar.visibility = View.VISIBLE
-        browserFragment.webview_container.visibility = View.VISIBLE
+        binding.appBar.visibility = View.VISIBLE
+        binding.webviewContainer.visibility = View.VISIBLE
         browserFragment.shoppingSearchViewStub.visibility = View.VISIBLE
-        browserFragment.browser_bottom_bar.visibility = View.VISIBLE
+        binding.browserBottomBar.visibility = View.VISIBLE
         if (browserFragment.systemVisibility != ViewUtils.SYSTEM_UI_VISIBILITY_NONE) {
             ViewUtils.exitImmersiveMode(
                 browserFragment.systemVisibility,
