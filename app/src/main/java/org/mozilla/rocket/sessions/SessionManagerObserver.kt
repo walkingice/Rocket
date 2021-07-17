@@ -14,9 +14,6 @@ import android.view.ViewGroup
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.fragment_browser.browser_bottom_bar
-import kotlinx.android.synthetic.main.fragment_browser.progress_bar
-import kotlinx.android.synthetic.main.toolbar.site_identity
 import org.mozilla.focus.R
 import org.mozilla.focus.fragment.BrowserFragment
 import org.mozilla.focus.navigation.ScreenNavigator
@@ -89,15 +86,15 @@ class SessionManagerObserver(
         )
 
         if (tab.progress == 0 || tab.progress == 100) {
-            browserFragment.progress_bar.visibility = View.GONE
+            browserFragment.binding?.progressBar?.visibility = View.GONE
         } else {
-            browserFragment.progress_bar.progress = tab.progress
+            browserFragment.binding?.progressBar?.progress = tab.progress
         }
 
         val identity = if (tab.securityInfo.secure) BrowserFragment.SITE_LOCK
         else BrowserFragment.SITE_GLOBE
 
-        browserFragment.site_identity.setImageLevel(identity)
+        browserFragment.binding?.toolbar?.siteIdentity?.setImageLevel(identity)
         browserFragment.hideFindInPage()
         val current = browserFragment.sessionManager.focusSession
         if (current != null) {
@@ -169,7 +166,7 @@ class SessionManagerObserver(
                 setAction(R.string.new_background_tab_switch) {
                     browserFragment.sessionManager.switchToTab(tab.id)
                 }
-                anchorView = browserFragment.browser_bottom_bar
+                anchorView = browserFragment.binding?.browserBottomBar
             }.show()
         }
     }
