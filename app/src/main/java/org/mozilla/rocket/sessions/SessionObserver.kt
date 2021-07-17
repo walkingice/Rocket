@@ -17,7 +17,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.lifecycle.Lifecycle
-import kotlinx.android.synthetic.main.fragment_browser.appbar
+import kotlinx.android.synthetic.main.fragment_browser.app_bar
 import kotlinx.android.synthetic.main.fragment_browser.browser_bottom_bar
 import kotlinx.android.synthetic.main.fragment_browser.progress_bar
 import kotlinx.android.synthetic.main.fragment_browser.video_container
@@ -214,7 +214,7 @@ class SessionObserver(
         browserFragment.fullscreenCallback = callback
         if (session?.engineSession?.tabView != null && view != null) {
             // Hide browser UI and web content
-            browserFragment.appbar.visibility = View.INVISIBLE
+            browserFragment.app_bar.visibility = View.INVISIBLE
             browserFragment.webview_container.visibility = View.INVISIBLE
             browserFragment.shoppingSearchViewStub.visibility = View.INVISIBLE
             browserFragment.browser_bottom_bar.visibility = View.INVISIBLE
@@ -241,7 +241,7 @@ class SessionObserver(
         browserFragment.video_container.visibility = View.GONE
 
         // Show browser UI and web content again
-        browserFragment.appbar.visibility = View.VISIBLE
+        browserFragment.app_bar.visibility = View.VISIBLE
         browserFragment.webview_container.visibility = View.VISIBLE
         browserFragment.shoppingSearchViewStub.visibility = View.VISIBLE
         browserFragment.browser_bottom_bar.visibility = View.VISIBLE

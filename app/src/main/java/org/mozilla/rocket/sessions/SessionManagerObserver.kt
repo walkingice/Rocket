@@ -16,7 +16,6 @@ import android.webkit.WebChromeClient
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_browser.browser_bottom_bar
 import kotlinx.android.synthetic.main.fragment_browser.progress_bar
-import kotlinx.android.synthetic.main.fragment_browser.webview_slot
 import kotlinx.android.synthetic.main.toolbar.site_identity
 import org.mozilla.focus.R
 import org.mozilla.focus.fragment.BrowserFragment
@@ -68,12 +67,14 @@ class SessionManagerObserver(
     private fun transitToTab(targetTab: Session) {
         val tabView = targetTab.engineSession?.tabView
             ?: throw RuntimeException("Tabview should be created at this moment and never be null")
+        val webViewSlot = browserFragment.getWebViewSlot()
+            ?: throw RuntimeException("WebViewSlot not found")
         // ensure it does not have attach to parent earlier.
         targetTab.engineSession?.detach()
-        val outView = findExistingTabView(browserFragment.webview_slot)
-        browserFragment.webview_slot.removeView(outView)
+        val outView = findExistingTabView(browserFragment.getWebViewSlot())
+        webViewSlot.removeView(outView)
         val inView = tabView.getView()
-        browserFragment.webview_slot.addView(inView)
+        webViewSlot.addView(inView)
         this.sessionObserver.changeSession(targetTab)
         if (inView != null) {
             startTransitionAnimation(null, inView, null)
@@ -138,7 +139,8 @@ class SessionManagerObserver(
             }
     }
 
-    private fun findExistingTabView(parent: ViewGroup): View? {
+    private fun findExistingTabView(nullableParent: ViewGroup?): View? {
+        val parent = nullableParent ?: return null
         val viewCount = parent.childCount
         for (childIdx in 0 until viewCount) {
             val childView = parent.getChildAt(childIdx)
@@ -158,8 +160,9 @@ class SessionManagerObserver(
 
     private fun onTabAddedByContextMenu(tab: Session, arguments: Bundle) {
         if (!TabUtil.toFocus(arguments)) {
+            val binding = browserFragment.binding ?: return
             Snackbar.make(
-                browserFragment.rootView,
+                binding.root,
                 R.string.new_background_tab_hint,
                 Snackbar.LENGTH_LONG
             ).apply {
