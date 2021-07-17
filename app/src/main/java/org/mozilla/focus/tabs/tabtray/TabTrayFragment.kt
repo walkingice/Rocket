@@ -41,19 +41,9 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import dagger.Lazy
-import kotlinx.android.synthetic.main.fragment_tab_tray.badge_in_private_mode
-import kotlinx.android.synthetic.main.fragment_tab_tray.bottom_divider
-import kotlinx.android.synthetic.main.fragment_tab_tray.close_all_tabs_btn
-import kotlinx.android.synthetic.main.fragment_tab_tray.logo_man
-import kotlinx.android.synthetic.main.fragment_tab_tray.new_tab_button
-import kotlinx.android.synthetic.main.fragment_tab_tray.plus_sign
-import kotlinx.android.synthetic.main.fragment_tab_tray.private_browsing_btn
-import kotlinx.android.synthetic.main.fragment_tab_tray.private_browsing_img
-import kotlinx.android.synthetic.main.fragment_tab_tray.root_layout
-import kotlinx.android.synthetic.main.fragment_tab_tray.star_background
-import kotlinx.android.synthetic.main.fragment_tab_tray.tab_tray_recycler_view
 import org.mozilla.focus.BuildConfig
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.FragmentTabTrayBinding
 import org.mozilla.focus.navigation.ScreenNavigator
 import org.mozilla.focus.tabs.tabtray.TabTrayAdapter.ShoppingSearchViewHolder
 import org.mozilla.focus.tabs.tabtray.TabTrayAdapter.TabViewHolder
@@ -75,7 +65,12 @@ import org.mozilla.rocket.tabs.Session
 import org.mozilla.rocket.tabs.TabsSessionProvider
 import javax.inject.Inject
 
-class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickListener, TabTrayAdapter.TabClickListener {
+class TabTrayFragment :
+    DialogFragment(),
+    TabTrayContract.View,
+    View.OnClickListener,
+    TabTrayAdapter.TabClickListener {
+
     @Inject
     lateinit var tabTrayViewModelCreator: Lazy<TabTrayViewModel>
 
@@ -89,6 +84,7 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     private lateinit var tabTrayViewModel: TabTrayViewModel
     private lateinit var homeViewModel: HomeViewModel
 
+    private var binding: FragmentTabTrayBinding? = null
     private var closeShoppingSearchDialog: AlertDialog? = null
     private var closeTabsDialog: AlertDialog? = null
     private var backgroundDrawable: Drawable? = null
@@ -115,22 +111,32 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
         )
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_tab_tray, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View = FragmentTabTrayBinding.inflate(inflater, container, false).also {
+        binding = it
+    }.root
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val binding = this.binding ?: return
         setDarkThemeEnabled(Settings.getInstance(view.context).isDarkThemeEnable)
         initWindowBackground(view.context)
         setupBottomSheetCallback()
         prepareExpandAnimation()
         initRecyclerView()
-        observeTabTrayAction()
+        observeTabTrayAction(binding)
 
-        new_tab_button.setOnClickListener(this)
-        close_all_tabs_btn.setOnClickListener(this)
-        private_browsing_btn.setOnClickListener(this)
+        binding.newTabButton.setOnClickListener(this)
+        binding.closeAllTabsBtn.setOnClickListener(this)
+        binding.privateBrowsingBtn.setOnClickListener(this)
         setupTapBackgroundToExpand()
         view.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
             override fun onPreDraw(): Boolean {
@@ -174,18 +180,23 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     }
 
     private fun updateBottomBarLayout() {
-        val bottomBarHeight = new_tab_button.resources.getDimensionPixelOffset(R.dimen.tab_tray_new_tab_btn_height)
-        new_tab_button.layoutParams = new_tab_button.layoutParams.apply {
+        val binding = this.binding ?: return
+        val bottomBarHeight = resources.getDimensionPixelOffset(R.dimen.tab_tray_new_tab_btn_height)
+        binding.newTabButton.layoutParams = binding.newTabButton.layoutParams.apply {
             height = bottomBarHeight
         }
-        val bottomBarMarginStart = private_browsing_btn.resources.getDimensionPixelOffset(R.dimen.tab_tray_bottom_sheet_start_margin)
-        private_browsing_btn.layoutParams = (private_browsing_btn.layoutParams as ViewGroup.MarginLayoutParams).apply {
-            marginStart = bottomBarMarginStart
-        }
-        val bottomBarMarginEnd = close_all_tabs_btn.resources.getDimensionPixelOffset(R.dimen.tab_tray_bottom_sheet_end_margin)
-        close_all_tabs_btn.layoutParams = (close_all_tabs_btn.layoutParams as ViewGroup.MarginLayoutParams).apply {
-            marginEnd = bottomBarMarginEnd
-        }
+        val bottomBarMarginStart =
+            resources.getDimensionPixelOffset(R.dimen.tab_tray_bottom_sheet_start_margin)
+        binding.privateBrowsingBtn.layoutParams =
+            (binding.privateBrowsingBtn.layoutParams as ViewGroup.MarginLayoutParams).apply {
+                marginStart = bottomBarMarginStart
+            }
+        val bottomBarMarginEnd =
+            resources.getDimensionPixelOffset(R.dimen.tab_tray_bottom_sheet_end_margin)
+        binding.closeAllTabsBtn.layoutParams =
+            (binding.closeAllTabsBtn.layoutParams as ViewGroup.MarginLayoutParams).apply {
+                marginEnd = bottomBarMarginEnd
+            }
     }
 
     override fun onClick(v: View) {
@@ -267,7 +278,10 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
                     }
                 }
 
-                override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                override fun areContentsTheSame(
+                    oldItemPosition: Int,
+                    newItemPosition: Int
+                ): Boolean {
                     return true
                 }
             },
@@ -296,10 +310,8 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     }
 
     override fun showFocusedTab(tabPosition: Int) {
-        layoutManager.scrollToPositionWithOffset(
-            tabPosition,
-            tab_tray_recycler_view.measuredHeight / 2
-        )
+        val offset = (binding?.tabTrayRecyclerView?.measuredHeight ?: 0) / 2
+        layoutManager.scrollToPositionWithOffset(tabPosition, offset)
     }
 
     override fun tabSwitched(tabPosition: Int) {
@@ -330,7 +342,8 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     }
 
     private fun setupBottomSheetCallback() {
-        val behavior = getBehavior(tab_tray_recycler_view) ?: return
+        val tabTrayView = binding?.tabTrayRecyclerView ?: return
+        val behavior = getBehavior(tabTrayView) ?: return
         behavior.setBottomSheetCallback(object : BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
@@ -345,18 +358,20 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     }
 
     private fun initRecyclerView() {
-        initRecyclerViewStyle(tab_tray_recycler_view)
-        setupSwipeToDismiss(tab_tray_recycler_view)
+        val tabTrayRecyclerView = binding?.tabTrayRecyclerView ?: return
+        initRecyclerViewStyle(tabTrayRecyclerView)
+        setupSwipeToDismiss(tabTrayRecyclerView)
         adapter.setTabClickListener(this)
-        tab_tray_recycler_view.adapter = adapter
+        tabTrayRecyclerView.adapter = adapter
     }
 
-    private fun observeTabTrayAction() {
+    private fun observeTabTrayAction(binding: FragmentTabTrayBinding) {
         tabTrayViewModel.hasPrivateTab().observe(
             viewLifecycleOwner,
             Observer { hasPrivateTab: Boolean ->
                 // Update the UI, in this case, a TextView.
-                badge_in_private_mode.visibility = if (hasPrivateTab) View.VISIBLE else View.INVISIBLE
+                binding.badgeInPrivateMode.visibility =
+                    if (hasPrivateTab) View.VISIBLE else View.INVISIBLE
             }
         )
         tabTrayViewModel.uiModel.observe(
@@ -367,10 +382,10 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
                     showShoppingSearch = showShoppingSearchNewState
                     presenter.setShoppingSearch(showShoppingSearch)
                     if (showShoppingSearch) {
-                        tab_tray_recycler_view.addItemDecoration(itemDecoration)
+                        binding.tabTrayRecyclerView.addItemDecoration(itemDecoration)
                         adapter.notifyItemInserted(0)
                     } else {
-                        tab_tray_recycler_view.removeItemDecoration(itemDecoration)
+                        binding.tabTrayRecyclerView.removeItemDecoration(itemDecoration)
                         adapter.notifyItemRemoved(0)
                     }
                     adapter.setShoppingSearch(showShoppingSearch, keyword)
@@ -380,9 +395,14 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     }
 
     private fun setupSwipeToDismiss(recyclerView: RecyclerView?) {
-        val swipeFlag = if (ENABLE_SWIPE_TO_DISMISS) ItemTouchHelper.START or ItemTouchHelper.END else 0
+        val swipeFlag =
+            if (ENABLE_SWIPE_TO_DISMISS) ItemTouchHelper.START or ItemTouchHelper.END else 0
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, swipeFlag) {
-            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
                 return false
             }
 
@@ -396,12 +416,28 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
                 }
             }
 
-            override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean) {
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
                 if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
                     val alpha = 1f - Math.abs(dX) / (recyclerView.width / 2f)
                     viewHolder.itemView.alpha = alpha
                 }
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                super.onChildDraw(
+                    c,
+                    recyclerView,
+                    viewHolder,
+                    dX,
+                    dY,
+                    actionState,
+                    isCurrentlyActive
+                )
             }
         }).attachToRecyclerView(recyclerView)
     }
@@ -411,19 +447,20 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
 
         // update logo-man and background alpha state
         slideCoordinator.onSlide(-1f)
-        logo_man.visibility = View.INVISIBLE
+        binding?.logoMan?.visibility = View.INVISIBLE
     }
 
     private fun startExpandAnimation() {
         val tabs = adapter.data
         val focusedPosition = tabs.indexOf(adapter.focusedTab)
-        val shouldExpand = isPositionVisibleWhenCollapse(if (showShoppingSearch) focusedPosition + 1 else focusedPosition)
+        val shouldExpand =
+            isPositionVisibleWhenCollapse(if (showShoppingSearch) focusedPosition + 1 else focusedPosition)
         uiHandler.postDelayed(
             {
                 if (isVisible) {
                     if (shouldExpand) {
                         bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
-                        logo_man.visibility = View.VISIBLE
+                        binding?.logoMan?.visibility = View.VISIBLE
                         setIntercept(false)
                     } else {
                         bottomSheetState = BottomSheetBehavior.STATE_EXPANDED
@@ -448,13 +485,14 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     private fun waitItemAnimation(onAnimationEnd: Runnable) {
         uiHandler.post {
             if (isVisible) {
-                val animator = tab_tray_recycler_view.itemAnimator ?: return@post
+                val animator = binding?.tabTrayRecyclerView?.itemAnimator ?: return@post
                 animator.isRunning { uiHandler.post(onAnimationEnd) }
             }
         }
     }
 
-    private fun getBehavior(view: View): InterceptBehavior<*>? {
+    private fun getBehavior(view: View?): InterceptBehavior<*>? {
+        val view = view ?: return null
         val params = view.layoutParams as? CoordinatorLayout.LayoutParams ?: return null
         val behavior = params.behavior ?: return null
         return if (behavior is InterceptBehavior<*>) {
@@ -464,11 +502,11 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
 
     private var bottomSheetState: Int
         get() {
-            val behavior: BottomSheetBehavior<*>? = getBehavior(tab_tray_recycler_view)
+            val behavior: BottomSheetBehavior<*>? = getBehavior(binding?.tabTrayRecyclerView)
             return behavior?.state ?: -1
         }
         private set(state) {
-            val behavior: BottomSheetBehavior<*>? = getBehavior(tab_tray_recycler_view)
+            val behavior: BottomSheetBehavior<*>? = getBehavior(binding?.tabTrayRecyclerView)
             if (behavior != null) {
                 behavior.state = state
             }
@@ -476,12 +514,12 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
 
     private val collapseHeight: Int
         get() {
-            val behavior: BottomSheetBehavior<*>? = getBehavior(tab_tray_recycler_view)
+            val behavior: BottomSheetBehavior<*>? = getBehavior(binding?.tabTrayRecyclerView)
             return behavior?.peekHeight ?: 0
         }
 
     private fun setIntercept(intercept: Boolean) {
-        val behavior = getBehavior(tab_tray_recycler_view)
+        val behavior = getBehavior(binding?.tabTrayRecyclerView)
         behavior?.setIntercept(intercept)
     }
 
@@ -511,7 +549,7 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
                 }
             }
         )
-        root_layout.setOnTouchListener { v: View, event: MotionEvent? ->
+        binding?.rootLayout?.setOnTouchListener { v: View, event: MotionEvent? ->
             val result = detector.onTouchEvent(event)
             if (result) {
                 v.performClick()
@@ -553,7 +591,8 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
         if (drawable is LayerDrawable) {
             val layerDrawable = drawable
             if (Settings.getInstance(getContext()).isDarkThemeEnable) {
-                backgroundDrawable = layerDrawable.findDrawableByLayerId(R.id.gradient_background_night)
+                backgroundDrawable =
+                    layerDrawable.findDrawableByLayerId(R.id.gradient_background_night)
                 // set alpha = 0 to let this layer invisible
                 layerDrawable.findDrawableByLayerId(R.id.gradient_background).alpha = 0
             } else {
@@ -563,7 +602,8 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
             backgroundOverlay = layerDrawable.findDrawableByLayerId(R.id.background_overlay)
             val alpha = validateBackgroundAlpha(0xff)
             backgroundDrawable?.alpha = alpha
-            backgroundOverlay?.alpha = if (bottomSheetState == BottomSheetBehavior.STATE_COLLAPSED) 0 else (alpha * OVERLAY_ALPHA_FULL_EXPANDED).toInt()
+            backgroundOverlay?.alpha =
+                if (bottomSheetState == BottomSheetBehavior.STATE_COLLAPSED) 0 else (alpha * OVERLAY_ALPHA_FULL_EXPANDED).toInt()
         } else {
             backgroundDrawable = drawable
         }
@@ -593,12 +633,12 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     }
 
     private fun onTranslateToHidden(translationY: Float) {
-        new_tab_button.translationY = translationY
-        logo_man.translationY = translationY
+        binding?.newTabButton?.translationY = translationY
+        binding?.logoMan?.translationY = translationY
     }
 
     private fun updateWindowBackground(backgroundAlpha: Float) {
-        root_layout.alpha = backgroundAlpha
+        binding?.rootLayout?.alpha = backgroundAlpha
         backgroundDrawable?.alpha = validateBackgroundAlpha((backgroundAlpha * 0xff).toInt())
     }
 
@@ -607,11 +647,11 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     }
 
     private fun onFullyExpanded() {
-        if (logo_man.visibility != View.VISIBLE) {
+        if (binding?.logoMan?.visibility != View.VISIBLE) {
             // We don't want to show logo-man during fully expand animation (too complex visually).
             // In this case, we hide logo-man at first, and make sure it become visible after tab
             // tray is fully expanded (slideOffset >= 1). See prepareExpandAnimation()
-            logo_man.visibility = View.VISIBLE
+            binding?.logoMan?.visibility = View.VISIBLE
         }
         setIntercept(false)
     }
@@ -645,7 +685,8 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
                 }
             } else {
                 val interpolated = overlayInterpolator.getInterpolation(1 - slideOffset)
-                overlayAlpha = -(interpolated * OVERLAY_ALPHA_FULL_EXPANDED) + OVERLAY_ALPHA_FULL_EXPANDED
+                overlayAlpha =
+                    -(interpolated * OVERLAY_ALPHA_FULL_EXPANDED) + OVERLAY_ALPHA_FULL_EXPANDED
             }
             if (slideOffset >= 1) {
                 fragment.onFullyExpanded()
@@ -665,7 +706,10 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
         }
     }
 
-    private class ShoppingSearchItemDecoration internal constructor(private val divierDefault: Drawable?, private val divierNight: Drawable?) : RecyclerView.ItemDecoration() {
+    private class ShoppingSearchItemDecoration internal constructor(
+        private val divierDefault: Drawable?,
+        private val divierNight: Drawable?
+    ) : RecyclerView.ItemDecoration() {
         private val bounds = Rect()
         private var isNight = false
         override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
@@ -701,7 +745,12 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
             c.restore()
         }
 
-        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
             if (parent.getChildAdapterPosition(view) == 1) {
                 outRect.top = view.resources.getDimensionPixelOffset(R.dimen.tab_tray_padding)
             }
@@ -713,16 +762,17 @@ class TabTrayFragment : DialogFragment(), TabTrayContract.View, View.OnClickList
     }
 
     private fun setDarkThemeEnabled(enable: Boolean) {
-        new_tab_button.setDarkTheme(enable)
-        private_browsing_img.setDarkTheme(enable)
-        plus_sign.setDarkTheme(enable)
-        bottom_divider.setDarkTheme(enable)
+        val binding = this.binding ?: return
+        binding.newTabButton.setDarkTheme(enable)
+        binding.privateBrowsingImg.setDarkTheme(enable)
+        binding.plusSign.setDarkTheme(enable)
+        binding.bottomDivider.setDarkTheme(enable)
+        binding.tabTrayRecyclerView.setDarkTheme(enable)
         itemDecoration.setDarkTheme(enable)
-        tab_tray_recycler_view.setDarkTheme(enable)
         dialog?.window?.let {
             ViewUtils.updateStatusBarStyle(!enable, it)
         }
-        star_background.visibility = if (enable) View.VISIBLE else View.GONE
+        binding.starBackground.visibility = if (enable) View.VISIBLE else View.GONE
     }
 
     companion object {
