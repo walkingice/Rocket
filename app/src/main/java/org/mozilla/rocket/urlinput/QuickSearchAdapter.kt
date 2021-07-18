@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.quick_search_item.view.quick_search_img
 import org.mozilla.focus.R
 import org.mozilla.icon.FavIconUtils
 import org.mozilla.strictmodeviolator.StrictModeViolation
@@ -27,7 +26,7 @@ class QuickSearchAdapter(private val clickListener: (QuickSearch) -> Unit) : Lis
     }
 
     class EngineViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var icon: ImageView = itemView.quick_search_img
+        var icon: ImageView = itemView.findViewById(R.id.quick_search_img)
 
         fun bind(item: QuickSearch, clickListener: (QuickSearch) -> Unit) {
             StrictModeViolation.tempGrant({ obj: StrictMode.ThreadPolicy.Builder -> obj.permitDiskWrites() }) {
