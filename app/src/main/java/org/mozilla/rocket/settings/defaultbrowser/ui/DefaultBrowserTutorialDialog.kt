@@ -2,21 +2,18 @@ package org.mozilla.rocket.settings.defaultbrowser.ui
 
 import android.content.Context
 import android.content.DialogInterface
+import android.view.LayoutInflater
 import android.view.View
 import androidx.appcompat.app.AlertDialog
-import kotlinx.android.synthetic.main.layout_default_browser_tutorial_dialog.view.first_step_description
-import kotlinx.android.synthetic.main.layout_default_browser_tutorial_dialog.view.first_step_image
-import kotlinx.android.synthetic.main.layout_default_browser_tutorial_dialog.view.second_step_description
-import kotlinx.android.synthetic.main.layout_default_browser_tutorial_dialog.view.second_step_image
-import kotlinx.android.synthetic.main.layout_default_browser_tutorial_dialog.view.title
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.LayoutDefaultBrowserTutorialDialogBinding
 import org.mozilla.focus.glide.GlideApp
 
 class DefaultBrowserTutorialDialog(
     private val context: Context,
     private val data: DefaultBrowserTutorialDialogData
 ) {
-    val view: View = View.inflate(context, R.layout.layout_default_browser_tutorial_dialog, null)
+    val binding: LayoutDefaultBrowserTutorialDialogBinding
 
     private var onPositiveListener: (() -> Unit)? = null
     private var onNegativeListener: (() -> Unit)? = null
@@ -29,6 +26,8 @@ class DefaultBrowserTutorialDialog(
     private var cancellable = false
 
     init {
+        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        binding = LayoutDefaultBrowserTutorialDialogBinding.inflate(inflater, null, false)
         initView()
     }
 
@@ -81,15 +80,15 @@ class DefaultBrowserTutorialDialog(
     }
 
     private fun initView() {
-        with(view.title) {
+        with(binding.title) {
             data.title.let { text = it }
         }
 
-        with(view.first_step_description) {
+        with(binding.firstStepDescription) {
             data.firstStepDescription.let { text = it }
         }
 
-        with(view.first_step_image) {
+        with(binding.firstStepImage) {
             val width = data.firstStepImageWidth
             val height = data.firstStepImageHeight
             if (width != 0 && height != 0) {
@@ -116,11 +115,11 @@ class DefaultBrowserTutorialDialog(
             }
         }
 
-        with(view.second_step_description) {
+        with(binding.secondStepDescription) {
             data.secondStepDescription.let { text = it }
         }
 
-        with(view.second_step_image) {
+        with(binding.secondStepImage) {
             val width = data.secondStepImageWidth
             val height = data.secondStepImageHeight
             if (width != 0 && height != 0) {
@@ -150,7 +149,7 @@ class DefaultBrowserTutorialDialog(
 
     private fun createDialog(): AlertDialog {
         val dialog = AlertDialog.Builder(context)
-            .setView(view)
+            .setView(binding.root)
             .setOnCancelListener {
                 onCancelListener?.invoke()
             }
