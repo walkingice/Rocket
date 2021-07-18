@@ -198,7 +198,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/menu_turbomode"
+                    android:id="@+id/menu_turbo_mode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingStart="0dp"
@@ -235,7 +235,7 @@
                     </LinearLayout>
 
                     <Switch
-                        android:id="@+id/turbomode_switch"
+                        android:id="@+id/turbo_mode_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"/>
@@ -243,7 +243,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/menu_blockimg"
+                    android:id="@+id/menu_block_img"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingStart="0dp"

@@ -14,26 +14,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.lifecycle.Observer
 import dagger.Lazy
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.block_images_switch
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.content_layout
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.img_screenshots
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.menu_blockimg
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.menu_bookmark
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.menu_delete
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.menu_download
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.menu_exit
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.menu_find_in_page
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.menu_history
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.menu_night_mode
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.menu_pin_shortcut
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.menu_preferences
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.menu_screenshots
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.menu_turbomode
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.night_mode_switch
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.scroll_view
-import kotlinx.android.synthetic.main.bottom_sheet_browser_menu.view.turbomode_switch
 import org.mozilla.fileutils.FileUtils
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.BottomSheetBrowserMenuBinding
 import org.mozilla.focus.telemetry.TelemetryWrapper
 import org.mozilla.focus.utils.FormatUtils
 import org.mozilla.rocket.chrome.BottomBarItemAdapter
@@ -41,7 +24,6 @@ import org.mozilla.rocket.chrome.ChromeViewModel
 import org.mozilla.rocket.chrome.MenuViewModel
 import org.mozilla.rocket.content.appComponent
 import org.mozilla.rocket.content.getActivityViewModel
-import org.mozilla.rocket.content.view.BottomBar
 import org.mozilla.rocket.extension.nonNullObserve
 import org.mozilla.rocket.extension.switchFrom
 import org.mozilla.rocket.nightmode.AdjustBrightnessDialog
@@ -60,8 +42,7 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
     private lateinit var chromeViewModel: ChromeViewModel
     private lateinit var bottomBarItemAdapter: BottomBarItemAdapter
 
-    private lateinit var rootView: View
-
+    private lateinit var binding: BottomSheetBrowserMenuBinding
     private val uiHandler = Handler(Looper.getMainLooper())
 
     constructor(context: Context) : super(context)
@@ -80,8 +61,8 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
     }
 
     override fun dismiss() {
-        if (::rootView.isInitialized) {
-            rootView.scroll_view.fullScroll(ScrollView.FOCUS_UP)
+        if (::binding.isInitialized) {
+            binding.scrollView.fullScroll(ScrollView.FOCUS_UP)
         }
         super.dismiss()
     }
@@ -92,8 +73,8 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
     }
 
     private fun initLayout() {
-        rootView = layoutInflater.inflate(R.layout.bottom_sheet_browser_menu, null)
-        rootView.content_layout.apply {
+        binding = BottomSheetBrowserMenuBinding.inflate(layoutInflater, null, false)
+        binding.contentLayout.apply {
             outlineProvider = object : ViewOutlineProvider() {
                 override fun getOutline(view: View, outline: Outline) {
                     outline.setRoundRect(
@@ -107,39 +88,39 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
             }
             clipToOutline = true
         }
-        initMenuTabs(rootView)
-        initMenuItems(rootView)
+        initMenuTabs()
+        initMenuItems()
         initBottomBar()
-        setContentView(rootView)
+        setContentView(binding.root)
     }
 
-    private fun initMenuTabs(contentLayout: View) {
-        contentLayout.apply {
+    private fun initMenuTabs() {
+        binding.contentLayout.apply {
             chromeViewModel.hasUnreadScreenshot.observe(this@BrowserMenuDialog) {
-                img_screenshots.isActivated = it
+                binding.imgScreenshots.isActivated = it
             }
 
-            menu_screenshots.setOnClickListener {
+            binding.menuScreenshots.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.showScreenshots()
                 }
             }
-            menu_bookmark.setOnClickListener {
+            binding.menuBookmark.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.showBookmarks.call()
                     TelemetryWrapper.clickMenuBookmark()
                 }
             }
-            menu_history.setOnClickListener {
+            binding.menuHistory.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.showHistory.call()
                     TelemetryWrapper.clickMenuHistory()
                 }
             }
-            menu_download.setOnClickListener {
+            binding.menuDownload.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.showDownloadPanel.call()
@@ -149,58 +130,58 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
         }
     }
 
-    private fun initMenuItems(contentLayout: View) {
-        contentLayout.apply {
+    private fun initMenuItems() {
+        binding.contentLayout.apply {
             chromeViewModel.isTurboModeEnabled.observe(this@BrowserMenuDialog) {
-                turbomode_switch.isChecked = it
+                binding.turboModeSwitch.isChecked = it
             }
 
             chromeViewModel.isBlockImageEnabled.observe(this@BrowserMenuDialog) {
-                block_images_switch.isChecked = it
+                binding.blockImagesSwitch.isChecked = it
             }
 
             chromeViewModel.isNightMode.observe(this@BrowserMenuDialog) { nightModeSettings ->
-                night_mode_switch.isChecked = nightModeSettings.isEnabled
+                binding.nightModeSwitch.isChecked = nightModeSettings.isEnabled
             }
 
-            menu_find_in_page.setOnClickListener {
+            binding.menuFindInPage.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.showFindInPage.call()
                 }
             }
-            menu_pin_shortcut.setOnClickListener {
+            binding.menuPinShortcut.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.pinShortcut.call()
                     TelemetryWrapper.clickMenuPinShortcut()
                 }
             }
-            menu_night_mode.setOnClickListener {
+            binding.menuNightMode.setOnClickListener {
                 chromeViewModel.adjustNightMode()
             }
-            menu_turbomode.setOnClickListener { turbomode_switch.toggle() }
-            turbomode_switch.setOnCheckedChangeListener { _, isChecked ->
+            binding.menuTurboMode.setOnClickListener { binding.turboModeSwitch.toggle() }
+            binding.turboModeSwitch.setOnCheckedChangeListener { _, isChecked ->
                 val needToUpdate = isChecked != (chromeViewModel.isTurboModeEnabled.value == true)
                 if (needToUpdate) {
                     chromeViewModel.onTurboModeToggled()
                 }
             }
-            menu_blockimg.setOnClickListener { block_images_switch.toggle() }
-            block_images_switch.setOnCheckedChangeListener { _, isChecked ->
+            binding.menuBlockImg.setOnClickListener { binding.blockImagesSwitch.toggle() }
+            binding.blockImagesSwitch.setOnCheckedChangeListener { _, isChecked ->
                 val needToUpdate = isChecked != (chromeViewModel.isBlockImageEnabled.value == true)
                 if (needToUpdate) {
                     chromeViewModel.onBlockImageToggled()
                 }
             }
-            night_mode_switch.setOnCheckedChangeListener { _, isChecked ->
+            binding.nightModeSwitch.setOnCheckedChangeListener { _, isChecked ->
                 val needToUpdate =
                     isChecked != (chromeViewModel.isNightMode.value?.isEnabled == true)
                 if (needToUpdate) {
                     chromeViewModel.onNightModeToggled()
                 }
             }
-            menu_preferences.setOnClickListener {
+            binding.menuPreferences.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.checkToDriveDefaultBrowser()
@@ -208,14 +189,14 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
                     TelemetryWrapper.clickMenuSettings()
                 }
             }
-            menu_delete.setOnClickListener {
+            binding.menuDelete.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     onDeleteClicked()
                     TelemetryWrapper.clickMenuClearCache()
                 }
             }
-            menu_exit.setOnClickListener {
+            binding.menuExit.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.exitApp.call()
@@ -246,7 +227,7 @@ class BrowserMenuDialog : LifecycleBottomSheetDialog {
     }
 
     private fun initBottomBar() {
-        val bottomBar = rootView.findViewById<BottomBar>(R.id.menu_bottom_bar)
+        val bottomBar = binding.menuBottomBar
         bottomBar.setOnItemClickListener { type, position ->
             cancel()
             when (type) {
