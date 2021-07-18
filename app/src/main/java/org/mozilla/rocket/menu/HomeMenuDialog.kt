@@ -14,26 +14,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
 import dagger.Lazy
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.add_top_sites_red_dot
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.btn_private_browsing
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.img_private_mode
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.img_screenshots
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.menu_add_top_sites
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.menu_bookmark
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.menu_delete
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.menu_download
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.menu_exit
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.menu_history
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.menu_night_mode
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.menu_preferences
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.menu_screenshots
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.menu_smart_shopping_search
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.menu_themes
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.night_mode_switch
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.scroll_view
-import kotlinx.android.synthetic.main.bottom_sheet_home_menu.view.themes_red_dot
 import org.mozilla.fileutils.FileUtils
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.BottomSheetHomeMenuBinding
 import org.mozilla.focus.telemetry.TelemetryWrapper
 import org.mozilla.focus.utils.FormatUtils
 import org.mozilla.rocket.chrome.ChromeViewModel
@@ -57,7 +40,7 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
     private lateinit var chromeViewModel: ChromeViewModel
     private lateinit var menuViewModel: MenuViewModel
 
-    private lateinit var rootView: View
+    private lateinit var binding: BottomSheetHomeMenuBinding
 
     private val uiHandler = Handler(Looper.getMainLooper())
 
@@ -78,7 +61,7 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
     }
 
     override fun dismiss() {
-        if (::rootView.isInitialized) {
+        if (::binding.isInitialized) {
             resetStates()
         }
         super.dismiss()
@@ -90,13 +73,13 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
     }
 
     private fun resetStates() {
-        rootView.scroll_view.fullScroll(ScrollView.FOCUS_UP)
+        binding.scrollView.fullScroll(ScrollView.FOCUS_UP)
         hideNewItemHint()
     }
 
     private fun initLayout() {
-        rootView = layoutInflater.inflate(R.layout.bottom_sheet_home_menu, null)
-        rootView.scroll_view.apply {
+        binding = BottomSheetHomeMenuBinding.inflate(layoutInflater, null, false)
+        binding.scrollView.apply {
             outlineProvider = object : ViewOutlineProvider() {
                 override fun getOutline(view: View, outline: Outline) {
                     val dimen = resources.getDimension(R.dimen.menu_corner_radius)
@@ -105,38 +88,38 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
             }
             clipToOutline = true
         }
-        initMenuTabs(rootView)
-        initMenuItems(rootView)
-        setContentView(rootView)
+        initMenuTabs()
+        initMenuItems()
+        setContentView(binding.root)
     }
 
-    private fun initMenuTabs(contentLayout: View) {
-        contentLayout.apply {
+    private fun initMenuTabs() {
+        binding.contentLayout.apply {
             chromeViewModel.hasUnreadScreenshot.observe(this@HomeMenuDialog) {
-                img_screenshots.isActivated = it
+                binding.imgScreenshots.isActivated = it
             }
 
-            menu_screenshots.setOnClickListener {
+            binding.menuScreenshots.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.showScreenshots()
                 }
             }
-            menu_bookmark.setOnClickListener {
+            binding.menuBookmark.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.showBookmarks.call()
                     TelemetryWrapper.clickMenuBookmark()
                 }
             }
-            menu_history.setOnClickListener {
+            binding.menuHistory.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.showHistory.call()
                     TelemetryWrapper.clickMenuHistory()
                 }
             }
-            menu_download.setOnClickListener {
+            binding.menuDownload.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.showDownloadPanel.call()
@@ -146,17 +129,17 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
         }
     }
 
-    private fun initMenuItems(contentLayout: View) {
-        contentLayout.apply {
+    private fun initMenuItems() {
+        binding.contentLayout.apply {
             chromeViewModel.isNightMode.observe(this@HomeMenuDialog) { nightModeSettings ->
-                night_mode_switch.isChecked = nightModeSettings.isEnabled
+                binding.nightModeSwitch.isChecked = nightModeSettings.isEnabled
             }
             menuViewModel.isHomeScreenShoppingSearchEnabled.observe(this@HomeMenuDialog) {
-                btn_private_browsing.isVisible = !it
-                menu_smart_shopping_search.isVisible = it
+                binding.btnPrivateBrowsing.isVisible = !it
+                binding.menuSmartShoppingSearch.isVisible = it
             }
             chromeViewModel.isPrivateBrowsingActive.observe(this@HomeMenuDialog) {
-                img_private_mode.isActivated = it
+                binding.imgPrivateMode.isActivated = it
             }
             menuViewModel.shouldShowNewMenuItemHint.observe(this@HomeMenuDialog) {
                 if (it) {
@@ -165,44 +148,44 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
                 }
             }
 
-            btn_private_browsing.setOnClickListener {
+            binding.btnPrivateBrowsing.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.togglePrivateMode.call()
                     TelemetryWrapper.togglePrivateMode(true)
                 }
             }
-            menu_smart_shopping_search.setOnClickListener {
+            binding.menuSmartShoppingSearch.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     showShoppingSearch()
                 }
             }
-            menu_night_mode.setOnClickListener {
+            binding.menuNightMode.setOnClickListener {
                 chromeViewModel.adjustNightMode()
             }
-            night_mode_switch.setOnCheckedChangeListener { _, isChecked ->
+            binding.nightModeSwitch.setOnCheckedChangeListener { _, isChecked ->
                 val needToUpdate =
                     isChecked != (chromeViewModel.isNightMode.value?.isEnabled == true)
                 if (needToUpdate) {
                     chromeViewModel.onNightModeToggled()
                 }
             }
-            menu_add_top_sites.setOnClickListener {
+            binding.menuAddTopSites.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.onAddNewTopSiteMenuClicked()
                     TelemetryWrapper.clickMenuAddTopsite()
                 }
             }
-            menu_themes.setOnClickListener {
+            binding.menuThemes.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.onThemeSettingMenuClicked()
                     TelemetryWrapper.clickMenuTheme()
                 }
             }
-            menu_preferences.setOnClickListener {
+            binding.menuPreferences.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.checkToDriveDefaultBrowser()
@@ -210,14 +193,14 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
                     TelemetryWrapper.clickMenuSettings()
                 }
             }
-            menu_delete.setOnClickListener {
+            binding.menuDelete.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     onDeleteClicked()
                     TelemetryWrapper.clickMenuClearCache()
                 }
             }
-            menu_exit.setOnClickListener {
+            binding.menuExit.setOnClickListener {
                 postDelayClickEvent {
                     cancel()
                     chromeViewModel.exitApp.call()
@@ -228,13 +211,13 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
     }
 
     private fun showNewItemHint() {
-        rootView.add_top_sites_red_dot.visibility = View.VISIBLE
-        rootView.themes_red_dot.visibility = View.VISIBLE
+        binding.addTopSitesRedDot.visibility = View.VISIBLE
+        binding.themesRedDot.visibility = View.VISIBLE
     }
 
     private fun hideNewItemHint() {
-        rootView.add_top_sites_red_dot.visibility = View.INVISIBLE
-        rootView.themes_red_dot.visibility = View.INVISIBLE
+        binding.addTopSitesRedDot.visibility = View.INVISIBLE
+        binding.themesRedDot.visibility = View.INVISIBLE
     }
 
     private fun onDeleteClicked() {
@@ -258,7 +241,6 @@ class HomeMenuDialog : LifecycleBottomSheetDialog {
     }
 
     private fun showShoppingSearch() {
-        val context: Context = this.context ?: return
         context.startActivity(ShoppingSearchActivity.getStartIntent(context))
     }
 
