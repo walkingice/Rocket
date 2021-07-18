@@ -23,22 +23,8 @@ import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.google.android.material.snackbar.Snackbar
 import dagger.Lazy
-import kotlinx.android.synthetic.main.button_menu.menu_red_dot
-import kotlinx.android.synthetic.main.fragment_home.arc_panel
-import kotlinx.android.synthetic.main.fragment_home.arc_view
-import kotlinx.android.synthetic.main.fragment_home.home_background
-import kotlinx.android.synthetic.main.fragment_home.home_fragment_fake_input
-import kotlinx.android.synthetic.main.fragment_home.home_fragment_fake_input_icon
-import kotlinx.android.synthetic.main.fragment_home.home_fragment_fake_input_text
-import kotlinx.android.synthetic.main.fragment_home.home_fragment_menu_button
-import kotlinx.android.synthetic.main.fragment_home.home_fragment_tab_counter
-import kotlinx.android.synthetic.main.fragment_home.logo_man_notification
-import kotlinx.android.synthetic.main.fragment_home.main_list
-import kotlinx.android.synthetic.main.fragment_home.page_indicator
-import kotlinx.android.synthetic.main.fragment_home.private_mode_button
-import kotlinx.android.synthetic.main.fragment_home.search_panel
-import kotlinx.android.synthetic.main.fragment_home.shopping_button
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.FragmentHomeBinding
 import org.mozilla.focus.locale.LocaleAwareFragment
 import org.mozilla.focus.navigation.ScreenNavigator
 import org.mozilla.focus.telemetry.TelemetryWrapper
@@ -91,6 +77,8 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
     @Inject
     lateinit var appContext: Context
 
+    var binding: FragmentHomeBinding? = null
+
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var chromeViewModel: ChromeViewModel
     private lateinit var downloadIndicatorViewModel: DownloadIndicatorViewModel
@@ -122,7 +110,7 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View = FragmentHomeBinding.inflate(inflater, container, false).also {
         // toastObserver is an instance which lives for long time
         // do not directly store `appContext` reference inside toastObserver
         // otherwise, toastObserver stores `homeFragment.appContext` - which leaks HomeFragment
@@ -130,21 +118,22 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         toastObserver = Observer { applicationContext.showFxToast(it) }
         homeViewModel.showToast.observeForever(toastObserver)
 
-        return inflater.inflate(R.layout.fragment_home, container, false)
-    }
+        this.binding = it
+    }.root
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        val binding = this.binding ?: return
         themeManager = (context as ThemeManager.ThemeHost).themeManager
-        initSearchToolBar()
-        initBackgroundView()
-        initTopSites()
-        initLogoManNotification()
-        observeDarkTheme()
-        initOnboardingSpotlight()
-        observeAddNewTopSites()
+        initSearchToolBar(binding)
+        initBackgroundView(binding)
+        initTopSites(binding)
+        initLogoManNotification(binding)
+        observeDarkTheme(binding)
+        initOnboardingSpotlight(binding)
+        observeAddNewTopSites(binding)
         observeSetDefaultBrowser()
-        observeActions()
+        observeActions(binding)
 
         Looper.myQueue().addIdleHandler {
             FirebaseHelper.retrieveTrace("coldStart")?.stopAndClose()
@@ -152,12 +141,12 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         }
     }
 
-    private fun initSearchToolBar() {
-        home_fragment_fake_input.setOnClickListener {
+    private fun initSearchToolBar(binding: FragmentHomeBinding) {
+        binding.homeFragmentFakeInput.setOnClickListener {
             chromeViewModel.showUrlInput.call()
             TelemetryWrapper.showSearchBarHome()
         }
-        home_fragment_menu_button.apply {
+        binding.homeFragmentMenuButton.apply {
             setOnClickListener {
                 chromeViewModel.showHomeMenu.call()
                 TelemetryWrapper.showMenuHome()
@@ -168,7 +157,7 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
                 true
             }
         }
-        home_fragment_tab_counter.setOnClickListener {
+        binding.homeFragmentTabCounter.setOnClickListener {
             chromeViewModel.showTabTray.call()
             TelemetryWrapper.showTabTrayHome()
         }
@@ -181,11 +170,11 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         homeViewModel.isShoppingSearchEnabled.observe(
             viewLifecycleOwner,
             Observer { isEnabled ->
-                shopping_button.isVisible = isEnabled
-                private_mode_button.isVisible = !isEnabled
+                binding.shoppingButton.isVisible = isEnabled
+                binding.privateModeButton.isVisible = !isEnabled
             }
         )
-        shopping_button.setOnClickListener { homeViewModel.onShoppingButtonClicked() }
+        binding.shoppingButton.setOnClickListener { homeViewModel.onShoppingButtonClicked() }
         homeViewModel.openShoppingSearch.observe(
             viewLifecycleOwner,
             Observer {
@@ -195,10 +184,10 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         chromeViewModel.isPrivateBrowsingActive.observe(
             viewLifecycleOwner,
             Observer {
-                private_mode_button.isActivated = it
+                binding.privateModeButton.isActivated = it
             }
         )
-        private_mode_button.setOnClickListener { homeViewModel.onPrivateModeButtonClicked() }
+        binding.privateModeButton.setOnClickListener { homeViewModel.onPrivateModeButtonClicked() }
         homeViewModel.openPrivateMode.observe(
             viewLifecycleOwner,
             Observer {
@@ -214,7 +203,7 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         }.observe(
             viewLifecycleOwner,
             Observer {
-                home_fragment_menu_button.apply {
+                binding.homeFragmentMenuButton.apply {
                     when (it) {
                         DownloadIndicatorViewModel.Status.DOWNLOADING -> setDownloadState(
                             DOWNLOAD_STATE_DOWNLOADING
@@ -233,13 +222,13 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         homeViewModel.shouldShowNewMenuItemHint.observe(
             viewLifecycleOwner,
             Observer {
-                menu_red_dot.isVisible = it
+                binding.homeFragmentMenuButton.findViewById<View>(R.id.menu_red_dot).isVisible = it
             }
         )
     }
 
-    private fun initBackgroundView() {
-        themeManager.subscribeThemeChange(home_background)
+    private fun initBackgroundView(binding: FragmentHomeBinding) {
+        themeManager.subscribeThemeChange(binding.homeBackground)
         val backgroundGestureDetector =
             GestureDetector(
                 requireContext(),
@@ -257,7 +246,7 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
                     }
                 }
             )
-        home_background.setOnTouchListener { _, event ->
+        binding.homeBackground.setOnTouchListener { _, event ->
             backgroundGestureDetector.onTouchEvent(event)
         }
         homeViewModel.toggleBackgroundColor.observe(
@@ -282,7 +271,7 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         )
     }
 
-    private fun initTopSites() {
+    private fun initTopSites(binding: FragmentHomeBinding) {
         topSitesAdapter = DelegateAdapter(
             AdapterDelegatesManager().apply {
                 add(
@@ -292,7 +281,7 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
                 )
             }
         )
-        main_list.apply {
+        binding.mainList.apply {
             adapter = this@HomeFragment.topSitesAdapter
             registerOnPageChangeCallback(topSitesPageChangeCallback)
         }
@@ -301,18 +290,18 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
             sitePages.observe(
                 viewLifecycleOwner,
                 Observer {
-                    page_indicator.setSize(it.size)
+                    binding.pageIndicator.setSize(it.size)
                     topSitesAdapter.setData(it)
                     savedTopSitesPagePosition?.let { savedPosition ->
                         savedTopSitesPagePosition = null
-                        main_list.setCurrentItem(savedPosition, false)
+                        binding.mainList.setCurrentItem(savedPosition, false)
                     }
                 }
             )
             topSitesPageIndex.observe(
                 viewLifecycleOwner,
                 Observer {
-                    page_indicator.setSelection(it)
+                    binding.pageIndicator.setSelection(it)
                 }
             )
             openBrowser.observe(
@@ -326,7 +315,8 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
                 Observer { (site, position) ->
                     site as Site.UrlSite.RemovableSite
                     val anchorView =
-                        main_list.findViewWithTag<View>(TOP_SITE_LONG_CLICK_TARGET).apply { tag = null }
+                        binding.mainList.findViewWithTag<View>(TOP_SITE_LONG_CLICK_TARGET)
+                            .apply { tag = null }
                     val allowToPin = !site.isPinned
                     showTopSiteMenu(anchorView, allowToPin, site, position)
                 }
@@ -335,7 +325,8 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
                 viewLifecycleOwner,
                 Observer {
                     val anchorView =
-                        main_list.findViewWithTag<View>(TOP_SITE_LONG_CLICK_TARGET).apply { tag = null }
+                        binding.mainList.findViewWithTag<View>(TOP_SITE_LONG_CLICK_TARGET)
+                            .apply { tag = null }
                     showAddTopSiteMenu(anchorView)
                 }
             )
@@ -348,23 +339,24 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         )
     }
 
-    private fun observeDarkTheme() {
+    private fun observeDarkTheme(binding: FragmentHomeBinding) {
         chromeViewModel.isDarkTheme.observe(
             viewLifecycleOwner,
             Observer { darkThemeEnable ->
                 ViewUtils.updateStatusBarStyle(!darkThemeEnable, requireActivity().window)
                 topSitesAdapter.notifyDataSetChanged()
-                home_background.setDarkTheme(darkThemeEnable)
-                arc_view.setDarkTheme(darkThemeEnable)
-                arc_panel.setDarkTheme(darkThemeEnable)
-                search_panel.setDarkTheme(darkThemeEnable)
-                home_fragment_fake_input.setDarkTheme(darkThemeEnable)
-                home_fragment_fake_input_icon.setDarkTheme(darkThemeEnable)
-                home_fragment_fake_input_text.setDarkTheme(darkThemeEnable)
-                home_fragment_tab_counter.setDarkTheme(darkThemeEnable)
-                home_fragment_menu_button.setDarkTheme(darkThemeEnable)
-                shopping_button.setDarkTheme(darkThemeEnable)
-                private_mode_button.setDarkTheme(darkThemeEnable)
+                binding.homeBackground.setDarkTheme(darkThemeEnable)
+                binding.arcView.setDarkTheme(darkThemeEnable)
+                binding.arcPanel.setDarkTheme(darkThemeEnable)
+                binding.searchPanel.setDarkTheme(darkThemeEnable)
+                binding.homeFragmentFakeInput.setDarkTheme(darkThemeEnable)
+                binding.homeFragmentFakeInputIcon.setDarkTheme(darkThemeEnable)
+                binding.homeFragmentFakeInputText.setDarkTheme(darkThemeEnable)
+                binding.homeFragmentTabCounter.setDarkTheme(darkThemeEnable)
+                binding.homeFragmentMenuButton.setDarkTheme(darkThemeEnable)
+                binding.homeFragmentMenuButton.setDarkTheme(darkThemeEnable)
+                binding.shoppingButton.setDarkTheme(darkThemeEnable)
+                binding.privateModeButton.setDarkTheme(darkThemeEnable)
             }
         )
     }
@@ -391,9 +383,12 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        themeManager.unsubscribeThemeChange(home_background)
-        main_list.unregisterOnPageChangeCallback(topSitesPageChangeCallback)
         homeViewModel.showToast.removeObserver(toastObserver)
+        this.binding?.let {
+            themeManager.unsubscribeThemeChange(it.homeBackground)
+            it.mainList.unregisterOnPageChangeCallback(topSitesPageChangeCallback)
+        }
+        this.binding = null
     }
 
     override fun getFragment(): Fragment = this
@@ -407,7 +402,7 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
     }
 
     override fun applyLocale() {
-        home_fragment_fake_input_text.text = getString(R.string.home_search_bar_text)
+        binding?.homeFragmentFakeInputText?.text = getString(R.string.home_search_bar_text)
     }
 
     fun notifyAddNewTopSiteResult(pinTopSiteResult: PinTopSiteUseCase.PinTopSiteResult) {
@@ -450,7 +445,7 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
     }
 
     private fun setTabCount(count: Int, animationEnabled: Boolean = false) {
-        home_fragment_tab_counter.apply {
+        binding?.homeFragmentTabCounter?.apply {
             if (animationEnabled) {
                 setCountWithAnimation(count)
             } else {
@@ -480,7 +475,7 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         }
     }
 
-    private fun initLogoManNotification() {
+    private fun initLogoManNotification(binding: FragmentHomeBinding) {
         homeViewModel.logoManNotification.observe(
             viewLifecycleOwner,
             Observer {
@@ -495,8 +490,8 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
                 hideLogoManNotification()
             }
         )
-        logo_man_notification.setNotificationActionListener(object :
-                LogoManNotification.NotificationActionListener {
+        binding.logoManNotification.setNotificationActionListener(
+            object : LogoManNotification.NotificationActionListener {
                 override fun onNotificationClick() {
                     homeViewModel.onLogoManNotificationClicked()
                 }
@@ -504,33 +499,34 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
                 override fun onNotificationDismiss() {
                     homeViewModel.onLogoManDismissed()
                 }
-            })
+            }
+        )
     }
 
     private fun showLogoManNotification(
         notification: LogoManNotification.Notification,
         animate: Boolean
     ) {
-        logo_man_notification.showNotification(notification, animate)
+        binding?.logoManNotification?.showNotification(notification, animate)
         homeViewModel.onLogoManShown()
     }
 
     private fun hideLogoManNotification() {
-        logo_man_notification.isVisible = false
+        binding?.logoManNotification?.isVisible = false
     }
 
-    private fun showShoppingSearchSpotlight() {
+    private fun showShoppingSearchSpotlight(binding: FragmentHomeBinding) {
         val dismissListener = DialogInterface.OnDismissListener {
             restoreStatusBarColor()
-            shopping_button?.isVisible = currentShoppingBtnVisibleState
-            private_mode_button?.isVisible = !currentShoppingBtnVisibleState
+            binding.shoppingButton.isVisible = currentShoppingBtnVisibleState
+            binding.privateModeButton.isVisible = !currentShoppingBtnVisibleState
         }
-        shopping_button.post {
+        binding.shoppingButton.post {
             if (isAdded) {
                 setOnboardingStatusBarColor()
                 DialogUtils.showShoppingSearchSpotlight(
                     requireActivity(),
-                    shopping_button,
+                    binding.shoppingButton,
                     dismissListener
                 )
             }
@@ -547,19 +543,19 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         }
     }
 
-    private fun initOnboardingSpotlight() {
+    private fun initOnboardingSpotlight(binding: FragmentHomeBinding) {
         homeViewModel.showShoppingSearchOnboardingSpotlight.observe(
             viewLifecycleOwner,
             Observer {
-                currentShoppingBtnVisibleState = shopping_button.isVisible
-                shopping_button.isVisible = true
-                private_mode_button.isVisible = false
-                showShoppingSearchSpotlight()
+                currentShoppingBtnVisibleState = binding.shoppingButton.isVisible
+                binding.shoppingButton.isVisible = true
+                binding.privateModeButton.isVisible = false
+                showShoppingSearchSpotlight(binding)
             }
         )
     }
 
-    private fun observeAddNewTopSites() {
+    private fun observeAddNewTopSites(binding: FragmentHomeBinding) {
         homeViewModel.openAddNewTopSitesPage.observe(
             viewLifecycleOwner,
             Observer {
@@ -584,10 +580,10 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
             viewLifecycleOwner,
             Observer { page ->
                 page?.let {
-                    scrollToTopSitePage(it)
+                    scrollToTopSitePage(binding, it)
                 }
                 Snackbar.make(
-                    main_list,
+                    binding.mainList,
                     getText(R.string.add_top_site_snackbar_1),
                     Snackbar.LENGTH_LONG
                 )
@@ -599,10 +595,10 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
             viewLifecycleOwner,
             Observer { page ->
                 page?.let {
-                    scrollToTopSitePage(it)
+                    scrollToTopSitePage(binding, it)
                 }
                 Snackbar.make(
-                    main_list,
+                    binding.mainList,
                     getText(R.string.add_top_site_snackbar_2),
                     Snackbar.LENGTH_LONG
                 )
@@ -666,10 +662,10 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
         }
     }
 
-    private fun scrollToTopSitePage(page: Int) =
-        main_list.postDelayed({ main_list.setCurrentItem(page, 300) }, 100)
+    private fun scrollToTopSitePage(binding: FragmentHomeBinding, page: Int) =
+        binding.mainList.postDelayed({ binding.mainList.setCurrentItem(page, 300) }, 100)
 
-    private fun observeActions() {
+    private fun observeActions(binding: FragmentHomeBinding) {
         homeViewModel.executeUriAction.observe(
             viewLifecycleOwner,
             Observer { action ->
@@ -688,7 +684,7 @@ class HomeFragment : LocaleAwareFragment(), ScreenNavigator.HomeScreen {
             Observer {
                 Looper.myQueue().addIdleHandler {
                     if (!isStateSaved) {
-                        home_fragment_fake_input.performClick()
+                        binding.homeFragmentFakeInput.performClick()
                     }
                     false
                 }
