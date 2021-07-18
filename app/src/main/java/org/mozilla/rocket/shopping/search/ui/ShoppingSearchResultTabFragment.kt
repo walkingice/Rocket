@@ -13,6 +13,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.ViewCompat.getLayoutDirection
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -20,18 +21,8 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.animation.AnimationUtils
 import com.google.android.material.tabs.TabLayout
 import dagger.Lazy
-import kotlinx.android.synthetic.main.fragment_shopping_search_result_tab.appbar
-import kotlinx.android.synthetic.main.fragment_shopping_search_result_tab.bottom_bar
-import kotlinx.android.synthetic.main.fragment_shopping_search_result_tab.preferenceButton
-import kotlinx.android.synthetic.main.fragment_shopping_search_result_tab.tab_layout
-import kotlinx.android.synthetic.main.fragment_shopping_search_result_tab.tab_layout_scroll_view
-import kotlinx.android.synthetic.main.fragment_shopping_search_result_tab.url_bar
-import kotlinx.android.synthetic.main.fragment_shopping_search_result_tab.video_container
-import kotlinx.android.synthetic.main.fragment_shopping_search_result_tab.view_pager
-import kotlinx.android.synthetic.main.layout_collapsing_url_bar.progress
-import kotlinx.android.synthetic.main.toolbar.display_url
-import kotlinx.android.synthetic.main.toolbar.site_identity
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.FragmentShoppingSearchResultTabBinding
 import org.mozilla.focus.utils.AppConstants
 import org.mozilla.focus.widget.BackKeyHandleable
 import org.mozilla.rocket.chrome.BottomBarItemAdapter
@@ -43,7 +34,6 @@ import org.mozilla.rocket.content.common.ui.ContentTabViewContract
 import org.mozilla.rocket.content.common.ui.TabSwipeTelemetryViewModel
 import org.mozilla.rocket.content.getActivityViewModel
 import org.mozilla.rocket.content.getViewModel
-import org.mozilla.rocket.content.view.BottomBar
 import org.mozilla.rocket.content.view.BottomBar.BottomBarBehavior.Companion.slideUp
 import org.mozilla.rocket.extension.nonNullObserve
 import org.mozilla.rocket.extension.switchFrom
@@ -56,6 +46,8 @@ import org.mozilla.rocket.tabs.utils.TabUtil
 import javax.inject.Inject
 
 class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, BackKeyHandleable {
+
+    var binding: FragmentShoppingSearchResultTabBinding? = null
 
     @Inject
     lateinit var viewModelCreator: Lazy<ShoppingSearchResultViewModel>
@@ -82,7 +74,7 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
             interpolator = AnimationUtils.FAST_OUT_SLOW_IN_INTERPOLATOR
             duration = ANIMATION_DURATION
             addUpdateListener { animator ->
-                tab_layout_scroll_view.scrollTo(
+                binding?.tabLayoutScrollView?.scrollTo(
                     animator.animatedValue as Int,
                     0
                 )
@@ -106,19 +98,21 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_shopping_search_result_tab, container, false)
-    }
+    ): View = FragmentShoppingSearchResultTabBinding.inflate(inflater, container, false).also {
+        this.binding = it
+    }.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupBottomBar(view)
+        val binding = this.binding ?: return
 
-        appbar.setOnApplyWindowInsetsListener { v, insets ->
+        setupBottomBar(binding)
+
+        binding.appbar.setOnApplyWindowInsetsListener { v, insets ->
             (v.layoutParams as ViewGroup.MarginLayoutParams).topMargin = insets.systemWindowInsetTop
             insets
         }
-        view_pager.setOnApplyWindowInsetsListener { v, insets ->
+        binding.viewPager.setOnApplyWindowInsetsListener { v, insets ->
             if (insets.systemWindowInsetBottom == 0) {
                 v.setPadding(
                     0,
@@ -135,9 +129,10 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        initUrlBar()
-        initViewPager()
-        initTabLayout()
+        val binding = this.binding ?: return
+        initUrlBar(binding)
+        initViewPager(binding)
+        initTabLayout(binding)
 
         contentTabHelper = ContentTabHelper(this)
         contentTabHelper.initPermissionHandler()
@@ -164,7 +159,7 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
     override fun onResume() {
         super.onResume()
         sessionManager.resume()
-        appbar.requestApplyInsets()
+        binding?.appbar?.requestApplyInsets()
     }
 
     override fun onPause() {
@@ -175,6 +170,7 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
     override fun onDestroyView() {
         super.onDestroyView()
 
+        this.binding = null
         sessionManager.focusSession?.unregister(contentTabObserver)
         sessionManager.unregister(contentTabObserver)
     }
@@ -185,25 +181,55 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
 
     override fun getChromeViewModel() = chromeViewModel
 
-    override fun getSiteIdentity(): ImageView? = site_identity
+    override fun getSiteIdentity(): ImageView? {
+        // TODO: we should use ViewBinding to ensure we got the correct instance and type
+        // It is a long trip looking for the target view, across Custom View and include-xml
+        val binding = this.binding ?: return null
+        // layout_collapsing_url_bar.xml
+        val collapsingUrlBar: CollapsingUrlBar = binding.urlBar
+        // toolbar.xml
+        val toolBar: View = collapsingUrlBar.findViewById(R.id.toolbar) ?: return null
+        return toolBar.findViewById(R.id.site_identity)
+    }
 
-    override fun getDisplayUrlView(): TextView? = display_url
+    override fun getDisplayUrlView(): TextView? {
+        // TODO: we should use ViewBinding to ensure we got the correct instance and type
+        // It is a long trip looking for the target view, across Custom View and include-xml
+        val binding = this.binding ?: return null
+        // layout_collapsing_url_bar.xml
+        val collapsingUrlBar: CollapsingUrlBar = binding.urlBar
+        // toolbar.xml
+        val toolBar: View = collapsingUrlBar.findViewById(R.id.toolbar) ?: return null
+        return toolBar.findViewById(R.id.display_url)
+    }
 
-    override fun getProgressBar(): ProgressBar? = progress
+    override fun getProgressBar(): ProgressBar? {
+        // TODO: we should use ViewBinding to ensure we got the correct instance and type
+        // It is a long trip looking for the target view, across Custom View and include-xml
+        val binding = this.binding ?: return null
+        // layout_collapsing_url_bar.xml
+        val collapsingUrlBar: CollapsingUrlBar = binding.urlBar
+        return collapsingUrlBar.findViewById(R.id.progress)
+    }
 
-    override fun getFullScreenGoneViews() = listOf(appbar, bottom_bar, tab_layout)
+    override fun getFullScreenGoneViews() =
+        binding?.let { listOf(it.appbar, it.bottomBar, it.tabLayout) } ?: emptyList()
 
-    override fun getFullScreenInvisibleViews() = listOf(view_pager)
+    override fun getFullScreenInvisibleViews(): List<View> {
+        val binding = this.binding ?: return emptyList()
+        return listOf(binding.viewPager)
+    }
 
-    override fun getFullScreenContainerView(): ViewGroup = video_container
+    // TODO: getting a View from a Fragment, we shouldn't expect it is NonNull
+    override fun getFullScreenContainerView(): ViewGroup = binding!!.videoContainer
 
     override fun onBackPressed(): Boolean {
-        val tabItem =
-            if (tabItems.size > view_pager.currentItem) {
-                tabItems[view_pager.currentItem]
-            } else {
-                null
-            }
+        val binding = this.binding ?: return false
+        val tabItem = if (tabItems.size > binding.viewPager.currentItem) {
+            tabItems[binding.viewPager.currentItem]
+        } else {
+            null
+        }
         val tabView = tabItem?.session?.engineSession?.tabView ?: return false
         if (tabView.canGoBack()) {
             goBack()
@@ -213,9 +239,8 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
         return false
     }
 
-    private fun setupBottomBar(rootView: View) {
-        val bottomBar = rootView.findViewById<BottomBar>(R.id.bottom_bar)
-        bottomBar.setOnItemClickListener { type, position ->
+    private fun setupBottomBar(binding: FragmentShoppingSearchResultTabBinding) {
+        binding.bottomBar.setOnItemClickListener { type, position ->
             when (type) {
                 BottomBarItemAdapter.TYPE_HOME -> sendHomeIntent(requireContext())
                 BottomBarItemAdapter.TYPE_REFRESH -> chromeViewModel.refreshOrStop.call()
@@ -226,7 +251,7 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
             }
         }
         bottomBarItemAdapter =
-            BottomBarItemAdapter(bottomBar, BottomBarItemAdapter.Theme.ShoppingSearch)
+            BottomBarItemAdapter(binding.bottomBar, BottomBarItemAdapter.Theme.ShoppingSearch)
         val bottomBarViewModel = getActivityViewModel(bottomBarViewModelCreator)
         bottomBarViewModel.items.nonNullObserve(this) {
             bottomBarItemAdapter.setItems(it)
@@ -246,12 +271,12 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
             .observe(viewLifecycleOwner) { bottomBarItemAdapter.setCanGoForward(it == true) }
     }
 
-    private fun initUrlBar() {
-        url_bar.setTitle(searchKeyword)
-        url_bar.setOnClickListener { shoppingSearchResultViewModel.onUrlBarClicked() }
+    private fun initUrlBar(binding: FragmentShoppingSearchResultTabBinding) {
+        binding.urlBar.setTitle(searchKeyword)
+        binding.urlBar.setOnClickListener { shoppingSearchResultViewModel.onUrlBarClicked() }
     }
 
-    private fun initViewPager() {
+    private fun initViewPager(binding: FragmentShoppingSearchResultTabBinding) {
         shoppingSearchResultViewModel.uiModel.observe(viewLifecycleOwner) { uiModel ->
             tabItems.clear()
             tabItems.addAll(
@@ -265,9 +290,10 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
             )
             val shoppingSearchTabsAdapter =
                 ShoppingSearchTabsAdapter(childFragmentManager, tabItems)
-            view_pager.adapter = shoppingSearchTabsAdapter
-            view_pager.clearOnPageChangeListeners()
-            view_pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+
+            binding.viewPager.adapter = shoppingSearchTabsAdapter
+            binding.viewPager.clearOnPageChangeListeners()
+            binding.viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
                 override fun onPageScrollStateChanged(state: Int) = Unit
 
                 override fun onPageScrolled(
@@ -277,13 +303,13 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
                 ) = Unit
 
                 override fun onPageSelected(position: Int) {
-                    animateToTab(position)
+                    animateToTab(binding, position)
                     selectContentFragment(shoppingSearchTabsAdapter, position)
-                    appbar.setExpanded(true)
-                    bottom_bar.slideUp()
+                    binding.appbar.setExpanded(true)
+                    binding.bottomBar.slideUp()
                 }
             })
-            view_pager.setSwipeable(false)
+            binding.viewPager.setSwipeable(false)
             Looper.myQueue().addIdleHandler {
                 if (!isStateSaved && tabItems.isNotEmpty()) {
                     selectContentFragment(shoppingSearchTabsAdapter, 0)
@@ -297,34 +323,38 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
         }
     }
 
-    private fun animateToTab(newPosition: Int) {
+    private fun animateToTab(binding: FragmentShoppingSearchResultTabBinding, newPosition: Int) {
         if (newPosition == TabLayout.Tab.INVALID_POSITION) {
             return
         }
 
-        if (tab_layout_scroll_view.windowToken == null || !ViewCompat.isLaidOut(
-                tab_layout_scroll_view
-            )
+        if (binding.tabLayoutScrollView.windowToken == null ||
+            !ViewCompat.isLaidOut(binding.tabLayoutScrollView)
         ) {
             // If we don't have a window token, or we haven't been laid out yet just draw the new
             // position now
             if (scrollAnimator.isRunning) {
                 scrollAnimator.cancel()
             }
-            tab_layout_scroll_view.scrollTo(calculateScrollXForTab(newPosition, 0F), 0)
+            val scrollX = calculateScrollXForTab(binding, newPosition, 0F)
+            binding.tabLayoutScrollView.scrollTo(scrollX, 0)
             return
         }
 
-        val startScrollX: Int = tab_layout_scroll_view.scrollX
-        val targetScrollX = calculateScrollXForTab(newPosition, 0F)
+        val startScrollX: Int = binding.tabLayoutScrollView.scrollX
+        val targetScrollX = calculateScrollXForTab(binding, newPosition, 0F)
         if (startScrollX != targetScrollX) {
             scrollAnimator.setIntValues(startScrollX, targetScrollX)
             scrollAnimator.start()
         }
     }
 
-    private fun calculateScrollXForTab(position: Int, positionOffset: Float): Int {
-        val slidingTabIndicator = tab_layout.getChildAt(0) as ViewGroup
+    private fun calculateScrollXForTab(
+        binding: FragmentShoppingSearchResultTabBinding,
+        position: Int,
+        positionOffset: Float
+    ): Int {
+        val slidingTabIndicator = binding.tabLayout.getChildAt(0) as ViewGroup
         val selectedChild: View = slidingTabIndicator.getChildAt(position)
         val nextChild: View? =
             if (position + 1 < slidingTabIndicator.childCount) slidingTabIndicator.getChildAt(
@@ -333,9 +363,10 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
         val selectedWidth = selectedChild.width
         val nextWidth = nextChild?.width ?: 0
         val scrollBase: Int =
-            selectedChild.left + selectedWidth / 2 - tab_layout_scroll_view.width / 2
+            selectedChild.left + selectedWidth / 2 - binding.tabLayoutScrollView.width / 2
         val scrollOffset = ((selectedWidth + nextWidth).toFloat() * 0.5f * positionOffset).toInt()
-        return if (ViewCompat.getLayoutDirection(tab_layout) == ViewCompat.LAYOUT_DIRECTION_LTR) scrollBase + scrollOffset else scrollBase - scrollOffset
+        val isLtr = getLayoutDirection(binding.tabLayout) == ViewCompat.LAYOUT_DIRECTION_LTR
+        return if (isLtr) scrollBase + scrollOffset else scrollBase - scrollOffset
     }
 
     private fun selectContentFragment(adapter: ShoppingSearchTabsAdapter, position: Int) {
@@ -367,10 +398,10 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
         return tabSession
     }
 
-    private fun initTabLayout() {
-        tab_layout.setupWithViewPager(view_pager)
+    private fun initTabLayout(binding: FragmentShoppingSearchResultTabBinding) {
+        binding.tabLayout.setupWithViewPager(binding.viewPager)
 
-        preferenceButton.setOnClickListener {
+        binding.preferenceButton.setOnClickListener {
             shoppingSearchResultViewModel.goPreferences.call()
         }
 
@@ -401,8 +432,8 @@ class ShoppingSearchResultTabFragment : Fragment(), ContentTabViewContract, Back
         }
 
         chromeViewModel.currentUrl.observe(viewLifecycleOwner) {
-            appbar.setExpanded(true)
-            bottom_bar.slideUp()
+            binding?.appbar?.setExpanded(true)
+            binding?.bottomBar?.slideUp()
             telemetryViewModel.onUrlOpened()
         }
     }
