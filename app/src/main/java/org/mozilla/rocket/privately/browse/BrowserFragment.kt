@@ -25,8 +25,6 @@ import androidx.lifecycle.Observer
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.snackbar.Snackbar
 import dagger.Lazy
-import kotlinx.android.synthetic.main.fragment_private_browser.*
-import kotlinx.android.synthetic.main.toolbar.*
 import mozilla.components.browser.engine.system.SystemEngineView
 import mozilla.components.browser.session.Session
 import mozilla.components.browser.session.SessionManager
@@ -37,6 +35,7 @@ import mozilla.components.concept.engine.LifecycleObserver
 import org.mozilla.focus.BuildConfig
 import org.mozilla.focus.FocusApplication
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.FragmentPrivateBrowserBinding
 import org.mozilla.focus.locale.LocaleAwareFragment
 import org.mozilla.focus.navigation.ScreenNavigator
 import org.mozilla.focus.telemetry.TelemetryWrapper
@@ -85,6 +84,8 @@ class BrowserFragment :
     private lateinit var bottomBarItemAdapter: BottomBarItemAdapter
     private lateinit var chromeViewModel: ChromeViewModel
 
+    private var binding: FragmentPrivateBrowserBinding? = null
+
     private lateinit var tabViewSlot: ViewGroup
     private lateinit var engineView: EngineView
     private lateinit var displayUrlView: TextView
@@ -107,11 +108,9 @@ class BrowserFragment :
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_private_browser, container, false)
-    }
+    ): View = FragmentPrivateBrowserBinding.inflate(inflater, container, false).also {
+        this.binding = it
+    }.root
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -161,6 +160,7 @@ class BrowserFragment :
 
     override fun onDestroyView() {
         super.onDestroyView()
+        this.binding = null
         sessionManager.unregister(sessionManagerObserver)
         lastSession?.unregister(sessionObserver)
         unregisterForContextMenu(engineView.asView())
@@ -214,7 +214,7 @@ class BrowserFragment :
                         this@BrowserFragment,
                         it.findViewById(R.id.container),
                         R.string.permission_toast_storage,
-                        browser_bottom_bar
+                        it.findViewById(R.id.browser_bottom_bar)
                     )
                 }
                 throw IllegalStateException("No Activity to show Snackbar.")
@@ -254,12 +254,12 @@ class BrowserFragment :
         trackerPopup.dismiss()
 
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            toolbar_root.visibility = View.GONE
-            browser_bottom_bar.visibility = View.GONE
+            binding?.toolbar?.root?.visibility = View.GONE
+            binding?.browserBottomBar?.visibility = View.GONE
         } else {
             if (sessionManager.selectedSession?.fullScreenMode == false) {
-                toolbar_root.visibility = View.VISIBLE
-                browser_bottom_bar.visibility = View.VISIBLE
+                binding?.toolbar?.root?.visibility = View.VISIBLE
+                binding?.browserBottomBar?.visibility = View.VISIBLE
             }
         }
 
@@ -271,15 +271,16 @@ class BrowserFragment :
     // the issue happened rate by changing the video view layout size to a slight smaller size
     // then add to the full screen size again when the device is rotated.
     private fun refreshVideoContainer() {
-        if (tab_view_slot.visibility == View.VISIBLE) {
+        val binding = this.binding ?: return
+        if (binding.tabViewSlot.visibility == View.VISIBLE) {
             updateVideoContainerWithLayoutParams(
                 FrameLayout.LayoutParams(
-                    (tab_view_slot.height * 0.99).toInt(),
-                    (tab_view_slot.width * 0.99).toInt()
+                    (binding.tabViewSlot.height * 0.99).toInt(),
+                    (binding.tabViewSlot.width * 0.99).toInt()
                 )
             )
-            tab_view_slot.post {
-                if (tab_view_slot.visibility == View.VISIBLE) {
+            binding.tabViewSlot.post {
+                if (binding.tabViewSlot.visibility == View.VISIBLE) {
                     updateVideoContainerWithLayoutParams(
                         FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -292,10 +293,11 @@ class BrowserFragment :
     }
 
     private fun updateVideoContainerWithLayoutParams(params: FrameLayout.LayoutParams) {
-        val fullscreenContentView: View? = tab_view_slot.getChildAt(0)
+        val binding = this.binding ?: return
+        val fullscreenContentView: View? = binding.tabViewSlot.getChildAt(0)
         if (fullscreenContentView != null) {
-            tab_view_slot.removeAllViews()
-            tab_view_slot.addView(fullscreenContentView, params)
+            binding.tabViewSlot.removeAllViews()
+            binding.tabViewSlot.addView(fullscreenContentView, params)
         }
     }
 
@@ -484,7 +486,7 @@ class BrowserFragment :
                 Observer { bottomBarItemAdapter.setCanGoForward(it == true) }
             )
 
-        browser_container.setOnKeyboardVisibilityChangedListener { isKeyboardVisible ->
+        binding?.browserContainer?.setOnKeyboardVisibilityChangedListener { isKeyboardVisible ->
             val isLandscape =
                 resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             bottomBar.isVisible = !isKeyboardVisible && !isLandscape
@@ -617,8 +619,8 @@ class BrowserFragment :
                 resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
             if (enabled) {
                 if (!isLandscape) {
-                    toolbar_root.visibility = View.GONE
-                    browser_bottom_bar.visibility = View.GONE
+                    binding?.toolbar?.root?.visibility = View.GONE
+                    binding?.browserBottomBar?.visibility = View.GONE
                 }
 
                 updateContainerBehavior(isFullScreenMode = true)
@@ -627,8 +629,8 @@ class BrowserFragment :
                 systemVisibility = ViewUtils.switchToImmersiveMode(activity)
             } else {
                 if (!isLandscape) {
-                    toolbar_root.visibility = View.VISIBLE
-                    browser_bottom_bar.visibility = View.VISIBLE
+                    binding?.toolbar?.root?.visibility = View.VISIBLE
+                    binding?.browserBottomBar?.visibility = View.VISIBLE
                 }
 
                 updateContainerBehavior(isFullScreenMode = false)
