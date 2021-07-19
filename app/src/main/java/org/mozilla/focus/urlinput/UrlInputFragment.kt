@@ -26,12 +26,10 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.Lazy
-import kotlinx.android.synthetic.main.fragment_urlinput.awesomeBar
-import kotlinx.android.synthetic.main.fragment_urlinput.input_container
-import kotlinx.android.synthetic.main.fragment_urlinput.search_suggestion_block
 import mozilla.components.browser.domains.autocomplete.ShippedDomainsProvider
 import mozilla.components.ui.autocomplete.InlineAutocompleteEditText
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.FragmentUrlinputBinding
 import org.mozilla.focus.navigation.ScreenNavigator
 import org.mozilla.focus.search.SearchEngineManager
 import org.mozilla.focus.telemetry.TelemetryWrapper
@@ -46,7 +44,6 @@ import org.mozilla.focus.utils.SearchUtils
 import org.mozilla.focus.utils.SupportUtils
 import org.mozilla.focus.utils.ViewUtils
 import org.mozilla.focus.web.WebViewProvider
-import org.mozilla.focus.widget.FlowLayout
 import org.mozilla.rocket.awesomebar.ClipboardSuggestionProvider
 import org.mozilla.rocket.awesomebar.FrecensySuggestionProvider
 import org.mozilla.rocket.chrome.ChromeViewModel
@@ -73,6 +70,7 @@ class UrlInputFragment :
 
     @Inject
     lateinit var quickSearchViewModelCreator: Lazy<QuickSearchViewModel>
+
     @Inject
     lateinit var chromeViewModelCreator: Lazy<ChromeViewModel>
 
@@ -80,12 +78,9 @@ class UrlInputFragment :
     private lateinit var presenter: UrlInputContract.Presenter
     private lateinit var chromeViewModel: ChromeViewModel
 
+    private var binding: FragmentUrlinputBinding? = null
+
     private lateinit var urlView: InlineAutocompleteEditText
-    private lateinit var suggestionView: FlowLayout
-    private lateinit var clearView: View
-    private lateinit var dismissView: View
-    private lateinit var quickSearchRecyclerView: RecyclerView
-    private lateinit var quickSearchView: ViewGroup
     private var lastRequestTime: Long = 0
     private var autoCompleteInProgress: Boolean = false
     private var allowSuggestion: Boolean = false
@@ -112,18 +107,13 @@ class UrlInputFragment :
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_urlinput, container, false)
+    ): View = FragmentUrlinputBinding.inflate(inflater, container, false).also {
+        this.binding = it
 
-        dismissView = view.findViewById(R.id.dismiss)
-        dismissView.setOnClickListener(this)
+        it.dismiss.setOnClickListener(this)
+        it.clear.setOnClickListener(this)
 
-        clearView = view.findViewById(R.id.clear)
-        clearView.setOnClickListener(this)
-
-        suggestionView = view.findViewById<View>(R.id.search_suggestion) as FlowLayout
-
-        urlView = view.findViewById<View>(R.id.url_edit) as InlineAutocompleteEditText
+        urlView = it.urlEdit
         urlView.setOnTextChangeListener(::onTextChange)
         urlView.setOnCommitListener(::onCommit)
         urlView.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
@@ -138,10 +128,12 @@ class UrlInputFragment :
         urlView.setOnFilterListener(::onFilter)
 
         initByArguments()
+        initQuickSearch(it)
+    }.root
 
-        initQuickSearch(view)
-
-        return view
+    override fun onDestroyView() {
+        super.onDestroyView()
+        this.binding = null
     }
 
     private fun toAwesomeBarIcon(res: Int): Bitmap? {
@@ -153,15 +145,16 @@ class UrlInputFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val ctx = activity ?: return
+        val binding = this.binding ?: return
         val bookmarkRepo = chromeViewModel.bookmarkRepo
         val historyRepo = chromeViewModel.historyRepo
         val iconTab = toAwesomeBarIcon(R.drawable.ic_current_tab)
 
-        awesomeBar.setOnApplyWindowInsetsListener { v: View, insets: WindowInsets ->
+        binding.awesomeBar.setOnApplyWindowInsetsListener { v: View, insets: WindowInsets ->
             (v.layoutParams as ViewGroup.MarginLayoutParams).topMargin = insets.systemWindowInsetTop
             insets
         }
-        awesomeBar.addProviders(
+        binding.awesomeBar.addProviders(
 
             FrecensySuggestionProvider(
                 context = activity!!.applicationContext,
@@ -192,8 +185,9 @@ class UrlInputFragment :
             }
         )
 
-        awesomeBar.onInputStarted() // if something is in the clipboard, it'll be the first and show directly
-        awesomeBar.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+        // if something is in the clipboard, it'll be the first and show directly
+        binding.awesomeBar.onInputStarted()
+        binding.awesomeBar.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 recyclerView.requestFocus()
@@ -202,10 +196,10 @@ class UrlInputFragment :
         })
     }
 
-    private fun initQuickSearch(view: View) {
-        quickSearchView = view.findViewById(R.id.quick_search_container)
-        quickSearchRecyclerView = view.findViewById(R.id.quick_search_recycler_view)
-        quickSearchRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+    private fun initQuickSearch(binding: FragmentUrlinputBinding) {
+        val recyclerView = binding.quickSearchRecyclerView
+        recyclerView.layoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         val quickSearchAdapter = QuickSearchAdapter(
             fun(quickSearch: QuickSearch) {
                 if (TextUtils.isEmpty(urlView.text)) {
@@ -216,7 +210,7 @@ class UrlInputFragment :
                 TelemetryWrapper.clickQuickSearchEngine(quickSearch.name)
             }
         )
-        quickSearchRecyclerView.adapter = quickSearchAdapter
+        recyclerView.adapter = quickSearchAdapter
         getActivityViewModel(quickSearchViewModelCreator).run {
             quickSearchObservable.observe(
                 viewLifecycleOwner,
@@ -244,8 +238,9 @@ class UrlInputFragment :
     }
 
     private fun updateUrlInputHeight() {
-        val urlInputHeight = input_container.resources.getDimensionPixelOffset(R.dimen.search_url_input_height)
-        input_container.layoutParams = input_container.layoutParams.apply {
+        val binding = this.binding ?: return
+        val urlInputHeight = resources.getDimensionPixelOffset(R.dimen.search_url_input_height)
+        binding.inputContainer.layoutParams = binding.inputContainer.layoutParams.apply {
             height = urlInputHeight
         }
     }
@@ -262,18 +257,22 @@ class UrlInputFragment :
     }
 
     override fun onClick(view: View) {
+        val binding = this.binding ?: return
         when (view.id) {
             R.id.clear -> {
                 urlView.setText("")
                 urlView.requestFocus()
-                awesomeBar.onInputChanged("")
+                binding.awesomeBar.onInputChanged("")
                 TelemetryWrapper.searchClear(isInLandscape())
             }
             R.id.dismiss -> {
                 dismiss()
                 TelemetryWrapper.searchDismiss(isInLandscape())
             }
-            R.id.suggestion_item -> onSuggestionClicked((view as TextView).text, AWESOMEBAR_TYPE_SUGGESTION)
+            R.id.suggestion_item -> onSuggestionClicked(
+                (view as TextView).text,
+                AWESOMEBAR_TYPE_SUGGESTION
+            )
             else -> throw IllegalStateException("Unhandled view in onClick()")
         }
     }
@@ -287,7 +286,7 @@ class UrlInputFragment :
         if (args?.containsKey(ARGUMENT_URL) == true) {
             val url = args.getString(ARGUMENT_URL)
             urlView.setText(url)
-            clearView.visibility = if (TextUtils.isEmpty(url)) View.GONE else View.VISIBLE
+            binding?.clear?.visibility = if (TextUtils.isEmpty(url)) View.GONE else View.VISIBLE
         }
         allowSuggestion = args?.getBoolean(ARGUMENT_ALLOW_SUGGESTION, true) ?: false
         privateMode = args?.getBoolean(ARGUMENT_BOOLEAN_PRIVATE_MODE, false) ?: false
@@ -360,7 +359,8 @@ class UrlInputFragment :
         } else {
             false
         }
-        chromeViewModel.openUrl.value = OpenUrlAction(url, withNewTab = openNewTab, isFromExternal = false)
+        chromeViewModel.openUrl.value =
+            OpenUrlAction(url, withNewTab = openNewTab, isFromExternal = false)
 
         return openNewTab
     }
@@ -373,15 +373,16 @@ class UrlInputFragment :
     }
 
     override fun setSuggestions(texts: List<CharSequence>?) {
-        this.suggestionView.removeAllViews()
-        search_suggestion_block.visibility = View.GONE
+        val binding = this.binding ?: return
+        binding.searchSuggestion.removeAllViews()
+        binding.searchSuggestionBlock.visibility = View.GONE
         if (texts == null) {
             return
         }
 
         val searchKey = urlView.originalText.trim { it <= ' ' }.toLowerCase(Locale.getDefault())
         if (texts.isNotEmpty()) {
-            search_suggestion_block.visibility = View.VISIBLE
+            binding.searchSuggestionBlock.visibility = View.VISIBLE
         }
         for (i in texts.indices) {
             val item = View.inflate(context, R.layout.tag_text, null) as TextView
@@ -402,7 +403,7 @@ class UrlInputFragment :
 
             item.setOnClickListener(this)
             item.setOnLongClickListener(this)
-            this.suggestionView.addView(item)
+            binding?.searchSuggestion?.addView(item)
         }
     }
 
@@ -419,9 +420,21 @@ class UrlInputFragment :
         }
         autoCompleteInProgress = true
         autoCompleteProvider.getAutocompleteSuggestion(searchText)?.let { result ->
-            urlView.applyAutocompleteResult(InlineAutocompleteEditText.AutocompleteResult(result.text, result.source, result.totalItems) { result.url })
+            urlView.applyAutocompleteResult(
+                InlineAutocompleteEditText.AutocompleteResult(
+                    result.text,
+                    result.source,
+                    result.totalItems
+                ) { result.url }
+            )
         } ?: run {
-            urlView.applyAutocompleteResult(InlineAutocompleteEditText.AutocompleteResult(searchText, "", 0))
+            urlView.applyAutocompleteResult(
+                InlineAutocompleteEditText.AutocompleteResult(
+                    searchText,
+                    "",
+                    0
+                )
+            )
         }
         autoCompleteInProgress = false
     }
@@ -430,15 +443,16 @@ class UrlInputFragment :
         originalText: String,
         @Suppress("UNUSED_PARAMETER") autocompleteText: String
     ) {
+        val binding = this.binding ?: return
         if (autoCompleteInProgress) {
             return
         }
         if (allowSuggestion) {
-            awesomeBar.onInputChanged(originalText.toLowerCase(Locale.getDefault()))
+            binding.awesomeBar.onInputChanged(originalText.toLowerCase(Locale.getDefault()))
             this@UrlInputFragment.presenter.onInput(originalText, detectThrottle())
         }
         val visibility = if (TextUtils.isEmpty(originalText)) View.GONE else View.VISIBLE
-        this@UrlInputFragment.clearView.visibility = visibility
+        binding.clear?.visibility = visibility
         isUserInput = originalText == autocompleteText
     }
 
@@ -462,7 +476,12 @@ class UrlInputFragment :
          * fake url bar view.
          */
         @JvmStatic
-        fun create(url: String?, parentFragmentTag: String?, allowSuggestion: Boolean, privateMode: Boolean = false): UrlInputFragment {
+        fun create(
+            url: String?,
+            parentFragmentTag: String?,
+            allowSuggestion: Boolean,
+            privateMode: Boolean = false
+        ): UrlInputFragment {
             val arguments = Bundle()
             arguments.putString(ARGUMENT_URL, url)
             arguments.putString(ARGUMENT_PARENT_FRAGMENT, parentFragmentTag)
