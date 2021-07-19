@@ -31,7 +31,9 @@
                 tools:background="#FF0000" />
 
             <!-- divider between appbar and web-vew, will be covered by progress bar -->
-            <include layout="@layout/toolbar" />
+            <include
+                android:id="@+id/toolbar"
+                layout="@layout/toolbar" />
 
             <org.mozilla.focus.widget.AnimatedProgressBar
                 android:id="@+id/progress"
