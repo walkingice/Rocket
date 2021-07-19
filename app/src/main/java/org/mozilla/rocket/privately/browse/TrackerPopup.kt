@@ -9,20 +9,22 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Rect
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
-import kotlinx.android.synthetic.main.view_tracker_popup.view.*
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.ViewTrackerPopupBinding
 
-class TrackerPopup(context: Context) : PopupWindow(
-    View.inflate(
-        context,
-        R.layout.view_tracker_popup,
-        null
-    ),
+class TrackerPopup(
+    context: Context,
+    private val binding: ViewTrackerPopupBinding = ViewTrackerPopupBinding.inflate(
+        LayoutInflater.from(context), null, false
+    )
+) : PopupWindow(
+    binding.root,
     ViewGroup.LayoutParams.MATCH_PARENT,
     ViewGroup.LayoutParams.WRAP_CONTENT,
     true
@@ -43,9 +45,9 @@ class TrackerPopup(context: Context) : PopupWindow(
 
     var blockedCount: Int = 0
         set(value) {
-            if (contentView.tracker_switch.isChecked) {
+            if (binding.trackerSwitch.isChecked) {
                 val count = value.toString()
-                contentView.tracker_count.text = if (count.length <= MAX_NUMBER_OF_DIGITS) {
+                binding.trackerCount.text = if (count.length <= MAX_NUMBER_OF_DIGITS) {
                     value.toString()
                 } else {
                     COUNT_INFINITY
@@ -57,9 +59,14 @@ class TrackerPopup(context: Context) : PopupWindow(
     init {
         val view = contentView
         elevation = contentView.elevation
-        setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.background_tracker_popup))
+        setBackgroundDrawable(
+            ContextCompat.getDrawable(
+                context,
+                R.drawable.background_tracker_popup
+            )
+        )
 
-        val switchView = contentView.tracker_switch
+        val switchView = binding.trackerSwitch
         DrawableCompat.setTintList(
             switchView.thumbDrawable,
             ContextCompat.getColorStateList(context, R.color.switch_thumb_dark)
@@ -69,16 +76,16 @@ class TrackerPopup(context: Context) : PopupWindow(
             ContextCompat.getColorStateList(context, R.color.switch_track_dark)
         )
 
-        val counterBkg = DrawableCompat.wrap(view.tracker_count_container.background).mutate()
-        view.tracker_count_container.background = counterBkg
+        val counterBkg = DrawableCompat.wrap(binding.trackerCountContainer.background).mutate()
+        binding.trackerCountContainer.background = counterBkg
 
-        val counterView = view.tracker_count
+        val counterView = binding.trackerCount
         switchView.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 counterView.text = "0"
                 DrawableCompat.setTint(counterBkg, counterColorEnabled)
             } else {
-                view.tracker_count.text = COUNT_DISABLED
+                binding.trackerCount.text = COUNT_DISABLED
                 DrawableCompat.setTint(counterBkg, counterColorDisabled)
             }
 
@@ -87,7 +94,7 @@ class TrackerPopup(context: Context) : PopupWindow(
     }
 
     fun setSwitchToggled(enabled: Boolean) {
-        contentView.tracker_switch.isChecked = enabled
+        binding.trackerSwitch.isChecked = enabled
     }
 
     fun show(parentView: View) {
