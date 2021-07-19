@@ -8,18 +8,18 @@ import android.graphics.Color
 import android.os.StrictMode
 import android.view.ContextThemeWrapper
 import android.view.View
+import android.view.ViewGroup
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import kotlinx.android.synthetic.main.item_dummy_top_site.*
-import kotlinx.android.synthetic.main.item_top_site.*
-import kotlinx.android.synthetic.main.item_top_site.content_image
-import kotlinx.android.synthetic.main.item_top_site.text
+import com.airbnb.lottie.LottieAnimationView
 import org.mozilla.focus.R
 import org.mozilla.focus.utils.DimenUtils
 import org.mozilla.icon.FavIconUtils
 import org.mozilla.rocket.adapter.AdapterDelegate
 import org.mozilla.rocket.adapter.DelegateAdapter
 import org.mozilla.rocket.chrome.ChromeViewModel
+import org.mozilla.rocket.nightmode.themed.ThemedTextView
 import org.mozilla.strictmodeviolator.StrictModeViolation
 
 class SiteAdapterDelegate(
@@ -38,9 +38,14 @@ class SiteViewHolder(
 
     override fun bind(uiModel: DelegateAdapter.UiModel) {
         val site = uiModel as Site
+        // R.layout.item_top_site
+        val contentImg = containerView.findViewById<AppCompatImageView>(R.id.content_image)
+        val contentText = containerView.findViewById<ThemedTextView>(R.id.text)
+        val pinIndicator = containerView.findViewById<ViewGroup>(R.id.pin_indicator)
+        val contentImgMask = containerView.findViewById<LottieAnimationView>(R.id.content_image_mask)
         when (site) {
             is Site.UrlSite -> {
-                text.text = site.title
+                contentText.text = site.title
 
                 // Tried AsyncTask and other simple offloading, the performance drops significantly.
                 // FIXME: 9/21/18 by saving bitmap color, cause FaviconUtils.getDominantColor runs slow.
@@ -49,12 +54,12 @@ class SiteViewHolder(
                     { obj: StrictMode.ThreadPolicy.Builder -> obj.permitDiskReads() },
                     { getFavicon(itemView.context, site) }
                 )
-                content_image.visibility = View.VISIBLE
-                content_image.imageTintList = null
-                content_image.setImageBitmap(favicon)
+                contentImg.visibility = View.VISIBLE
+                contentImg.imageTintList = null
+                contentImg.setImageBitmap(favicon)
 
                 // Pin
-                PinViewWrapper(pin_indicator).run {
+                PinViewWrapper(pinIndicator).run {
                     visibility = when (site) {
                         is Site.UrlSite.FixedSite -> View.GONE
                         is Site.UrlSite.RemovableSite -> if (site.isPinned) View.VISIBLE else View.GONE
@@ -73,23 +78,23 @@ class SiteViewHolder(
                 }
 
                 if (site.highlight) {
-                    content_image_mask.visibility = View.VISIBLE
-                    content_image_mask.playAnimation()
+                    contentImgMask.visibility = View.VISIBLE
+                    contentImgMask.playAnimation()
                 } else {
-                    content_image_mask.cancelAnimation()
-                    content_image_mask.visibility = View.GONE
+                    contentImgMask.cancelAnimation()
+                    contentImgMask.visibility = View.GONE
                 }
             }
             is Site.EmptyHintSite -> {
-                text.setText(R.string.add_top_site_placeholder)
+                contentText.setText(R.string.add_top_site_placeholder)
 
-                content_image.setImageResource(R.drawable.action_add)
-                ViewCompat.setBackgroundTintList(content_image, ColorStateList.valueOf(Color.WHITE))
-                val contextThemeWrapper = ContextThemeWrapper(content_image.context, 0)
-                content_image.imageTintList = ContextCompat.getColorStateList(contextThemeWrapper, R.color.paletteDarkGreyE100)
-                content_image.visibility = View.VISIBLE
+                contentImg.setImageResource(R.drawable.action_add)
+                ViewCompat.setBackgroundTintList(contentImg, ColorStateList.valueOf(Color.WHITE))
+                val contextThemeWrapper = ContextThemeWrapper(contentImg.context, 0)
+                contentImg.imageTintList = ContextCompat.getColorStateList(contextThemeWrapper, R.color.paletteDarkGreyE100)
+                contentImg.visibility = View.VISIBLE
 
-                pin_indicator.visibility = View.GONE
+                pinIndicator.visibility = View.GONE
 
                 itemView.setOnClickListener { topSiteClickListener.onTopSiteClicked(site, adapterPosition) }
                 itemView.setOnLongClickListener(null)
@@ -102,7 +107,7 @@ class SiteViewHolder(
             }
         }
         if (site != Site.DummySite) {
-            text.setDarkTheme(chromeViewModel.isDarkTheme.value == true)
+            contentText.setDarkTheme(chromeViewModel.isDarkTheme.value == true)
         }
     }
 
