@@ -11,7 +11,6 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.Lazy
-import kotlinx.android.synthetic.main.fragment_add_new_top_sites.recycler_view
 import org.mozilla.focus.R
 import org.mozilla.rocket.adapter.AdapterDelegatesManager
 import org.mozilla.rocket.adapter.DelegateAdapter
@@ -41,24 +40,23 @@ class AddNewTopSitesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initRecyclerView()
+        initRecyclerView(view)
         bindListData()
         observeActions()
     }
 
-    private fun initRecyclerView() {
+    private fun initRecyclerView(view: View) {
         adapter = DelegateAdapter(
             AdapterDelegatesManager().apply {
                 add(RecommendedSitesUiCategory::class, R.layout.item_recommended_sites_category, RecommendedSitesCategoryAdapterDelegate())
                 add(Site.UrlSite.FixedSite::class, R.layout.item_recommended_site, RecommendedSitesAdapterDelegate(addNewTopSitesViewModel))
             }
         )
-        recycler_view.apply {
-            adapter = this@AddNewTopSitesFragment.adapter
-        }
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
+        recyclerView.adapter = this@AddNewTopSitesFragment.adapter
 
-        initSpanSizeLookup()
-        initItemDecoration()
+        initSpanSizeLookup(recyclerView)
+        initItemDecoration(recyclerView)
     }
 
     private fun bindListData() {
@@ -82,11 +80,11 @@ class AddNewTopSitesFragment : Fragment() {
         )
     }
 
-    private fun initSpanSizeLookup() {
-        val layoutManager = recycler_view.layoutManager as GridLayoutManager
+    private fun initSpanSizeLookup(recyclerView: RecyclerView) {
+        val layoutManager = recyclerView.layoutManager as GridLayoutManager
         layoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
-                return recycler_view.adapter?.let {
+                return recyclerView.adapter?.let {
                     when (it.getItemViewType(position)) {
                         R.layout.item_recommended_sites_category -> 4
                         else -> 1
@@ -97,12 +95,12 @@ class AddNewTopSitesFragment : Fragment() {
         layoutManager.spanSizeLookup.isSpanIndexCacheEnabled = true
     }
 
-    private fun initItemDecoration() {
-        recycler_view.addItemDecoration(
+    private fun initItemDecoration(recyclerView: RecyclerView) {
+        recyclerView.addItemDecoration(
             DefaultGridSpacingItemDecoration(
-                recycler_view.context.resources.getDimensionPixelOffset(R.dimen.common_margin_m1),
-                recycler_view.context.resources.getDimensionPixelOffset(R.dimen.common_margin_m2),
-                recycler_view.context.resources.getDimensionPixelOffset(R.dimen.common_margin_m5)
+                resources.getDimensionPixelOffset(R.dimen.common_margin_m1),
+                resources.getDimensionPixelOffset(R.dimen.common_margin_m2),
+                resources.getDimensionPixelOffset(R.dimen.common_margin_m5)
             )
         )
     }
