@@ -7,8 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import dagger.Lazy
-import kotlinx.android.synthetic.main.activity_shopping_search_preferences.*
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.ActivityShoppingSearchPreferencesBinding
 import org.mozilla.rocket.adapter.AdapterDelegatesManager
 import org.mozilla.rocket.adapter.DelegateAdapter
 import org.mozilla.rocket.content.appComponent
@@ -20,6 +20,8 @@ import javax.inject.Inject
 
 class ShoppingSearchPreferencesActivity : AppCompatActivity() {
 
+    private var binding: ActivityShoppingSearchPreferencesBinding? = null
+
     @Inject
     lateinit var viewModelCreator: Lazy<ShoppingSearchPreferencesViewModel>
 
@@ -30,10 +32,12 @@ class ShoppingSearchPreferencesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         appComponent().inject(this)
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_shopping_search_preferences)
+        val binding = ActivityShoppingSearchPreferencesBinding.inflate(layoutInflater)
+            .also { setContentView(it.root) }
+        this.binding = binding
         viewModel = getViewModel(viewModelCreator)
-        initToolBar()
-        initPreferenceList()
+        initToolBar(binding)
+        initPreferenceList(binding)
     }
 
     override fun onStop() {
@@ -41,13 +45,13 @@ class ShoppingSearchPreferencesActivity : AppCompatActivity() {
         super.onStop()
     }
 
-    private fun initToolBar() {
-        toolbar.setNavigationOnClickListener {
+    private fun initToolBar(binding: ActivityShoppingSearchPreferencesBinding) {
+        binding.toolbar.setNavigationOnClickListener {
             onBackPressed()
         }
     }
 
-    private fun initPreferenceList() {
+    private fun initPreferenceList(binding: ActivityShoppingSearchPreferencesBinding) {
         val adapterDelegate = PreferencesAdapterDelegate(viewModel)
         val adapterDelegatesManager = AdapterDelegatesManager().apply {
             add(ShoppingSiteItem::class, R.layout.item_shopping_search_preference, adapterDelegate)
@@ -61,7 +65,7 @@ class ShoppingSearchPreferencesActivity : AppCompatActivity() {
         }.apply {
             setHasStableIds(true)
         }
-        recyclerView.apply {
+        binding.recyclerView.apply {
             val itemMoveCallback = ItemMoveCallback(adapterDelegate)
             val touchHelper = ItemTouchHelper(itemMoveCallback)
             touchHelper.attachToRecyclerView(this)
