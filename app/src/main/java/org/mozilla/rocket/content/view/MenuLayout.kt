@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.content.ContextCompat
-import kotlinx.android.synthetic.main.menu_item_text_image.view.menu_item_image
-import kotlinx.android.synthetic.main.menu_item_text_image.view.menu_item_text
 import org.mozilla.focus.R
 import org.mozilla.focus.widget.EqualDistributeGrid
 
@@ -81,13 +81,13 @@ class MenuLayout : FrameLayout {
                 return LayoutInflater.from(context)
                     .inflate(R.layout.menu_item_text_image, parent, false).apply {
                         id = viewId
-                        menu_item_image.apply {
+                        findViewById<ImageView>(R.id.menu_item_image).apply {
                             setImageResource(drawableResId)
                             if (tintResId != null) {
                                 imageTintList = ContextCompat.getColorStateList(context, tintResId)
                             }
                         }
-                        menu_item_text.apply {
+                        findViewById<TextView>(R.id.menu_item_text).apply {
                             setText(textResId)
                             if (tintResId != null) {
                                 setTextColor(ContextCompat.getColorStateList(context, tintResId))
