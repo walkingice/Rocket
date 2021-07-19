@@ -6,12 +6,13 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.StrictMode
 import android.view.View
-import kotlinx.android.synthetic.main.item_recommended_site.content_image
-import kotlinx.android.synthetic.main.item_recommended_site.text
+import androidx.appcompat.widget.AppCompatImageView
+import org.mozilla.focus.R
 import org.mozilla.focus.utils.DimenUtils
 import org.mozilla.icon.FavIconUtils
 import org.mozilla.rocket.adapter.AdapterDelegate
 import org.mozilla.rocket.adapter.DelegateAdapter
+import org.mozilla.rocket.nightmode.themed.ThemedTextView
 import org.mozilla.strictmodeviolator.StrictModeViolation
 
 class RecommendedSitesAdapterDelegate(
@@ -27,9 +28,12 @@ class RecommendedSiteViewHolder(
 ) : DelegateAdapter.ViewHolder(containerView) {
 
     override fun bind(uiModel: DelegateAdapter.UiModel) {
+        // R.layout.item_recommended_site
+        val contentImage = containerView.findViewById<AppCompatImageView>(R.id.content_image)
+        val contentText = containerView.findViewById<ThemedTextView>(R.id.text)
         when (val site = uiModel as Site) {
             is Site.UrlSite -> {
-                text.text = site.title
+                contentText.text = site.title
 
                 // Tried AsyncTask and other simple offloading, the performance drops significantly.
                 // FIXME: 9/21/18 by saving bitmap color, cause FaviconUtils.getDominantColor runs slow.
@@ -38,8 +42,8 @@ class RecommendedSiteViewHolder(
                     { obj: StrictMode.ThreadPolicy.Builder -> obj.permitDiskReads() },
                     { getFavicon(itemView.context, site) }
                 )
-                content_image.visibility = View.VISIBLE
-                content_image.setImageBitmap(favicon)
+                contentImage.visibility = View.VISIBLE
+                contentImage.setImageBitmap(favicon)
 
                 itemView.setOnClickListener { topSiteClickListener.onTopSiteClicked(site, adapterPosition) }
             }
