@@ -16,8 +16,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.Observer
 import dagger.Lazy
-import kotlinx.android.synthetic.main.activity_edit_bookmark.*
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.ActivityEditBookmarkBinding
 import org.mozilla.focus.persistence.BookmarkModel
 import org.mozilla.focus.viewmodel.BookmarkViewModel
 import org.mozilla.rocket.content.appComponent
@@ -32,6 +32,7 @@ class EditBookmarkActivity : BaseActivity() {
     @Inject
     lateinit var viewModelCreator: Lazy<BookmarkViewModel>
 
+    private var binding: ActivityEditBookmarkBinding? = null
     private lateinit var viewModel: BookmarkViewModel
 
     private val itemId: String by lazy { intent.getStringExtra(ITEM_UUID_KEY) }
@@ -94,9 +95,12 @@ class EditBookmarkActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         viewModel = getViewModel(viewModelCreator)
 
-        setContentView(R.layout.activity_edit_bookmark)
-        setSupportActionBar(toolbar)
-        val drawable: Drawable = DrawableCompat.wrap(resources.getDrawable(R.drawable.edit_close, theme))
+        val binding =
+            ActivityEditBookmarkBinding.inflate(layoutInflater).also { setContentView(it.root) }
+        this.binding = binding
+        setSupportActionBar(binding.toolbar)
+        val drawable: Drawable =
+            DrawableCompat.wrap(resources.getDrawable(R.drawable.edit_close, theme))
         DrawableCompat.setTint(drawable, ContextCompat.getColor(this, R.color.paletteWhite100))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(drawable)
@@ -152,7 +156,13 @@ class EditBookmarkActivity : BaseActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             SAVE_ACTION_ID -> {
-                viewModel.updateBookmark(BookmarkModel(bookmark.id, editTextName.text.toString(), editTextLocation.text.toString()))
+                viewModel.updateBookmark(
+                    BookmarkModel(
+                        bookmark.id,
+                        editTextName.text.toString(),
+                        editTextLocation.text.toString()
+                    )
+                )
                 Toast.makeText(this, R.string.bookmark_edit_success, Toast.LENGTH_LONG).show()
                 finish()
             }

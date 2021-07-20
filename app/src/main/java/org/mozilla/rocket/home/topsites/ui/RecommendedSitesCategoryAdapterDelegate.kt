@@ -1,7 +1,8 @@
 package org.mozilla.rocket.home.topsites.ui
 
 import android.view.View
-import kotlinx.android.synthetic.main.item_recommended_sites_category.recommended_category
+import android.widget.TextView
+import org.mozilla.focus.R
 import org.mozilla.rocket.adapter.AdapterDelegate
 import org.mozilla.rocket.adapter.DelegateAdapter
 
@@ -11,11 +12,14 @@ class RecommendedSitesCategoryAdapterDelegate() : AdapterDelegate {
         RecommendedSitesCategoryViewHolder(view)
 }
 
-class RecommendedSitesCategoryViewHolder(override val containerView: View) : DelegateAdapter.ViewHolder(containerView) {
+class RecommendedSitesCategoryViewHolder(override val containerView: View) :
+    DelegateAdapter.ViewHolder(containerView) {
 
     override fun bind(uiModel: DelegateAdapter.UiModel) {
         val recommendedSitesUiCategory = uiModel as RecommendedSitesUiCategory
-        recommended_category.text = recommendedSitesUiCategory.categoryName
+        // R.layout.item_recommended_sites_category
+        containerView.findViewById<TextView>(R.id.recommended_category).text =
+            recommendedSitesUiCategory.categoryName
     }
 }
 

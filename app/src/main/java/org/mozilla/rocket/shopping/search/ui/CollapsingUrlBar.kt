@@ -7,14 +7,14 @@ import android.view.LayoutInflater
 import android.view.ViewParent
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.appbar.AppBarLayout
-import kotlinx.android.synthetic.main.layout_collapsing_url_bar.view.icon
-import kotlinx.android.synthetic.main.layout_collapsing_url_bar.view.title
-import kotlinx.android.synthetic.main.layout_collapsing_url_bar.view.toolbar
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.LayoutCollapsingUrlBarBinding
 import org.mozilla.rocket.extension.dpToPx
 import kotlin.math.abs
 
 class CollapsingUrlBar : ConstraintLayout, AppBarLayout.OnOffsetChangedListener {
+
+    private val binding: LayoutCollapsingUrlBarBinding
 
     private val titleMarginStart: Int
     private val titleMarginStartCollapsed: Int
@@ -49,17 +49,17 @@ class CollapsingUrlBar : ConstraintLayout, AppBarLayout.OnOffsetChangedListener 
         titleMarginStart = dpToPx(TITLE_MARGIN_START_IN_DP)
         titleMarginStartCollapsed = dpToPx(TITLE_MARGIN_START_COLLAPSED_IN_DP)
         titleMarginBottomCollapsed = dpToPx(TITLE_MARGIN_BOTTOM_COLLAPSED_IN_DP)
-        LayoutInflater.from(context).inflate(R.layout.layout_collapsing_url_bar, this, true)
+        binding = LayoutCollapsingUrlBarBinding.inflate(LayoutInflater.from(context), this)
     }
 
     fun setTitle(titleText: String) {
         this.titleText = titleText
-        title?.text = titleText
+        binding.title.text = titleText
     }
 
     fun setIcon(resId: Int) {
         this.iconRedId = resId
-        icon?.setImageResource(resId)
+        binding.icon.setImageResource(resId)
     }
 
     override fun onAttachedToWindow() {
@@ -93,29 +93,29 @@ class CollapsingUrlBar : ConstraintLayout, AppBarLayout.OnOffsetChangedListener 
 
     private fun updateIcon(progress: Float) {
         val scale = 1 - (1 - ICON_SIZE_RATIO) * progress
-        icon.scaleX = scale
-        icon.scaleY = scale
-        icon.translationX =
+        binding.icon.scaleX = scale
+        binding.icon.scaleY = scale
+        binding.icon.translationX =
             -(titleMarginStart - titleMarginStartCollapsed) * progress * ICON_TRANSLATION_X_RATIO
-        icon.translationY =
-            (toolbar.height - titleMarginBottomCollapsed) * progress * ICON_TRANSLATION_Y_RATIO
+        binding.icon.translationY =
+            (binding.toolbar.root.height - titleMarginBottomCollapsed) * progress * ICON_TRANSLATION_Y_RATIO
     }
 
     private fun updateTitle(progress: Float) {
         if (!isTitleMinHeightSet) {
             // To avoid view height changing caused by text size updates
-            title.minHeight = title.height
-            title.gravity = Gravity.BOTTOM
+            binding.title.minHeight = binding.title.height
+            binding.title.gravity = Gravity.BOTTOM
             isTitleMinHeightSet = true
         }
-        title.textSize =
+        binding.title.textSize =
             TITLE_SIZE_IN_SP * (TITLE_SIZE_RATIO + (1 - TITLE_SIZE_RATIO) * (1 - progress))
-        title.translationX = -(titleMarginStart - titleMarginStartCollapsed) * progress
-        title.translationY = (toolbar.height - titleMarginBottomCollapsed) * progress
+        binding.title.translationX = -(titleMarginStart - titleMarginStartCollapsed) * progress
+        binding.title.translationY = (binding.toolbar.root.height - titleMarginBottomCollapsed) * progress
     }
 
     private fun updateToolbar(progress: Float) {
-        toolbar.alpha = 1f - progress
+        binding.toolbar.root.alpha = 1f - progress
     }
 
     companion object {

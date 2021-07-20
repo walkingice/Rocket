@@ -15,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -22,7 +23,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.airbnb.lottie.LottieAnimationView
 import dagger.Lazy
-import kotlinx.android.synthetic.main.fragment_private_homescreen.pm_home_brand_description
 import org.mozilla.focus.R
 import org.mozilla.focus.locale.LocaleAwareFragment
 import org.mozilla.focus.navigation.ScreenNavigator
@@ -63,7 +63,7 @@ class PrivateHomeFragment :
         super.onViewCreated(view, savedInstanceState)
         logoMan = view.findViewById(R.id.pm_home_logo)
         fakeInput = view.findViewById(R.id.pm_home_fake_input)
-        initDescription()
+        initDescription(view)
 
         fakeInput.setOnClickListener { chromeViewModel.showUrlInput.call() }
         chromeViewModel.isHomePageUrlInputShowing.observe(
@@ -84,14 +84,14 @@ class PrivateHomeFragment :
         return this
     }
 
-    private fun initDescription() {
+    private fun initDescription(inflatedView: View) {
         val highlightStr = getString(R.string.private_home_description_2)
         val descriptionStr = getString(R.string.private_home_description_1, highlightStr)
         val str = SpannableString(descriptionStr).apply {
             val highlightIndex = descriptionStr.indexOf(highlightStr)
             setSpan(ForegroundColorSpan(Color.WHITE), highlightIndex, highlightIndex + highlightStr.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
-        pm_home_brand_description.text = str
+        inflatedView.findViewById<TextView>(R.id.pm_home_brand_description).text = str
     }
 
     private fun observeViewModel() {

@@ -3,24 +3,18 @@
 package org.mozilla.rocket.widget
 
 import android.content.Context
+import android.view.LayoutInflater
 import android.view.View
 import androidx.appcompat.app.AlertDialog
-import kotlinx.android.synthetic.main.layout_promotion_dialog.view.button_divider1
-import kotlinx.android.synthetic.main.layout_promotion_dialog.view.button_divider2
-import kotlinx.android.synthetic.main.layout_promotion_dialog.view.close_button
-import kotlinx.android.synthetic.main.layout_promotion_dialog.view.description
-import kotlinx.android.synthetic.main.layout_promotion_dialog.view.image
-import kotlinx.android.synthetic.main.layout_promotion_dialog.view.negative_button
-import kotlinx.android.synthetic.main.layout_promotion_dialog.view.positive_button
-import kotlinx.android.synthetic.main.layout_promotion_dialog.view.title
-import org.mozilla.focus.R
+import org.mozilla.focus.databinding.LayoutPromotionDialogBinding
 import org.mozilla.rocket.landing.DialogQueue
 
 class PromotionDialog(
     private val context: Context,
     private val data: CustomViewDialogData
 ) {
-    val view: View = View.inflate(context, R.layout.layout_promotion_dialog, null)
+
+    val binding: LayoutPromotionDialogBinding
 
     private var onPositiveListener: (() -> Unit)? = null
     private var onNegativeListener: (() -> Unit)? = null
@@ -33,6 +27,8 @@ class PromotionDialog(
     private var cancellable = false
 
     init {
+        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        binding = LayoutPromotionDialogBinding.inflate(inflater, null, false)
         initView()
     }
 
@@ -76,7 +72,7 @@ class PromotionDialog(
     }
 
     private fun initView() {
-        with(view.image) {
+        with(binding.image) {
             val width = data.imgWidth
             val height = data.imgHeight
             if (width != null && height != null) {
@@ -88,29 +84,29 @@ class PromotionDialog(
             data.drawable?.let { setImageDrawable(it) } ?: run { visibility = View.GONE }
         }
 
-        with(view.title) {
+        with(binding.title) {
             data.title?.let { text = it } ?: run { visibility = View.GONE }
         }
 
-        with(view.description) {
+        with(binding.description) {
             data.description?.let { text = it } ?: run { visibility = View.GONE }
         }
 
-        with(view.positive_button) {
+        with(binding.positiveButton) {
             data.positiveText?.let { text = it } ?: run {
                 visibility = View.GONE
-                view.button_divider1.visibility = View.GONE
+                binding.buttonDivider1.visibility = View.GONE
             }
         }
 
-        with(view.negative_button) {
+        with(binding.negativeButton) {
             data.negativeText?.let { text = it } ?: run {
                 visibility = View.GONE
-                view.button_divider2.visibility = View.GONE
+                binding.buttonDivider2.visibility = View.GONE
             }
         }
 
-        view.close_button.visibility = if (data.showCloseButton) {
+        binding.closeButton.visibility = if (data.showCloseButton) {
             View.VISIBLE
         } else {
             View.GONE
@@ -119,24 +115,24 @@ class PromotionDialog(
 
     private fun createDialog(): AlertDialog {
         val dialog = AlertDialog.Builder(context)
-            .setView(view)
+            .setView(binding.root)
             .setOnCancelListener {
                 onCancelListener?.invoke()
             }
             .setCancelable(cancellable)
             .create()
 
-        view.positive_button.setOnClickListener {
+        binding.positiveButton.setOnClickListener {
             dialog.dismiss()
             onPositiveListener?.invoke()
         }
 
-        view.negative_button.setOnClickListener {
+        binding.negativeButton.setOnClickListener {
             dialog.dismiss()
             onNegativeListener?.invoke()
         }
 
-        view.close_button.setOnClickListener {
+        binding.closeButton.setOnClickListener {
             dialog.dismiss()
             onCloseListener?.invoke()
         }

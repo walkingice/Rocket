@@ -26,7 +26,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import dagger.Lazy
-import kotlinx.android.synthetic.main.fragment_private_browser_legacy.*
 import org.mozilla.focus.BuildConfig
 import org.mozilla.focus.FocusApplication
 import org.mozilla.focus.R
@@ -227,7 +226,7 @@ class BrowserFragmentLegacy :
                         this@BrowserFragmentLegacy,
                         it.findViewById(R.id.container),
                         R.string.permission_toast_storage,
-                        browser_bottom_bar
+                        it.findViewById(R.id.browser_bottom_bar)
                     )
                 }
                 throw IllegalStateException("No Activity to show Snackbar.")
@@ -268,9 +267,9 @@ class BrowserFragmentLegacy :
 
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             toolbarRoot.visibility = View.GONE
-            browser_bottom_bar.visibility = View.GONE
+            view?.findViewById<View>(R.id.browser_bottom_bar)?.visibility = View.GONE
         } else {
-            browser_bottom_bar.visibility = View.VISIBLE
+            view?.findViewById<View>(R.id.browser_bottom_bar)?.visibility = View.VISIBLE
             toolbarRoot.visibility = View.VISIBLE
         }
 

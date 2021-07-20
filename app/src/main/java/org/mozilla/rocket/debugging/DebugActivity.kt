@@ -12,15 +12,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
-import kotlinx.android.synthetic.main.activity_debug.debug_firebase_id
-import kotlinx.android.synthetic.main.activity_debug.debug_firebase_register_token
-import kotlinx.android.synthetic.main.activity_debug.debug_locale_layout
-import kotlinx.android.synthetic.main.activity_debug.debug_locale_text
-import kotlinx.android.synthetic.main.activity_debug.debug_mission_reminder
-import kotlinx.android.synthetic.main.activity_debug.switch_disable_server_push
-import kotlinx.android.synthetic.main.activity_debug.toolbar
 import org.json.JSONArray
-import org.mozilla.focus.R
+import org.mozilla.focus.databinding.ActivityDebugBinding
 import org.mozilla.focus.utils.FirebaseHelper
 import org.mozilla.focus.utils.Settings
 import org.mozilla.rocket.preference.stringLiveData
@@ -32,19 +25,19 @@ class DebugActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_debug)
-        setSupportActionBar(toolbar)
+        val binding = ActivityDebugBinding.inflate(layoutInflater).also { setContentView(it.root) }
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         preference = getSharedPreferences(PREF_NAME_DEBUG, Context.MODE_PRIVATE)
-        initDebugLocale()
-        initDebugMissionReminderNotification()
-        initDebugServerPush()
+        initDebugLocale(binding)
+        initDebugMissionReminderNotification(binding)
+        initDebugServerPush(binding)
     }
 
-    private fun initDebugServerPush() {
-        switch_disable_server_push.isChecked = Settings.getInstance(this).isServerPushDebugging
-        switch_disable_server_push.setOnCheckedChangeListener { _, isChecked ->
+    private fun initDebugServerPush(binding: ActivityDebugBinding) {
+        binding.switchDisableServerPush.isChecked = Settings.getInstance(this).isServerPushDebugging
+        binding.switchDisableServerPush.setOnCheckedChangeListener { _, isChecked ->
             Settings.getInstance(this).isServerPushDebugging = isChecked
         }
     }
@@ -54,20 +47,20 @@ class DebugActivity : AppCompatActivity() {
         return true
     }
 
-    private fun initDebugLocale() {
+    private fun initDebugLocale(binding: ActivityDebugBinding) {
         val debugLocales = getDebugLocales()
         getDebugLocaleLiveData().observe(this) {
-            debug_locale_text.text = it
+            binding.debugLocaleText.text = it
         }
-        debug_locale_layout.setOnClickListener {
+        binding.debugLocaleLayout.setOnClickListener {
             showDropDownListDialog(debugLocales)
         }
-        debug_firebase_id.setOnClickListener {
+        binding.debugFirebaseId.setOnClickListener {
             val firebaseId = FirebaseHelper.getFirebase().getInstanceId() ?: "null"
             copyToClipboard("firebaseId", firebaseId)
             Toast.makeText(this, "$firebaseId copied", Toast.LENGTH_LONG).show()
         }
-        debug_firebase_register_token.setOnClickListener {
+        binding.debugFirebaseRegisterToken.setOnClickListener {
             FirebaseHelper.getFirebase().getRegisterToekn {
                 val token = it ?: ""
                 copyToClipboard("firebaseRegisterToken", token)
@@ -109,8 +102,8 @@ class DebugActivity : AppCompatActivity() {
         }
     }
 
-    private fun initDebugMissionReminderNotification() {
-        debug_mission_reminder.setOnClickListener {
+    private fun initDebugMissionReminderNotification(binding: ActivityDebugBinding) {
+        binding.debugMissionReminder.setOnClickListener {
             isMissionReminderDebugEnabled = true
             Toast.makeText(this, "Repeat interval has been set to 15 minutes", Toast.LENGTH_SHORT)
                 .show()

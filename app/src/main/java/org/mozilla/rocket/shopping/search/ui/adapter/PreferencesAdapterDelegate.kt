@@ -2,11 +2,11 @@ package org.mozilla.rocket.shopping.search.ui.adapter
 
 import android.graphics.Color
 import android.view.View
+import android.widget.TextView
+import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_shopping_search_preference.preference_site_name
-import kotlinx.android.synthetic.main.item_shopping_search_preference.preference_site_switch
-import kotlinx.android.synthetic.main.item_shopping_search_preference.preference_site_url
+import org.mozilla.focus.R
 import org.mozilla.rocket.adapter.AdapterDelegate
 import org.mozilla.rocket.adapter.DelegateAdapter
 import org.mozilla.rocket.shopping.search.ui.ShoppingSearchPreferencesViewModel
@@ -27,8 +27,8 @@ class PreferencesAdapterDelegate(private val viewModel: ShoppingSearchPreference
     override fun onRowMoved(viewHolder: SiteViewHolder, target: SiteViewHolder) {
         val toPosition = target.adapterPosition
         val fromPosition = viewHolder.adapterPosition
-        viewHolder.preference_site_switch.tag = toPosition
-        target.preference_site_switch?.tag = fromPosition
+        viewHolder.containerView.findViewById<View>(R.id.preference_site_switch).tag = toPosition
+        target.containerView.findViewById<View?>(R.id.preference_site_switch)?.tag = toPosition
 
         viewModel.onItemMoved(fromPosition, toPosition)
     }
@@ -44,9 +44,9 @@ class SiteViewHolder(
 
     override fun bind(uiModel: DelegateAdapter.UiModel) {
         uiModel as ShoppingSiteItem
-        preference_site_name.text = uiModel.title
-        preference_site_url.text = uiModel.displayUrl
-        preference_site_switch.apply {
+        containerView.findViewById<TextView>(R.id.preference_site_name).text = uiModel.title
+        containerView.findViewById<TextView>(R.id.preference_site_url).text = uiModel.displayUrl
+        containerView.findViewById<SwitchCompat>(R.id.preference_site_switch)?.apply {
             isChecked = uiModel.isChecked
             isEnabled = uiModel.isEnabled
             setOnCheckedChangeListener { _, isChecked ->

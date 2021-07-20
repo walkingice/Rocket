@@ -14,16 +14,8 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import dagger.Lazy
-import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.clear
-import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.content_layout
-import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.description
-import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.input_container
-import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.logo_man
-import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.root_view
-import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.search_keyword_edit
-import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.search_suggestion_layout
-import kotlinx.android.synthetic.main.fragment_shopping_search_keyword_input.search_suggestion_view
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.FragmentShoppingSearchKeywordInputBinding
 import org.mozilla.focus.glide.GlideApp
 import org.mozilla.focus.telemetry.TelemetryWrapper
 import org.mozilla.focus.utils.ViewUtils
@@ -34,6 +26,8 @@ import javax.inject.Inject
 
 class ShoppingSearchKeywordInputFragment :
     Fragment(), View.OnClickListener, ViewTreeObserver.OnGlobalLayoutListener {
+
+    var binding: FragmentShoppingSearchKeywordInputBinding? = null
 
     @Inject
     lateinit var viewModelCreator: Lazy<ShoppingSearchKeywordInputViewModel>
@@ -50,22 +44,28 @@ class ShoppingSearchKeywordInputFragment :
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_shopping_search_keyword_input, container, false)
+    ): View = FragmentShoppingSearchKeywordInputBinding.inflate(inflater, container, false).also {
+        this.binding = it
+    }.root
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        this.binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val binding = this.binding ?: return
 
         ShoppingSearchMode.getInstance(view.context).deleteKeyword()
 
         viewModel.uiModel.observe(viewLifecycleOwner) { uiModel ->
-            setupView(uiModel)
+            setupView(binding, uiModel)
         }
 
         viewModel.navigateToResultTab.observe(viewLifecycleOwner) { showResultTab(it) }
 
-        search_keyword_edit.addTextChangedListener(
+        binding.searchKeywordEdit.addTextChangedListener(
             object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
                 }
@@ -84,7 +84,7 @@ class ShoppingSearchKeywordInputFragment :
                 }
             }
         )
-        search_keyword_edit.setOnEditorActionListener { editTextView, actionId, _ ->
+        binding.searchKeywordEdit.setOnEditorActionListener { editTextView, actionId, _ ->
             when (actionId) {
                 EditorInfo.IME_ACTION_SEARCH -> {
                     viewModel.onTypedKeywordSent(editTextView.text.toString())
@@ -93,18 +93,19 @@ class ShoppingSearchKeywordInputFragment :
                 else -> false
             }
         }
-        search_keyword_edit.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
-            // Avoid showing keyboard again when returning to the previous page by back key.
-            if (hasFocus) {
-                ViewUtils.showKeyboard(v)
-            } else {
-                ViewUtils.hideKeyboard(v)
+        binding.searchKeywordEdit.onFocusChangeListener =
+            View.OnFocusChangeListener { v, hasFocus ->
+                // Avoid showing keyboard again when returning to the previous page by back key.
+                if (hasFocus) {
+                    ViewUtils.showKeyboard(v)
+                } else {
+                    ViewUtils.hideKeyboard(v)
+                }
             }
-        }
 
-        clear.setOnClickListener(this)
+        binding.clear.setOnClickListener(this)
 
-        root_view.setOnKeyboardVisibilityChangedListener { visible ->
+        binding.root.setOnKeyboardVisibilityChangedListener { visible ->
             if (visible) {
                 viewModel.onKeyboardShown()
             }
@@ -113,23 +114,26 @@ class ShoppingSearchKeywordInputFragment :
 
     override fun onStart() {
         super.onStart()
-        root_view.viewTreeObserver.addOnGlobalLayoutListener(this)
-        search_keyword_edit.requestFocus()
-        viewModel.onStart(search_keyword_edit.text.toString())
+        val binding = this.binding ?: return
+        binding.root.viewTreeObserver.addOnGlobalLayoutListener(this)
+        binding.searchKeywordEdit.requestFocus()
+        viewModel.onStart(binding.searchKeywordEdit.text.toString())
     }
 
     override fun onStop() {
         super.onStop()
-        root_view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+        val binding = this.binding ?: return
+        binding.root.viewTreeObserver.removeOnGlobalLayoutListener(this)
     }
 
     override fun onClick(view: View) {
+        val binding = this.binding ?: return
         when (view.id) {
-            R.id.clear -> search_keyword_edit.text.clear()
+            R.id.clear -> binding.searchKeywordEdit.text.clear()
             R.id.suggestion_item -> {
                 val searchTerm = (view as TextView).text
-                val isTrendingKeyword = search_keyword_edit.text.isEmpty()
-                search_keyword_edit.text = SpannableStringBuilder(searchTerm)
+                val isTrendingKeyword = binding.searchKeywordEdit.text.isEmpty()
+                binding.searchKeywordEdit.text = SpannableStringBuilder(searchTerm)
                 viewModel.onSuggestionKeywordSent(searchTerm.toString(), isTrendingKeyword)
             }
             else -> throw IllegalStateException("Unhandled view in onClick()")
@@ -137,45 +141,52 @@ class ShoppingSearchKeywordInputFragment :
     }
 
     override fun onGlobalLayout() {
-        val contentLayoutHeight = content_layout.measuredHeight
-        val descriptionHeight = description.measuredHeight
-        val logoManHeight = logo_man.measuredHeight
-        val searchSuggestionLayoutHeight = search_suggestion_layout.measuredHeight
-        val inputContainerHeight = input_container.measuredHeight
+        val binding = this.binding ?: return
+        val contentLayoutHeight = binding.contentLayout.measuredHeight
+        val descriptionHeight = binding.description.measuredHeight
+        val logoManHeight = binding.logoMan.measuredHeight
+        val searchSuggestionLayoutHeight = binding.searchSuggestionLayout.measuredHeight
+        val inputContainerHeight = binding.inputContainer.measuredHeight
 
         val extraMargin = (contentLayoutHeight / 10)
         val expectedContentHeight =
             descriptionHeight + logoManHeight + searchSuggestionLayoutHeight + inputContainerHeight + extraMargin
 
-        logo_man.isVisible = (contentLayoutHeight > expectedContentHeight)
+        binding.logoMan.isVisible = (contentLayoutHeight > expectedContentHeight)
     }
 
-    private fun setupView(uiModel: ShoppingSearchKeywordInputUiModel) {
-        description.text = uiModel.description
+    private fun setupView(
+        binding: FragmentShoppingSearchKeywordInputBinding,
+        uiModel: ShoppingSearchKeywordInputUiModel
+    ) {
+        binding.description.text = uiModel.description
         if (uiModel.logoManUrl.isNotEmpty()) {
-            GlideApp.with(logo_man.context)
+            GlideApp.with(binding.logoMan.context)
                 .asBitmap()
                 .placeholder(uiModel.defaultLogoManResId)
                 .load(uiModel.logoManUrl)
-                .into(logo_man)
+                .into(binding.logoMan)
         }
-        clear.visibility = if (uiModel.hideClear) View.GONE else View.VISIBLE
-        setSuggestions(uiModel.keywordSuggestions)
+        binding.clear.visibility = if (uiModel.hideClear) View.GONE else View.VISIBLE
+        setSuggestions(binding, uiModel.keywordSuggestions)
     }
 
-    private fun setSuggestions(suggestions: List<CharSequence>?) {
-        search_suggestion_view.removeAllViews()
+    private fun setSuggestions(
+        binding: FragmentShoppingSearchKeywordInputBinding,
+        suggestions: List<CharSequence>?
+    ) {
+        binding.searchSuggestionView.removeAllViews()
         if (suggestions == null || suggestions.isEmpty()) {
-            search_suggestion_layout.visibility = View.GONE
+            binding.searchSuggestionLayout.visibility = View.GONE
             return
         }
 
-        search_suggestion_layout.visibility = View.VISIBLE
+        binding.searchSuggestionLayout.visibility = View.VISIBLE
         for (suggestion in suggestions) {
             val item = View.inflate(context, R.layout.tag_text, null) as TextView
             item.text = suggestion
             item.setOnClickListener(this)
-            this.search_suggestion_view.addView(item)
+            binding.searchSuggestionView.addView(item)
         }
     }
 

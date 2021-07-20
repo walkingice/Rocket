@@ -1,9 +1,9 @@
 package org.mozilla.rocket.home.topsites.domain
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 import org.mozilla.rocket.home.topsites.data.TopSitesRepo
 import org.mozilla.rocket.home.topsites.ui.Site
 import org.mozilla.rocket.home.topsites.ui.toSiteModel

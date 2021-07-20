@@ -27,18 +27,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import dagger.Lazy
-import kotlinx.android.synthetic.main.fragment_first_run.animation_description
-import kotlinx.android.synthetic.main.fragment_first_run.animation_layout
-import kotlinx.android.synthetic.main.fragment_first_run.animation_view
-import kotlinx.android.synthetic.main.fragment_first_run.description
-import kotlinx.android.synthetic.main.fragment_first_run.item_browsing
-import kotlinx.android.synthetic.main.fragment_first_run.item_games
-import kotlinx.android.synthetic.main.fragment_first_run.item_news
-import kotlinx.android.synthetic.main.fragment_first_run.item_shopping
-import kotlinx.android.synthetic.main.fragment_first_run.progress_bar
-import kotlinx.android.synthetic.main.fragment_first_run.select_button
 import org.mozilla.focus.R
 import org.mozilla.focus.activity.MainActivity
+import org.mozilla.focus.databinding.FragmentFirstRunBinding
 import org.mozilla.focus.navigation.ScreenNavigator
 import org.mozilla.focus.telemetry.TelemetryWrapper
 import org.mozilla.focus.utils.FirebaseHelper
@@ -57,6 +48,8 @@ import org.mozilla.rocket.periodic.PeriodicReceiver
 import javax.inject.Inject
 
 class FirstrunFragment : Fragment(), ScreenNavigator.FirstrunScreen {
+
+    var binding: FragmentFirstRunBinding? = null
 
     @Inject
     lateinit var firstrunViewModelCreator: Lazy<FirstrunViewModel>
@@ -83,15 +76,22 @@ class FirstrunFragment : Fragment(), ScreenNavigator.FirstrunScreen {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? =
-        inflater.inflate(R.layout.fragment_first_run, container, false)
+    ): View = FragmentFirstRunBinding.inflate(inflater, container, false).also {
+        this.binding = it
+    }.root
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        this.binding = null
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        description.text =
+        val binding = this.binding ?: return
+        binding.description.text =
             getString(R.string.firstrun_fxlite_2_5_title_B, getString(R.string.app_name))
-        select_button.setOnClickListener { goNext() }
-        initContentPrefItems()
+        binding.selectButton.setOnClickListener { goNext() }
+        initContentPrefItems(binding)
         observeActions()
     }
 
@@ -149,7 +149,8 @@ class FirstrunFragment : Fragment(), ScreenNavigator.FirstrunScreen {
     }
 
     private fun showAnimation() {
-        animation_layout.isVisible = true
+        val binding = this.binding ?: return
+        binding.animationLayout.isVisible = true
 
         var textIndex = 0
         var nextText = TEXT_SHOWING_LIST[0]
@@ -159,11 +160,11 @@ class FirstrunFragment : Fragment(), ScreenNavigator.FirstrunScreen {
             interpolator = LinearInterpolator()
             addUpdateListener { valueAnimator: ValueAnimator ->
                 val progress = valueAnimator.animatedValue as Float
-                animation_view?.progress = progress
+                binding.animationView.progress = progress
 
                 val time = (progress * ANIMATION_DURATION).toInt()
                 if (time >= nextText.first) {
-                    animation_description?.text = getString(nextText.second)
+                    binding.animationDescription.text = getString(nextText.second)
                     nextText = if (++textIndex < TEXT_SHOWING_LIST.size) {
                         TEXT_SHOWING_LIST[textIndex]
                     } else {
@@ -186,14 +187,14 @@ class FirstrunFragment : Fragment(), ScreenNavigator.FirstrunScreen {
                 }
             })
         }
-        progress_bar.max = PROGRESS_BAR_MAX
+        binding.progressBar.max = PROGRESS_BAR_MAX
         val progressAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = PROGRESS_BAR_DURATION
             startDelay = PROGRESS_BAR_START_DELAY
             interpolator = AccelerateInterpolator(PROGRESS_BAR_ACCELERATE_FACTOR)
             addUpdateListener { valueAnimator: ValueAnimator ->
                 val progress = valueAnimator.animatedValue as Float
-                progress_bar?.progress = (progress * PROGRESS_BAR_MAX).toInt()
+                binding.progressBar.progress = (progress * PROGRESS_BAR_MAX).toInt()
             }
         }
 
@@ -217,13 +218,13 @@ class FirstrunFragment : Fragment(), ScreenNavigator.FirstrunScreen {
                 }
 
                 override fun onAnimationEnd(animation: Animation?) {
-                    progress_bar.visibility = View.INVISIBLE
-                    animation_description.visibility = View.INVISIBLE
+                    binding.progressBar.visibility = View.INVISIBLE
+                    binding.animationDescription.visibility = View.INVISIBLE
                 }
 
                 override fun onAnimationStart(animation: Animation?) {
-                    progress_bar.visibility = View.VISIBLE
-                    animation_description.visibility = View.VISIBLE
+                    binding.progressBar.visibility = View.VISIBLE
+                    binding.animationDescription.visibility = View.VISIBLE
                 }
             })
         }
@@ -231,19 +232,19 @@ class FirstrunFragment : Fragment(), ScreenNavigator.FirstrunScreen {
         AnimatorSet().apply {
             playTogether(animationAnimator, progressAnimator)
         }.start()
-        progress_bar.animation = fadeInFadeOutAnimation
-        animation_description.animation = fadeInFadeOutAnimation
+        binding.progressBar.animation = fadeInFadeOutAnimation
+        binding.animationDescription.animation = fadeInFadeOutAnimation
     }
 
-    override fun isAnimationRunning(): Boolean = animation_layout?.isVisible == true
+    override fun isAnimationRunning(): Boolean = binding?.animationLayout?.isVisible == true
 
-    private fun initContentPrefItems() {
+    private fun initContentPrefItems(binding: FragmentFirstRunBinding) {
         setContentPrefSelected(Browsing)
 
-        item_browsing.setOnClickListener { setContentPrefSelected(Browsing) }
-        item_shopping.setOnClickListener { setContentPrefSelected(Shopping) }
-        item_games.setOnClickListener { setContentPrefSelected(Games) }
-        item_news.setOnClickListener { setContentPrefSelected(News) }
+        binding.itemBrowsing.setOnClickListener { setContentPrefSelected(Browsing) }
+        binding.itemShopping.setOnClickListener { setContentPrefSelected(Shopping) }
+        binding.itemGames.setOnClickListener { setContentPrefSelected(Games) }
+        binding.itemNews.setOnClickListener { setContentPrefSelected(News) }
     }
 
     private fun setContentPrefSelected(item: ContentPrefItem) {

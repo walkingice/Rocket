@@ -1,7 +1,7 @@
 package org.mozilla.rocket.home.topsites.ui
 
 import android.view.View
-import kotlinx.android.synthetic.main.item_top_site_page.page_list
+import androidx.recyclerview.widget.RecyclerView
 import org.mozilla.focus.R
 import org.mozilla.rocket.adapter.AdapterDelegate
 import org.mozilla.rocket.adapter.AdapterDelegatesManager
@@ -32,7 +32,8 @@ class SitePageViewHolder(
     )
 
     init {
-        page_list.adapter = this@SitePageViewHolder.adapter
+        containerView.findViewById<RecyclerView>(R.id.page_list).adapter =
+            this@SitePageViewHolder.adapter
     }
 
     override fun bind(uiModel: DelegateAdapter.UiModel) {

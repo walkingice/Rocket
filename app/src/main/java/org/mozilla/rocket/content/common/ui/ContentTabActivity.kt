@@ -17,10 +17,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.snackbar.Snackbar
 import dagger.Lazy
-import kotlinx.android.synthetic.main.activity_content_tab.*
-import kotlinx.android.synthetic.main.toolbar.*
 import org.mozilla.focus.R
 import org.mozilla.focus.activity.BaseActivity
+import org.mozilla.focus.databinding.ActivityContentTabBinding
 import org.mozilla.focus.utils.Constants
 import org.mozilla.focus.utils.IntentUtils
 import org.mozilla.focus.widget.BackKeyHandleable
@@ -63,18 +62,22 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
     private lateinit var uiMessageReceiver: BroadcastReceiver
     private lateinit var bottomBarItemAdapter: BottomBarItemAdapter
 
+    private var binding: ActivityContentTabBinding? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         appComponent().inject(this)
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_content_tab)
+        val binding = ActivityContentTabBinding.inflate(layoutInflater)
+            .also { setContentView(it.root) }
+        this.binding = binding
 
         chromeViewModel = getViewModel(chromeViewModelCreator)
         telemetryViewModel = getViewModel(telemetryViewModelCreator)
         tabViewProvider = PrivateTabViewProvider(this)
         sessionManager = SessionManager(tabViewProvider)
 
-        appbar.setOnApplyWindowInsetsListener { v, insets ->
+        binding.appbar.setOnApplyWindowInsetsListener { v, insets ->
             (v.layoutParams as ConstraintLayout.LayoutParams).topMargin =
                 insets.systemWindowInsetTop
             insets
@@ -82,7 +85,7 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
 
         makeStatusBarTransparent()
 
-        setupBottomBar(bottom_bar)
+        setupBottomBar(binding.bottomBar)
 
         initBroadcastReceivers()
 
@@ -145,12 +148,14 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
+        val binding = this.binding ?: return
+
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            toolbar_root.visibility = View.GONE
-            bottom_bar.visibility = View.GONE
+            binding.toolbar.root.visibility = View.GONE
+            binding.bottomBar.visibility = View.GONE
         } else {
-            toolbar_root.visibility = View.VISIBLE
-            bottom_bar.visibility = View.VISIBLE
+            binding.toolbar.root.visibility = View.VISIBLE
+            binding.bottomBar.visibility = View.VISIBLE
         }
     }
 
@@ -188,17 +193,19 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
 
     override fun getChromeViewModel() = chromeViewModel
 
-    override fun getSiteIdentity(): ImageView? = site_identity
+    override fun getSiteIdentity(): ImageView? = binding?.toolbar?.siteIdentity
 
-    override fun getDisplayUrlView(): TextView? = display_url
+    override fun getDisplayUrlView(): TextView? = binding?.toolbar?.displayUrl
 
-    override fun getProgressBar(): ProgressBar? = progress
+    override fun getProgressBar(): ProgressBar? = binding?.progress
 
-    override fun getFullScreenGoneViews() = listOf(toolbar_root, bottom_bar)
+    override fun getFullScreenGoneViews() = binding?.let { listOf(it.toolbar.root, it.bottomBar) }
+        ?: emptyList()
 
-    override fun getFullScreenInvisibleViews() = listOf(browser_container)
+    override fun getFullScreenInvisibleViews() = binding?.let { listOf(it.browserContainer) }
+        ?: emptyList()
 
-    override fun getFullScreenContainerView(): ViewGroup = video_container
+    override fun getFullScreenContainerView(): ViewGroup = binding!!.videoContainer
 
     private fun setupBottomBar(bottomBar: BottomBar) {
         bottomBar.setOnItemClickListener { type, position ->
@@ -292,8 +299,9 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
         }
 
         chromeViewModel.showDownloadFinishedSnackBar.observe(this) { downloadInfo ->
+            val binding = this.binding ?: return@observe
             val message = getString(R.string.download_completed, downloadInfo.fileName)
-            Snackbar.make(snack_bar_container, message, Snackbar.LENGTH_LONG).apply {
+            Snackbar.make(binding.snackBarContainer, message, Snackbar.LENGTH_LONG).apply {
                 // Set the open action only if we can.
                 if (downloadInfo.existInDownloadManager()) {
                     setAction(R.string.open) {
@@ -308,7 +316,7 @@ class ContentTabActivity : BaseActivity(), TabsSessionProvider.SessionHost, Cont
                         }
                     }
                 }
-                anchorView = bottom_bar
+                anchorView = binding.bottomBar
                 show()
             }
         }

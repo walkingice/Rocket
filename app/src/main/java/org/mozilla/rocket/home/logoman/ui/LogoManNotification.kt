@@ -9,8 +9,11 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,12 +23,8 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
-import kotlinx.android.synthetic.main.home_notification_board.notification_icon
-import kotlinx.android.synthetic.main.home_notification_board.notification_subtitle
-import kotlinx.android.synthetic.main.home_notification_board.notification_title
-import kotlinx.android.synthetic.main.logo_man_notification.view.logo_man
-import kotlinx.android.synthetic.main.logo_man_notification.view.notification_board
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.LogoManNotificationBinding
 import org.mozilla.focus.glide.GlideApp
 import org.mozilla.focus.utils.DrawableUtils
 import org.mozilla.rocket.adapter.AdapterDelegate
@@ -38,6 +37,8 @@ import kotlin.math.abs
 
 class LogoManNotification : FrameLayout {
 
+    private lateinit var binding: LogoManNotificationBinding
+
     private lateinit var adapter: DelegateAdapter
     private var actionListener: NotificationActionListener? = null
 
@@ -45,14 +46,18 @@ class LogoManNotification : FrameLayout {
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
 
     init {
         initViews()
     }
 
     private fun initViews() {
-        inflate(context, R.layout.logo_man_notification, this)
+        binding = LogoManNotificationBinding.inflate(LayoutInflater.from(context), this)
         minimumHeight = dpToPx(MIN_HEIGHT_IN_DP)
         initNotificationBoard()
     }
@@ -60,11 +65,19 @@ class LogoManNotification : FrameLayout {
     private fun initNotificationBoard() {
         adapter = DelegateAdapter(
             AdapterDelegatesManager().apply {
-                add(RemoteNotification::class, R.layout.home_notification_board, RemoteNotificationAdapterDelegate { actionListener?.onNotificationClick() })
-                add(MissionNotification::class, R.layout.home_notification_board_mission, MissionNotificationAdapterDelegate { actionListener?.onNotificationClick() })
+                add(
+                    RemoteNotification::class,
+                    R.layout.home_notification_board,
+                    RemoteNotificationAdapterDelegate { actionListener?.onNotificationClick() }
+                )
+                add(
+                    MissionNotification::class,
+                    R.layout.home_notification_board_mission,
+                    MissionNotificationAdapterDelegate { actionListener?.onNotificationClick() }
+                )
             }
         )
-        notification_board.apply {
+        binding.notificationBoard.apply {
             adapter = this@LogoManNotification.adapter
             layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         }
@@ -80,7 +93,7 @@ class LogoManNotification : FrameLayout {
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                notification_board.visibility = View.GONE
+                binding.notificationBoard.visibility = View.GONE
                 startSwipeOut()
                 actionListener?.onNotificationDismiss()
             }
@@ -98,9 +111,17 @@ class LogoManNotification : FrameLayout {
                     val alpha = 1f - abs(dX) / (recyclerView.width / 2f)
                     viewHolder.itemView.alpha = alpha
                 }
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                super.onChildDraw(
+                    c,
+                    recyclerView,
+                    viewHolder,
+                    dX,
+                    dY,
+                    actionState,
+                    isCurrentlyActive
+                )
             }
-        }).attachToRecyclerView(notification_board)
+        }).attachToRecyclerView(binding.notificationBoard)
     }
 
     fun showNotification(notification: Notification, animate: Boolean) {
@@ -108,19 +129,20 @@ class LogoManNotification : FrameLayout {
         if (animate) {
             startSwipeIn()
         } else {
-            logo_man.translationY = dpToPx(LOGO_MAN_SWIPE_IN_3_END_Y_IN_DP).toFloat()
-            notification_board.translationY = dpToPx(NOTIFICATION_BOARD_SWIPE_IN_2_END_Y_IN_DP).toFloat()
+            binding.logoMan.translationY = dpToPx(LOGO_MAN_SWIPE_IN_3_END_Y_IN_DP).toFloat()
+            binding.notificationBoard.translationY =
+                dpToPx(NOTIFICATION_BOARD_SWIPE_IN_2_END_Y_IN_DP).toFloat()
         }
     }
 
     private fun startSwipeIn() {
         val logoManListener = ValueAnimator.AnimatorUpdateListener {
             val value = it.animatedValue as Int
-            logo_man.translationY = value.toFloat()
+            binding.logoMan.translationY = value.toFloat()
         }
         val notificationBoardListener = ValueAnimator.AnimatorUpdateListener {
             val value = it.animatedValue as Int
-            notification_board.translationY = value.toFloat()
+            binding.notificationBoard.translationY = value.toFloat()
         }
         val logoManMoveInAnimatorSet = AnimatorSet().apply {
             val logoManSwipeInAnimator1 = ValueAnimator.ofInt(
@@ -144,7 +166,11 @@ class LogoManNotification : FrameLayout {
                 duration = LOGO_MAN_SWIPE_IN_3_DURATION_IN_MS
                 addUpdateListener(logoManListener)
             }
-            playSequentially(logoManSwipeInAnimator1, logoManSwipeInAnimator2, logoManSwipeInAnimator3)
+            playSequentially(
+                logoManSwipeInAnimator1,
+                logoManSwipeInAnimator2,
+                logoManSwipeInAnimator3
+            )
         }
         val notificationBoardMoveInAnimatorSet = AnimatorSet().apply {
             val notificationBoardMoveInAnimator1 = ValueAnimator.ofInt(
@@ -173,7 +199,7 @@ class LogoManNotification : FrameLayout {
     private fun startSwipeOut() {
         val logoManListener = ValueAnimator.AnimatorUpdateListener {
             val value = it.animatedValue as Int
-            logo_man.translationY = value.toFloat()
+            binding.logoMan.translationY = value.toFloat()
         }
         AnimatorSet().apply {
             val logoManMoveOutAnimator1 = ValueAnimator.ofInt(
@@ -198,12 +224,14 @@ class LogoManNotification : FrameLayout {
         actionListener = listener
     }
 
-    private class RemoteNotificationAdapterDelegate(private val clickListener: () -> Unit) : AdapterDelegate {
+    private class RemoteNotificationAdapterDelegate(private val clickListener: () -> Unit) :
+        AdapterDelegate {
         override fun onCreateViewHolder(view: View): DelegateAdapter.ViewHolder =
             RemoteNotificationViewHolder(view, clickListener)
     }
 
-    private class MissionNotificationAdapterDelegate(private val clickListener: () -> Unit) : AdapterDelegate {
+    private class MissionNotificationAdapterDelegate(private val clickListener: () -> Unit) :
+        AdapterDelegate {
         override fun onCreateViewHolder(view: View): DelegateAdapter.ViewHolder =
             MissionNotificationViewHolder(view, clickListener)
     }
@@ -214,25 +242,29 @@ class LogoManNotification : FrameLayout {
     ) : DelegateAdapter.ViewHolder(containerView) {
         override fun bind(uiModel: DelegateAdapter.UiModel) {
             uiModel as RemoteNotification
-            notification_title.text = uiModel.title
-            notification_subtitle.text = uiModel.subtitle
+            val notificationIcon = containerView.findViewById<ImageView>(R.id.notification_icon)
+            val notificationTitle = containerView.findViewById<TextView>(R.id.notification_title)
+            val notificationSubTitle =
+                containerView.findViewById<TextView>(R.id.notification_subtitle)
+            notificationTitle.text = uiModel.title
+            notificationSubTitle.text = uiModel.subtitle
             if (uiModel.subtitle.isNullOrEmpty()) {
-                notification_title.maxLines = 3
+                notificationTitle.maxLines = 3
             } else {
-                notification_title.maxLines = 1
+                notificationTitle.maxLines = 1
             }
             itemView.setOnClickListener { clickListener() }
 
             if (uiModel.imageUrl != null) {
-                notification_icon.isVisible = true
+                notificationIcon.isVisible = true
                 GlideApp.with(itemView.context)
                     .asBitmap()
                     .centerCrop()
                     .load(uiModel.imageUrl)
-                    .into(notification_icon)
+                    .into(notificationIcon)
             } else {
-                notification_icon.isVisible = false
-                notification_icon.setImageDrawable(null)
+                notificationIcon.isVisible = false
+                notificationIcon.setImageDrawable(null)
             }
         }
     }
@@ -242,39 +274,75 @@ class LogoManNotification : FrameLayout {
         private val clickListener: () -> Unit
     ) : DelegateAdapter.ViewHolder(containerView) {
 
-        private val imageSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 60f, containerView.resources.displayMetrics).toInt()
+        private val imageSize = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            60f,
+            containerView.resources.displayMetrics
+        ).toInt()
 
         override fun bind(uiModel: DelegateAdapter.UiModel) {
             uiModel as MissionNotification
-            notification_title.text = uiModel.title
-            notification_subtitle.text = uiModel.subtitle
+            val notificationIcon = containerView.findViewById<ImageView>(R.id.notification_icon)
+            val notificationTitle = containerView.findViewById<TextView>(R.id.notification_title)
+            val notificationSubTitle =
+                containerView.findViewById<TextView>(R.id.notification_subtitle)
+            notificationTitle.text = uiModel.title
+            notificationSubTitle.text = uiModel.subtitle
             if (uiModel.subtitle.isNullOrEmpty()) {
-                notification_title.maxLines = 3
+                notificationTitle.maxLines = 3
             } else {
-                notification_title.maxLines = 1
+                notificationTitle.maxLines = 1
             }
             itemView.setOnClickListener { clickListener() }
 
             val context = containerView.context
-            notification_icon.setImageResource(R.drawable.ic_reward_box)
+            notificationIcon.setImageResource(R.drawable.ic_reward_box)
             Glide.with(context)
                 .asBitmap()
                 .load(uiModel.imageUrl)
                 .apply(RequestOptions().transform(CircleCrop()))
                 .into(object : SimpleTarget<Bitmap>() {
-                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>) {
-                        notification_icon.setImageBitmap(getRewardImage(context, imageSize, imageSize, resource))
+                    override fun onResourceReady(
+                        resource: Bitmap,
+                        transition: Transition<in Bitmap>
+                    ) {
+                        notificationIcon.setImageBitmap(
+                            getRewardImage(
+                                context,
+                                imageSize,
+                                imageSize,
+                                resource
+                            )
+                        )
                     }
                 })
         }
 
-        private fun getRewardImage(context: Context, width: Int, height: Int, imageBitmap: Bitmap): Bitmap {
-            val imageSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 22f, context.resources.displayMetrics).toInt()
-            val shiftX = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5f, context.resources.displayMetrics).toInt()
-            val shiftY = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1f, context.resources.displayMetrics).toInt()
+        private fun getRewardImage(
+            context: Context,
+            width: Int,
+            height: Int,
+            imageBitmap: Bitmap
+        ): Bitmap {
+            val imageSize = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                22f,
+                context.resources.displayMetrics
+            ).toInt()
+            val shiftX = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                5f,
+                context.resources.displayMetrics
+            ).toInt()
+            val shiftY = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                1f,
+                context.resources.displayMetrics
+            ).toInt()
 
             val resultBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            val couponBitmap = DrawableUtils.getBitmap(context.getDrawable(R.drawable.ic_reward_box))
+            val couponBitmap =
+                DrawableUtils.getBitmap(context.getDrawable(R.drawable.ic_reward_box))
             val canvas = Canvas(resultBitmap)
             val paint = Paint()
             canvas.drawBitmap(couponBitmap, 0f, 0f, paint)
@@ -301,9 +369,11 @@ class LogoManNotification : FrameLayout {
         val subtitle: String?,
         val imageUrl: String?
     ) : DelegateAdapter.UiModel() {
-        class RemoteNotification(id: String, title: String, subtitle: String?, imageUrl: String?) : Notification(id, title, subtitle, imageUrl)
+        class RemoteNotification(id: String, title: String, subtitle: String?, imageUrl: String?) :
+            Notification(id, title, subtitle, imageUrl)
 
-        class MissionNotification(id: String, title: String, subtitle: String?, imageUrl: String?) : Notification(id, title, subtitle, imageUrl)
+        class MissionNotification(id: String, title: String, subtitle: String?, imageUrl: String?) :
+            Notification(id, title, subtitle, imageUrl)
     }
 
     interface NotificationActionListener {

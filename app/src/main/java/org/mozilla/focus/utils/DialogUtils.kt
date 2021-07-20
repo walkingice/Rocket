@@ -23,8 +23,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
-import kotlinx.android.synthetic.main.myshot_onboarding.view.my_shot_category_learn_more
-import kotlinx.android.synthetic.main.spotlight_message.view.spotlight_message
 import org.mozilla.focus.R
 import org.mozilla.focus.activity.MainActivity
 import org.mozilla.focus.activity.SettingsActivity
@@ -262,7 +260,8 @@ object DialogUtils {
             )
             .addView(
                 activity.inflate(R.layout.myshot_onboarding).apply {
-                    my_shot_category_learn_more.setOnClickListener(learnMore)
+                    val clickable = findViewById<View>(R.id.my_shot_category_learn_more)
+                    clickable.setOnClickListener(learnMore)
                 },
                 RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
@@ -284,7 +283,8 @@ object DialogUtils {
             )
             .addView(
                 activity.inflate(R.layout.spotlight_message).apply {
-                    spotlight_message.setText(R.string.my_shot_on_boarding_message)
+                    val textView = findViewById<TextView>(R.id.spotlight_message)
+                    textView.setText(R.string.my_shot_on_boarding_message)
                 },
                 RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams(

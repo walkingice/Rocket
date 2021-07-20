@@ -34,9 +34,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import dagger.Lazy
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_browser.*
 import org.mozilla.focus.R
+import org.mozilla.focus.databinding.ActivityMainBinding
 import org.mozilla.focus.fragment.BrowserFragment
 import org.mozilla.focus.fragment.ListPanelDialog
 import org.mozilla.focus.navigation.ScreenNavigator
@@ -140,6 +139,7 @@ class MainActivity :
     private var sessionManager: SessionManager? = null
     private val dialogQueue = DialogQueue()
     private var exitToast: Toast? = null
+    private var binding: ActivityMainBinding? = null
 
     private val downloadObserver = object : ContentObserver(null) {
         override fun onChange(selfChange: Boolean) {
@@ -187,7 +187,7 @@ class MainActivity :
             this
         )
 
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater).also { setContentView(it.root) }
         initViews()
         initBroadcastReceivers()
         registerFirebaseEventReceiver()
@@ -372,9 +372,7 @@ class MainActivity :
             dismissUrlInput.observe(this@MainActivity, Observer { screenNavigator.popUrlScreen() })
             pinShortcut.observe(this@MainActivity, Observer { requestPinShortcut() })
             bookmarkAdded.nonNullObserve(this@MainActivity) { itemId ->
-                showBookmarkAddedSnackbar(
-                    itemId
-                )
+                showBookmarkAddedSnackbar(itemId)
             }
             share.observe(
                 this@MainActivity,
@@ -440,6 +438,7 @@ class MainActivity :
             showDownloadFinishedSnackBar.observe(
                 this@MainActivity,
                 Observer { downloadInfo ->
+                    val container = binding?.container ?: return@Observer
                     val message = getString(R.string.download_completed, downloadInfo.fileName)
                     Snackbar.make(container, message, Snackbar.LENGTH_LONG).apply {
                         // Set the open action only if we can.
@@ -456,7 +455,7 @@ class MainActivity :
                                 }
                             }
                         }
-                        anchorView = browser.browser_bottom_bar
+                        anchorView = browserFragment?.binding?.browserBottomBar
                         show()
                     }
                 }
@@ -744,6 +743,7 @@ class MainActivity :
     }
 
     private fun showBookmarkAddedSnackbar(bookmarkItemId: String) {
+        val container = binding?.container ?: return
         Snackbar.make(container, R.string.bookmark_saved, Snackbar.LENGTH_LONG).apply {
             setAction(R.string.bookmark_saved_edit) {
                 startActivity(
@@ -753,7 +753,7 @@ class MainActivity :
                     )
                 )
             }
-            anchorView = browser.browser_bottom_bar
+            anchorView = browserFragment?.binding?.browserBottomBar
         }.show()
     }
 
@@ -904,6 +904,7 @@ class MainActivity :
     }
 
     override fun showInstallPrompt(actionCallback: () -> Unit) {
+        val container = binding?.container ?: return
         Snackbar.make(
             container,
             getString(R.string.update_to_latest_app_snack_bar_message),
