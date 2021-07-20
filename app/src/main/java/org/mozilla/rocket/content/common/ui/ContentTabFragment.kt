@@ -71,8 +71,8 @@ class ContentTabFragment : LocaleAwareFragment(), BackKeyHandleable {
         }
 
         if (tabViewSlot.childCount == 0) {
-            tabSession?.engineSession?.tabView?.apply {
-                tabViewSlot.addView(view)
+            tabSession?.engineSession?.tabView?.let {
+                tabViewSlot.addView(it.getView())
             }
         }
 
